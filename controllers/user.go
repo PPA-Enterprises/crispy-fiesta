@@ -20,17 +20,6 @@ func (u *UserController) Signup(c *gin.Context) {
 		return
 	}
 
-	/*
-		        TODO: validation logic
-				such as email
-
-		        if regexMethodChecker(data.Email) {
-		            c.JSON(400, gin.H{"message": "Email is invalid"})
-		            c.Abort()
-		            return
-		        }
-	*/
-
 	err := userModel.Signup(data)
 
 	if err != nil {
