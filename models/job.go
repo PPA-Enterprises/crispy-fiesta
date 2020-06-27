@@ -2,7 +2,8 @@ package models
 
 import (
 	"github.com/PPA-Enterprises/crispy-fiesta/forms"
-	"gopkg.in/mgo.v2/bson"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type Job struct {
@@ -12,6 +13,22 @@ type Job struct {
 	AppointmentInfo string `json:"appointment_info"bson:"appointment_info"`
 }
 
-type JobModel struct {}
+func FromSubmitJobCmd(data forms.SubmitJobCmd) *Job {
+	j := Job{
+		ClientInfo: data.ClientInfo,
+		CarInfo: data.CarInfo,
+		AppointmentInfo: data.AppointmentInfo
+	}
+	return &j;
+}
 
 
+func (job *Job) PersistJob() primitive.ObjectId {
+	coll := dbConnect.Use(databaseName, "job")
+	res, err := coll.collection.InsertOne(context.Background(), job)
+	if err != nil {
+		panic(err)
+	}
+
+	return res.InsertedID
+}
