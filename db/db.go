@@ -14,7 +14,7 @@ type DBConnection struct {
 }
 
 type DBCollection struct {
-	collection *mongo.Collection
+	Collection *mongo.Collection
 }
 
 func NewConnection(host string) (conn *DBConnection) {
@@ -37,18 +37,18 @@ func (conn *DBConnection) Use(dbName, tableName string) *DBCollection {
 
 	connect := conn.client.Database(dbName).Collection(tableName)
 
-	return &DBCollection{collection: connect}
+	return &DBCollection{Collection: connect}
 
 }
 
 func (col *DBCollection) Insert(data bson.D, options *options.InsertOneOptions) (*mongo.InsertOneResult, error) {
 
 	if options == nil {
-		result, err := col.collection.InsertOne(context.Background(), data)
+		result, err := col.Collection.InsertOne(context.Background(), data)
 		return result, err
 
 	}
 
-	result, err := col.collection.InsertOne(context.Background(), data, options)
+	result, err := col.Collection.InsertOne(context.Background(), data, options)
 	return result, err
 }
