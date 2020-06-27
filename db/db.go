@@ -1,41 +1,54 @@
 package db
 
 import (
-	"os"
+	"context"
 	"time"
 
-	"gopkg.in/mgo.v2"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type DBConnection struct {
-	session *mgo.Session
+	client *mongo.Client
 }
 
-func NewConnection(host string, dbName string) (conn *DBConnection) {
-	info := &mgo.DialInfo{
-		Addrs:    []string{host},
-		Timeout:  60 * time.Second,
-		Database: dbName,
-		Username: os.Getenv("DB_USER"),
-		Password: os.Getenv("DB_PWD"),
-	}
+type DBCollection struct {
+	collection *mongo.Collection
+}
 
-	session, err := mgo.DialWithInfo(info)
+func NewConnection(host string) (conn *DBConnection) {
+
+	//TODO: Auth
+	client, err := mongo.NewClient(options.Client().ApplyURI(host))
+	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+	err = client.Connect(ctx)
 
 	if err != nil {
 		panic(err)
 	}
 
-	session.SetMode(mgo.Monotonic, true)
-	conn = &DBConnection{session}
+	conn = &DBConnection{client}
 	return conn
+
 }
 
-func (conn *DBConnection) Use(dbName, tableName string) (collection *mgo.Collection) {
-	return conn.session.DB(dbName).C(tableName)
+func (conn *DBConnection) Use(dbName, tableName string) *DBCollection {
+
+	connect := conn.client.Database(dbName).Collection(tableName)
+
+	return &DBCollection{collection: connect}
+
 }
 
-func (conn *DBConnection) Close() {
-	conn.session.Close()
-	return
+func (col *DBCollection) Insert(data bson.D, options *options.InsertOneOptions) (*mongo.InsertOneResult, error) {
+
+	if options == nil {
+		result, err := col.collection.InsertOne(context.Background(), data)
+		return result, err
+
+	}
+
+	result, err := col.collection.InsertOne(context.Background(), data, options)
+	return result, err
 }

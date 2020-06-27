@@ -1,13 +1,11 @@
 package models
 
 import (
-	"os"
-
 	"github.com/PPA-Enterprises/crispy-fiesta/db"
 )
 
-var server = os.Getenv("DATABASE")
+var server = "mongodb://localhost:27017"
 
-var databaseName = os.Getenv("DATABASE_NAME")
+var databaseName = "PPA"
 
-var dbConnect = db.NewConnection(server, databaseName)
+var dbConnect = db.NewConnection(server)
