@@ -12,9 +12,11 @@ func main() {
 	{
 		hello := new(controllers.HelloWorldController)
 		user := new(controllers.UserController)
+		job := new(controllers.JobController)
 
 		v1.GET("/hello", hello.Default)
 		v1.POST("/signup", user.Signup)
+		v1.POST("/job", job.Create)
 	}
 
 	router.NoRoute(func(c *gin.Context) {
