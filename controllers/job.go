@@ -11,7 +11,7 @@ import (
 type JobController struct {}
 
 func (j *JobController) Create(c *gin.Context) {
-	var data forms.SubmitJobCmd
+	var data forms.SubmitJobCmd;
 	if c.BindJSON(&data) != nil {
 		c.JSON(http.StatusNotAcceptable, gin.H{"message": "Provide relevant fields"});
 		c.Abort();
@@ -23,7 +23,7 @@ func (j *JobController) Create(c *gin.Context) {
 	if err != nil {
 		//TODO: check for err type and respond accordingly
 		c.JSON(http.StatusCreated,
-			gin.H{"success": false, "payload": "", "message": "Job Create Failed"});
+			gin.H{"success": false, "payload": "", "message": err.Error()});
 		return;
 	}
 	c.JSON(http.StatusCreated,
