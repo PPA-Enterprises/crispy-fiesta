@@ -22,9 +22,10 @@ func (j *JobController) Create(c *gin.Context) {
 
 	if err != nil {
 		//TODO: check for err type and respond accordingly
-		return c.JSON(http.StatusCreated,
+		c.JSON(http.StatusCreated,
 			gin.H{"success": false, "payload": "", "message": "Job Create Failed"});
+		return;
 	}
-	return c.JSON(http.StatusCreated,
+	c.JSON(http.StatusCreated,
 		gin.H{"success": true, "payload": id.String(), "message": "Job Created"});
 }
