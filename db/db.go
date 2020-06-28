@@ -32,7 +32,7 @@ func (conn *DBConnection) Use(dbName, tableName string) *mongo.Collection {
 	return conn.client.Database(dbName).Collection(tableName)
 }
 
-func (conn *DBConnection) GetSession(opts ...*options.SessionOptions) (*mongo.Session, error) {
+func (conn *DBConnection) Session(opts ...*options.SessionOptions) (*mongo.Session, error) {
 	var sessionOpts *options.SessionOptions
 	if len(opts) <= 0 {
 		sessionOpts = options.Session();

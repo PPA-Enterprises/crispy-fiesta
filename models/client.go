@@ -13,6 +13,8 @@ type Client struct {
 	Completed []primitive.ObjectID `bson:"in_progress"`
 }
 
+//func ClientByName(name string) 
+
 /*func FromJob(job *Job) *Client {
 
 }*/
