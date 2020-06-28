@@ -32,3 +32,13 @@ func (conn *DBConnection) Use(dbName, tableName string) *mongo.Collection {
 	return conn.client.Database(dbName).Collection(tableName)
 }
 
+func (conn *DBConnection) GetSession(opts ...*options.SessionOptions) (*mongo.Session, error) {
+	var sessionOpts *options.SessionOptions
+	if len(opts) <= 0 {
+		sessionOpts = options.Session();
+	} else {
+		sessionOpts = options.MergeSessionOptions(opts...);
+	}
+	session, err := conn.client.StartSession(sessionOpts);
+	return &session, err;
+}
