@@ -1,0 +1,195 @@
+<!-- Theme customizer Starts-->
+<div #customizer class="customizer d-none d-lg-none d-xl-block" [ngClass]="{open: isOpen}">
+  <a class="customizer-close" (click)="closeCustomizer()">
+    <i class="ft-x font-medium-3"></i></a><a class="customizer-toggle bg-primary" id="customizer-toggle-icon"
+    (click)="toggleCustomizer()">
+    <i class="ft-settings font-medium-1 spinner white align-middle"></i>
+  </a>
+  <div [perfectScrollbar] class="customizer-content p-3 ps-container ps-theme-dark"
+    data-ps-id="df6a5ce4-a175-9172-4402-dabd98fc9c0a">
+    <h4 class="text-uppercase">Theme Customizer</h4>
+    <p>Customize & Preview in Real Time</p>
+    <!-- Layout Options Starts-->
+    <div class="ct-layout">
+      <hr>
+      <h6 class="mb-3 d-flex align-items-center"><i class="ft-layout font-medium-2 mr-2"></i><span>Layout Options</span>
+      </h6>
+      <div class="layout-switch">
+        <div class="radio radio-sm d-inline-block light-layout mr-3">
+          <input id="ll-switch" type="radio" name="layout-switch" [checked]="config.layout.variant === 'Light'"
+            (click)="customizerService.switchLayout('light', isBgImageDisplay)">
+          <label for="ll-switch">Light</label>
+        </div>
+        <div class="radio radio-sm d-inline-block dark-layout mr-3">
+          <input id="dl-switch" type="radio" name="layout-switch" [checked]="config.layout.variant === 'Dark'"
+            (click)="customizerService.switchLayout('dark', isBgImageDisplay)">
+          <label for="dl-switch">Dark</label>
+        </div>
+        <div class="radio radio-sm d-inline-block transparent-layout">
+          <input id="tl-switch" type="radio" name="layout-switch" [checked]="config.layout.variant === 'Transparent'"
+            (click)="customizerService.switchLayout('transparent', isBgImageDisplay)">
+          <label for="tl-switch">Transparent</label>
+        </div>
+      </div>
+      <!-- Layout Options Ends-->
+    </div>
+    <!-- Navigation Options Starts-->
+    <div class="ct-menu-type">
+      <hr>
+      <h6 class="mb-3 d-flex align-items-center"><i class="ft-credit-card font-medium-2 mr-2"></i><span>Navigation
+          Options</span></h6>
+      <div class="menu-switch">
+        <div class="radio radio-sm d-inline-block menu-side mr-3">
+          <input id="menu-side" type="radio" name="menu-switch" [checked]="config.layout.menuPosition === 'Side'"
+            (click)="customizerService.toggleMenuPosition('Side')">
+          <label for="menu-side">Vertical</label>
+        </div>
+        <div class="radio radio-sm d-inline-block menu-top">
+          <input id="menu-top" type="radio" name="menu-switch" [checked]="config.layout.menuPosition === 'Top'"
+            (click)="customizerService.toggleMenuPosition('Top')">
+          <label for="menu-top">Horizontal</label>
+        </div>
+      </div>
+    </div>
+    <!-- Sidebar Options Starts-->
+    <!-- Navbar Types-->
+    <div class="ct-navbar-type">
+      <hr>
+      <h6 class="mb-3 d-flex align-items-center"><i class="ft-more-horizontal font-medium-2 mr-2"></i><span>Navbar
+          Type</span></h6>
+      <div class="navbar-switch">
+        <div class="radio radio-sm d-inline-block nav-static mr-3">
+          <input id="nav-static" type="radio" name="navbar-switch" [checked]="config.layout.navbar.type === 'Static'"
+            (click)="customizerService.toggleNavbarType('Static')">
+          <label for="nav-static">Static</label>
+        </div>
+        <div class="radio radio-sm d-inline-block nav-fixed">
+          <input id="nav-fixed" type="radio" name="navbar-switch" [checked]="config.layout.navbar.type === 'Fixed'"
+            (click)="customizerService.toggleNavbarType('Fixed')">
+          <label for="nav-fixed">Fixed</label>
+        </div>
+      </div>
+    </div>
+    <!-- Sidebar Options Starts-->
+    <div class="ct-bg-color">
+      <hr>
+      <h6 class="sb-options d-flex align-items-center mb-3"><i class="ft-droplet font-medium-2 mr-2"></i><span>Sidebar
+          Color Options</span></h6>
+      <div class="cz-bg-color sb-color-options">
+        <div class="row mb-3">
+          <div class="col px-2" *ngFor="let color of customizerService.lightDarkLayoutGradientBGColors">
+            <span class="{{color.class}} d-block rounded" style="width:30px; height:30px;"
+              [attr.data-bg-color]="color.code" [ngClass]="{'selected': color.active}"
+              (click)="customizerService.changeSidebarBGColor(color)">
+            </span>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col px-2" *ngFor="let color of customizerService.lightDarkLayoutSolidBGColors">
+            <span class="{{color.class}} d-block rounded" style="width:30px; height:30px;"
+              [attr.data-bg-color]="color.code" [ngClass]="{'selected': color.active}"
+              (click)="customizerService.changeSidebarBGColor(color)">
+            </span>
+          </div>
+        </div>
+      </div>
+      <!-- Sidebar Options Ends-->
+      <!-- Transparent BG Image Ends-->
+      <div class="tl-bg-img">
+        <h6 class="d-flex align-items-center mb-3"><i class="ft-star font-medium-2 mr-2"></i><span>Background Colors
+            with Shades</span></h6>
+        <div class="cz-tl-bg-image row">
+
+          <div class="col-sm-3" *ngFor="let color of customizerService.transparentLayoutBGColorsWithShades">
+            <div class="rounded {{color.class}} ct-glass-bg" [attr.data-bg-image]="color.class"
+              [ngClass]="{'selected': color.active}" (click)="customizerService.changeSidebarTransparentBGColor(color)">
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Transparent BG Image Ends-->
+    </div>
+    <!-- Sidebar BG Image Starts-->
+    <div class="ct-bg-image">
+      <hr>
+      <h6 class="sb-bg-img d-flex align-items-center mb-3"><i class="ft-sidebar font-medium-2 mr-2"></i><span>Sidebar Bg
+          Image</span></h6>
+      <div class="cz-bg-image row sb-bg-img">
+        <div class="col-2 px-2" *ngFor="let img of customizerService.lightDarkLayoutBGImages">
+          <img class="rounded" alt="sidebar bg image" [src]="img.src" width="90" [ngClass]="{'selected': img.active}"
+            (click)="customizerService.changeSidebarBgImage(img)" />
+        </div>
+      </div>
+      <!-- Transparent Layout Bg color Options-->
+      <div class="tl-color-option">
+        <h6 class="tl-color-options d-flex align-items-center mb-3"><i
+            class="ft-droplet font-medium-2 mr-2"></i><span>Background Colors</span></h6>
+        <div class="cz-tl-bg-color">
+          <div class="row">
+            <div class="col" *ngFor="let color of customizerService.transparentLayoutBGColors">
+              <span class="{{color.class}} d-block rounded  ct-color-bg" style="width:30px; height:30px;"
+                [attr.data-bg-color]="color.class" [ngClass]="{'selected': color.active}"
+                (click)="customizerService.changeSidebarTransparentBGColor(color)">
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Transparent Layout Bg color Ends-->
+    </div>
+    <!-- Sidebar BG Image Toggle Starts-->
+    <div class="ct-bg-image-toggler">
+      <div class="togglebutton toggle-sb-bg-img">
+        <hr>
+        <div ><span>Sidebar Bg Image</span>
+          <div class="float-right">
+            <div class="checkbox">
+              <input class="cz-bg-image-display" id="sidebar-bg-img" type="checkbox" checked
+                (change)="bgImageDisplay($event)">
+              <label for="sidebar-bg-img"></label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Sidebar BG Image Toggle Ends-->
+    <!-- Compact Menu Starts-->
+    <div class="ct-compact-toggler">
+      <hr>
+      <div class="togglebutton">
+        <div ><span>Compact Menu</span>
+          <div class="float-right">
+            <div class="checkbox">
+              <input class="cz-compact-menu" id="cz-compact-menu" type="checkbox"
+                [checked]="config.layout.sidebar.collapsed" (change)="customizerService.toggleCompactMenu($event)">
+              <label for="cz-compact-menu"></label>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Compact Menu Ends-->
+    </div>
+
+    <!-- Sidebar Width Starts-->
+    <div class="ct-sidebar-size" *ngIf="!config.layout.sidebar.collapsed">
+      <hr>
+      <p>Sidebar Width</p>
+      <div class="cz-sidebar-width btn-group btn-group-toggle" id="cz-sidebar-width" data-toggle="buttons">
+        <label class="btn btn-outline-primary" [ngClass]="{'active': size === 'sidebar-sm'}">
+          <input id="cz-btn-radio-1" type="radio" name="cz-btn-radio" value="sidebar-sm"
+            [checked]="size === 'sidebar-sm'" (change)="changeSidebarWidth('sidebar-sm')"><span>Small</span>
+        </label>
+        <label class="btn btn-outline-primary " [ngClass]="{'active': size === 'sidebar-md'}">
+          <input id="cz-btn-radio-2" type="radio" name="cz-btn-radio" value="sidebar-md"
+            [checked]="size === 'sidebar-md'" (change)="changeSidebarWidth('sidebar-md')"><span>Medium</span>
+        </label>
+        <label class="btn btn-outline-primary" [ngClass]="{'active': size === 'sidebar-lg'}">
+          <input id="cz-btn-radio-3" type="radio" name="cz-btn-radio" value="sidebar-lg"
+            [checked]="size === 'sidebar-lg'" (change)="changeSidebarWidth('sidebar-lg')"><span>Large</span>
+        </label>
+      </div>
+    </div>
+    <!-- Sidebar Width Ends-->
+  </div>
+</div>
+<!-- Theme customizer Ends-->

@@ -1,0 +1,47 @@
+<!-- *NAVBAR* starts -->
+<app-navbar (seachTextEmpty)="checkNavbarSeachTextEmpty($event)"></app-navbar>
+<!-- *NAVBAR* ends -->
+
+<div class="wrapper" [ngClass]="{'show-overlay': !isNavbarSeachTextEmpty}" (click)="onWrapperClick();" (window:resize)="onResize($event)">
+
+  <!-- *TOP* Menu starts -->
+  <app-horizontal-menu appTopMenu *ngIf="menuPosition === 'Top' && !displayOverlayMenu"></app-horizontal-menu>
+  <!-- *TOP* Menu ends -->
+
+  <!-- *SIDE* Menu starts -->
+  <div appSidebar *ngIf="menuPosition === 'Side' || displayOverlayMenu"
+    [ngClass]="{'main-menu': menuPosition === 'Side' || displayOverlayMenu, 'menu-fixed': menuPosition === 'Side' || displayOverlayMenu, 'menu-native-scroll': !perfectScrollbarEnable }" class="app-sidebar"
+    (mouseenter)="sidebarMouseenter($event)" (mouseleave)="sidebarMouseleave($event)" data-active-color="white"
+    [attr.data-background-color]="config?.layout.variant === 'Transparent' ? 'black': bgColor"
+    [attr.data-image]="bgImage">
+    <app-sidebar></app-sidebar>
+    <div class="sidebar-background" [ngStyle]="{'background-image': 'url(' + bgImage + ')'}"
+      *ngIf="config?.layout.sidebar.backgroundImage"></div>
+  </div>
+  <!-- *SIDE* Menu ends -->
+
+  <div class="main-panel">
+    <div class="main-content">
+      <div class="content-overlay"></div>
+      <div class="content-wrapper">
+        <router-outlet></router-outlet>
+      </div>
+    </div>
+    <!-- FOOTER -->
+    <app-footer></app-footer>
+    <!-- Scroll to top button -->
+    <button class="btn btn-primary scroll-top" type="button" *ngIf="isScrollTopVisible" (click)="scrollToTop()"><i class="ft-arrow-up"></i></button>
+  </div>
+
+  <!-- *NOTIFICATION-SIDEBAR* starts -->
+  <app-notification-sidebar></app-notification-sidebar>
+  <!-- *NOTIFICATION-SIDEBAR* ends -->
+
+  <!-- *CUSTOMIZER* starts -- Uncomment below code if you want to use customizer in your project -->
+  <!-- <app-customizer></app-customizer> -->
+  <!-- *CUSTOMIZER* ends -->
+
+  <div class="sidenav-overlay" (click)="onOutsideClick($event);"
+    [ngClass]="{'d-none': displayOverlayMenu && hideSidebar && !overlayContent , 'd-block': displayOverlayMenu && !hideSidebar && overlayContent && innerWidth < 1200}"></div>
+  <div class="drag-target"></div>
+</div>
