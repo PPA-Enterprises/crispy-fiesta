@@ -11,6 +11,7 @@ type Job struct {
 	ClientInfo string `json:"client_info"bson:"client_info"`
 	CarInfo string `json:"car_info"bson:"car_info"`
 	AppointmentInfo string `json:"appointment_info"bson:"appointment_info"`
+	Notes string `json:"notes"bson:"notes"`
 }
 
 func FromSubmitJobCmd(data forms.SubmitJobCmd) *Job {
