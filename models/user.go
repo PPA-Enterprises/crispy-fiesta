@@ -1,6 +1,9 @@
 package models
 
 import (
+	"context"
+	"log"
+
 	"github.com/PPA-Enterprises/crispy-fiesta/forms"
 	"github.com/PPA-Enterprises/crispy-fiesta/helpers"
 
@@ -21,6 +24,16 @@ type UserModel struct{}
 
 func (u *UserModel) Signup(data forms.SignupUserCommand) (*mongo.InsertOneResult, error) {
 	collection := dbConnect.Use(databaseName, "user")
+
+	var foundEmail bson.M
+	err := collection.FindOne(context.Background(), bson.D{{"email", data.Email}}).Decode(&foundEmail)
+	if err != nil {
+		// ErrNoDocuments means that the filter did not match any documents in the collection
+		if err == mongo.ErrNoDocuments {
+			return
+		}
+		log.Fatal(err)
+	}
 
 	hash, err := helpers.GenerateFromPassword(data.Password, helpers.P)
 
