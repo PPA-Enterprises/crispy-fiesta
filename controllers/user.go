@@ -1,6 +1,8 @@
 package controllers
 
 import (
+	"log"
+
 	"github.com/gin-gonic/gin"
 
 	"github.com/PPA-Enterprises/crispy-fiesta/forms"
@@ -22,8 +24,10 @@ func (u *UserController) Signup(c *gin.Context) {
 
 	_, err := userModel.Signup(data)
 
+	log.Print(err)
+
 	if err != nil {
-		c.JSON(400, gin.H{"message": "Problem creating an account."})
+		c.JSON(400, gin.H{"message": err.Error()})
 		c.Abort()
 		return
 	}

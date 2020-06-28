@@ -4,17 +4,12 @@ import (
 	"context"
 	"time"
 
-	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type DBConnection struct {
 	client *mongo.Client
-}
-
-type DBCollection struct {
-	collection *mongo.Collection
 }
 
 func NewConnection(host string) (conn *DBConnection) {
@@ -33,22 +28,7 @@ func NewConnection(host string) (conn *DBConnection) {
 
 }
 
-func (conn *DBConnection) Use(dbName, tableName string) *DBCollection {
-
-	connect := conn.client.Database(dbName).Collection(tableName)
-
-	return &DBCollection{collection: connect}
-
+func (conn *DBConnection) Use(dbName, tableName string) *mongo.Collection {
+	return conn.client.Database(dbName).Collection(tableName)
 }
 
-func (col *DBCollection) Insert(data bson.D, options *options.InsertOneOptions) (*mongo.InsertOneResult, error) {
-
-	if options == nil {
-		result, err := col.collection.InsertOne(context.Background(), data)
-		return result, err
-
-	}
-
-	result, err := col.collection.InsertOne(context.Background(), data, options)
-	return result, err
-}

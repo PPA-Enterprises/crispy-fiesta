@@ -2,6 +2,7 @@ package models
 
 import (
 	"context"
+	"errors"
 	"log"
 
 	"github.com/PPA-Enterprises/crispy-fiesta/forms"
@@ -25,14 +26,15 @@ type UserModel struct{}
 func (u *UserModel) Signup(data forms.SignupUserCommand) (*mongo.InsertOneResult, error) {
 	collection := dbConnect.Use(databaseName, "user")
 
-	var foundEmail bson.M
+	var foundEmail User
+
+	log.Print(data.Email)
+
 	err := collection.FindOne(context.Background(), bson.D{{"email", data.Email}}).Decode(&foundEmail)
-	if err != nil {
-		// ErrNoDocuments means that the filter did not match any documents in the collection
-		if err == mongo.ErrNoDocuments {
-			return
-		}
-		log.Fatal(err)
+	log.Print(foundEmail)
+
+	if &foundEmail != nil {
+		return nil, errors.New("Email already exists")
 	}
 
 	hash, err := helpers.GenerateFromPassword(data.Password, helpers.P)
@@ -41,12 +43,11 @@ func (u *UserModel) Signup(data forms.SignupUserCommand) (*mongo.InsertOneResult
 		panic(err)
 	}
 
-	result, err := collection.Insert(bson.D{
+	result, err := collection.InsertOne(context.Background(), bson.D{
 		{"name", data.Name},
 		{"email", data.Email},
 		{"password", hash},
 		{"is_verified", false},
-	}, nil)
-
+	})
 	return result, err
 }
