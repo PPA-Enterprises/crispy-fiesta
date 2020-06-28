@@ -16,6 +16,7 @@ func main() {
 
 		v1.GET("/hello", hello.Default)
 		v1.POST("/signup", user.Signup)
+		v1.POST("/login", user.Login)
 		v1.POST("/job", job.Create)
 	}
 

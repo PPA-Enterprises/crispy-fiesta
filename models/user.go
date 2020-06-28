@@ -31,7 +31,6 @@ func (u *UserModel) Signup(data forms.SignupUserCommand) (*mongo.InsertOneResult
 	log.Print(data.Email)
 
 	err := collection.FindOne(context.Background(), bson.D{{"email", data.Email}}).Decode(&foundEmail)
-	log.Print(foundEmail)
 
 	if &foundEmail != nil {
 		return nil, errors.New("Email already exists")
@@ -50,4 +49,14 @@ func (u *UserModel) Signup(data forms.SignupUserCommand) (*mongo.InsertOneResult
 		{"is_verified", false},
 	})
 	return result, err
+}
+
+func (u *UserModel) Login(data forms.LoginUserCommand) (User, error) {
+	collection := dbConnect.Use(databaseName, "user")
+
+	var foundUser User
+
+	err := collection.FindOne(context.Background(), bson.D{{"email", data.Email}}).Decode(&foundUser)
+
+	return foundUser, err
 }
