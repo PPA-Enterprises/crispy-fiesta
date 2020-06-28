@@ -22,13 +22,12 @@ func FromSubmitJobCmd(data forms.SubmitJobCmd) *Job {
 }
 
 
-func (job *Job) PersistJob() primitive.ObjectID {
+func (job *Job) PersistJob() (*ID, error) {
 	coll := dbConnect.Use(databaseName, "job")
 	res, err := coll.InsertOne(context.Background(), job)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
-	id, _ := res.InsertedID.(primitive.ObjectID)
-	return id
+	return IdFromInterface(res.InsertedID)
 }

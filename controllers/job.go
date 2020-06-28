@@ -17,6 +17,6 @@ func (j *JobController) Create(c *gin.Context) {
 		return
 	}
 	job := models.FromSubmitJobCmd(data)
-	id := job.PersistJob()
+	id, _ := job.PersistJob()
 	c.JSON(201, gin.H{"message": id.String()})
 }
