@@ -24,7 +24,7 @@ func FromSubmitJobCmd(data forms.SubmitJobCmd) *Job {
 
 func (job *Job) PersistJob() primitive.ObjectID {
 	coll := dbConnect.Use(databaseName, "job")
-	res, err := coll.Collection.InsertOne(context.Background(), job)
+	res, err := coll.InsertOne(context.Background(), job)
 	if err != nil {
 		panic(err)
 	}

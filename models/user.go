@@ -1,6 +1,7 @@
 package models
 
 import (
+	"context"
 	"github.com/PPA-Enterprises/crispy-fiesta/forms"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -20,11 +21,11 @@ type UserModel struct{}
 func (u *UserModel) Signup(data forms.SignupUserCommand) (*mongo.InsertOneResult, error) {
 	collection := dbConnect.Use(databaseName, "user")
 
-	result, err := collection.Insert(bson.D{
+	result, err := collection.InsertOne(context.Background(), bson.D{
 		{"name", data.Name},
 		{"email", data.Email},
 		{"password", data.Password},
 		{"is_verified", false},
-	}, nil)
+	})
 	return result, err
 }
