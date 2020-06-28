@@ -2,7 +2,12 @@ package models
 
 import (
 	"context"
+	"errors"
+	"log"
+
 	"github.com/PPA-Enterprises/crispy-fiesta/forms"
+	"github.com/PPA-Enterprises/crispy-fiesta/helpers"
+
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -21,11 +26,37 @@ type UserModel struct{}
 func (u *UserModel) Signup(data forms.SignupUserCommand) (*mongo.InsertOneResult, error) {
 	collection := dbConnect.Use(databaseName, "user")
 
+	var foundEmail User
+
+	log.Print(data.Email)
+
+	err := collection.FindOne(context.Background(), bson.D{{"email", data.Email}}).Decode(&foundEmail)
+
+	if &foundEmail != nil {
+		return nil, errors.New("Email already exists")
+	}
+
+	hash, err := helpers.GenerateFromPassword(data.Password, helpers.P)
+
+	if err != nil {
+		panic(err)
+	}
+
 	result, err := collection.InsertOne(context.Background(), bson.D{
 		{"name", data.Name},
 		{"email", data.Email},
-		{"password", data.Password},
+		{"password", hash},
 		{"is_verified", false},
 	})
 	return result, err
+}
+
+func (u *UserModel) Login(data forms.LoginUserCommand) (User, error) {
+	collection := dbConnect.Use(databaseName, "user")
+
+	var foundUser User
+
+	err := collection.FindOne(context.Background(), bson.D{{"email", data.Email}}).Decode(&foundUser)
+
+	return foundUser, err
 }
