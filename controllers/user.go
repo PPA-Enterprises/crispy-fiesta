@@ -63,8 +63,13 @@ func (u *UserController) Login(c *gin.Context) {
 
 	if match {
 		//generate token
+		token, err := helpers.CreateToken(foundUser.ID.String())
+		if err != nil {
+			c.JSON(400, err.Error())
+			return
+		}
 		//status 200
-		c.JSON(200, gin.H{"message": "Logged in!!"})
+		c.JSON(200, gin.H{"message": token})
 	} else {
 		//wrong password
 		//status 401
