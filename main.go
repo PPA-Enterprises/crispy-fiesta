@@ -17,6 +17,7 @@ func main() {
 		v1.GET("/hello", hello.Default)
 		v1.POST("/signup", user.Signup)
 		v1.POST("/job", job.Create)
+		v1.PUT("/job", job.Update)
 	}
 
 	router.NoRoute(func(c *gin.Context) {
