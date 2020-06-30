@@ -1,19 +1,30 @@
 package models
 
 import (
-//	"context"
-	"go.mongodb.org/mongo-driver/bson/primitive"
+	"context"
 
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type Client struct {
-	ID primitive.ObjectID `bson:"_id,omitempty"`
-	name string `bson:"name"`
-	InProgress []primitive.ObjectID `bson:"in_progress"`
-	Completed []primitive.ObjectID `bson:"in_progress"`
+	ID         primitive.ObjectID   `json:"_id,omitempty" bson:"_id,omitempty"`
+	name       string               `json:"name" bson:"name"`
+	InProgress []primitive.ObjectID `json:"inProgress" bson:"in_progress"`
+	Completed  []primitive.ObjectID `json:"completed" bson:"in_progress"`
 }
 
-//func ClientByName(name string) 
+type ClientModel struct{}
+
+func (getClient *ClientModel) GetClientById(id string) (Client, error) {
+	collection := dbConnect.Use(databaseName, "client")
+	var client Client
+	err := collection.FindOne(context.TODO(), bson.D{{"_id", id}}).Decode(&client)
+
+	return client, err
+}
+
+//func ClientByName(name string)
 
 /*func FromJob(job *Job) *Client {
 
