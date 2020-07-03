@@ -2,6 +2,7 @@ package models
 
 import (
 	"context"
+	"log"
 
 	"github.com/PPA-Enterprises/crispy-fiesta/forms"
 	"go.mongodb.org/mongo-driver/bson"
@@ -37,6 +38,21 @@ func (getClient *ClientModel) GetClientById(id string) (Client, error) {
 	err := collection.FindOne(context.TODO(), bson.D{{"_id", oid}}).Decode(&client)
 
 	return client, err
+}
+
+func (getAllClients *ClientModel) GetAllClients() ([]Client, error) {
+	collection := dbConnect.Use(databaseName, "client")
+
+	cursor, err := collection.Find(context.TODO(), bson.D{})
+
+	var results []Client
+
+	if err = cursor.All(context.TODO(), &results); err != nil {
+		log.Fatal(err)
+	}
+
+	return results, err
+
 }
 
 /*func FromJob(job *Job) *Client {

@@ -46,3 +46,18 @@ func (getClient *ClientController) GetClientById(c *gin.Context) {
 
 	c.JSON(200, gin.H{"message": "Got client successfully", "client": client})
 }
+
+func (getAllClients *ClientController) GetAllClients(c *gin.Context) {
+	//var clients []models.ClientModel
+
+	clients, err := clientModel.GetAllClients()
+
+	if err != nil {
+		c.JSON(400, gin.H{"message": "Problem getting clients", "error": err.Error()})
+		c.Abort()
+		return
+	}
+
+	c.JSON(200, gin.H{"message": "Got clients successfully", "clients": clients})
+
+}

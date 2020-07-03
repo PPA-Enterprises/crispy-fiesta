@@ -21,6 +21,7 @@ func main() {
 		v1.PUT("/job", job.Update)
 		v1.POST("/client", client.CreateClient)
 		v1.GET("/client/:id", client.GetClientById)
+		v1.GET("/client", client.GetAllClients)
 	}
 
 	router.NoRoute(func(c *gin.Context) {
