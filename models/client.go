@@ -3,28 +3,41 @@ package models
 import (
 	"context"
 
+	"github.com/PPA-Enterprises/crispy-fiesta/forms"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type Client struct {
 	ID         primitive.ObjectID   `json:"_id,omitempty" bson:"_id,omitempty"`
-	name       string               `json:"name" bson:"name"`
+	Name       string               `json:"name" bson:"name"`
 	InProgress []primitive.ObjectID `json:"inProgress" bson:"in_progress"`
-	Completed  []primitive.ObjectID `json:"completed" bson:"in_progress"`
+	Completed  []primitive.ObjectID `json:"completed" bson:"in_completed"`
 }
 
 type ClientModel struct{}
 
+func (createClient *ClientModel) CreateClient(data forms.CreateClientCommand) (*mongo.InsertOneResult, error) {
+	collection := dbConnect.Use(databaseName, "client")
+
+	result, err := collection.InsertOne(context.Background(), bson.D{
+		{"name", data.Name},
+		{"inProgress", data.InProgress},
+		{"completed", data.Completed},
+	})
+
+	return result, err
+}
+
 func (getClient *ClientModel) GetClientById(id string) (Client, error) {
 	collection := dbConnect.Use(databaseName, "client")
 	var client Client
-	err := collection.FindOne(context.TODO(), bson.D{{"_id", id}}).Decode(&client)
+	oid, _ := primitive.ObjectIDFromHex(id)
+	err := collection.FindOne(context.TODO(), bson.D{{"_id", oid}}).Decode(&client)
 
 	return client, err
 }
-
-//func ClientByName(name string)
 
 /*func FromJob(job *Job) *Client {
 
