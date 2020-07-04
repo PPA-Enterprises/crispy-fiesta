@@ -1,31 +1,53 @@
 package controllers
 
 import (
-	"net/http"
-	"github.com/gin-gonic/gin"
 	"github.com/PPA-Enterprises/crispy-fiesta/forms"
 	"github.com/PPA-Enterprises/crispy-fiesta/models"
-
+	"github.com/gin-gonic/gin"
 )
 
-type JobController struct {}
+var jobModel = new(models.JobModel)
 
-func (j *JobController) Create(c *gin.Context) {
-	var data forms.SubmitJobCmd;
+type JobController struct{}
+
+// func (j *JobController) Create(c *gin.Context) {
+// 	var data forms.SubmitJobCmd
+// 	if c.BindJSON(&data) != nil {
+// 		c.JSON(http.StatusNotAcceptable,
+// 			gin.H{"success": false, "message": "Provide relevant fields"})
+// 		c.Abort()
+// 		return
+// 	}
+// 	job := models.FromSubmitJobCmd(data)
+// 	id, err := job.PersistJob()
+
+// 	if err != nil {
+// 		c.JSON(http.StatusInternalServerError,
+// 			gin.H{"success": false, "message": err.Error()})
+// 		return
+// 	}
+// 	c.JSON(http.StatusCreated,
+// 		gin.H{"success": true, "payload": id.String(), "message": "Job Created"})
+// }
+
+func (j *JobController) Update(c *gin.Context) {
+	var data forms.UpdateJobCmd
+
 	if c.BindJSON(&data) != nil {
-		c.JSON(http.StatusNotAcceptable,
-			gin.H{"success": false, "message": "Provide relevant fields"});
-		c.Abort();
+		c.JSON(406,
+			gin.H{"success": false, "message": "Provide relevant fields"})
+		c.Abort()
 		return
 	}
-	job := models.FromSubmitJobCmd(data);
-	id, err := job.PersistJob();
+
+	_, err := jobModel.UpdateJob(data)
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError,
-			gin.H{"success": false, "message": err.Error()});
-		return;
+		c.JSON(400, gin.H{"success": false, "message": err.Error()})
+		c.Abort()
+		return
 	}
-	c.JSON(http.StatusCreated,
-		gin.H{"success": true, "payload": id.String(), "message": "Job Created"});
+
+	c.JSON(202, gin.H{"success": true, "message": "Account updated."})
+
 }
