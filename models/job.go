@@ -6,11 +6,12 @@ import (
 	"github.com/PPA-Enterprises/crispy-fiesta/forms"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type Job struct {
 	ID              primitive.ObjectID `json:"_id,omitempty"bson:"_id,omitempty"`
-	ClientInfo      string             `json:"client_info"bson:"client_info"`
+	ClientName      string             `json:"client_info"bson:"client_info"`
 	CarInfo         string             `json:"car_info"bson:"car_info"`
 	AppointmentInfo string             `json:"appointment_info"bson:"appointment_info"`
 	Notes           string             `json:"notes"bson:"notes"`
@@ -18,57 +19,70 @@ type Job struct {
 
 type JobModel struct{}
 
-func FromSubmitJobCmd(data forms.SubmitJobCmd) *Job {
-	j := Job{
-		ClientInfo:      data.ClientInfo,
-		CarInfo:         data.CarInfo,
-		AppointmentInfo: data.AppointmentInfo}
-	return &j
+func (createJob *JobModel) CreateJob(data forms.SubmitJobCmd) ([2]*mongo.InsertOneResult, error) {
+	var err error
+	var client *mongo.Client
+	var jobsCollection *mongo.Collection
+	var clientCollection *mongo.Collection
+	var ctx = context.Background()
+	var result [2]*mongo.InsertOneResult
+	var session mongo.Session
+	client = dbConnect.Client
+	// defer client.Disconnect(ctx)
+	jobsCollection = client.Database("PPA").Collection("job")
+	clientCollection = client.Database("PPA").Collection("client")
+
+	if session, err = client.StartSession(); err != nil {
+		panic(err)
+	}
+	if err = session.StartTransaction(); err != nil {
+		panic(err)
+	}
+
+	if err = mongo.WithSession(ctx, session, func(sc mongo.SessionContext) error {
+		if result[0], err = jobsCollection.InsertOne(ctx, bson.D{
+			{"carInfo", data.CarInfo},
+			{"appointmentInfo", data.AppointmentInfo},
+			{"notes", data.Notes},
+		}); err != nil {
+			panic(err)
+		}
+
+		if err = session.CommitTransaction(sc); err != nil {
+			panic(err)
+		}
+
+		return nil
+	}); err != nil {
+		panic(err)
+	}
+
+	var inProgress [1]primitive.ObjectID
+	inProgress[0] = result[0].InsertedID.(primitive.ObjectID)
+	var completed []primitive.ObjectID
+
+	if err = mongo.WithSession(ctx, session, func(sc mongo.SessionContext) error {
+		if result[1], err = clientCollection.InsertOne(ctx, bson.D{
+			{"name", data.ClientName},
+			{"inProgress", inProgress},
+			{"completed", completed},
+		}); err != nil {
+			panic(err)
+		}
+
+		if err = session.CommitTransaction(sc); err != nil {
+			panic(err)
+		}
+
+		return nil
+	}); err != nil {
+		panic(err)
+	}
+
+	session.EndSession(ctx)
+
+	return result, err
 }
-
-// func (job *Job) PersistJob() (*ID, error) {
-// 	/*coll := dbConnect.Use(databaseName, "job")
-// 	res, err := coll.InsertOne(context.Background(), job)
-// 	if err != nil {
-// 		return nil, err
-// 	}*/
-
-// 	session, err := dbConnect.Session()
-// 	if err != nil {
-// 		//500
-// 	}
-// 	defer session.EndSession(context.TODO())
-// 	sessCtx := mongo.NewSessionContext(context.TODO(), session)
-
-// 	if err = session.StartTransaction(); err != nil {
-// 		panic(err)
-// 		//return err
-// 	}
-// 	coll := dbConnect.Use(databaseName, "job")
-// 	res, err := coll.InsertOne(sessCtx, job)
-// 	if err != nil {
-// 		if transErr = session.AbortTransaction(); transErr != nil {
-// 			//no transaction to abort
-// 			//500
-// 		}
-// 		return nil, err
-// 	}
-
-// 	id, err := IdFromInterface(res.InsertedID)
-// 	if err != nil {
-// 		if transErr = session.AbortTransaction(); transErr != nil {
-// 			//no transaction to abort
-// 			//500
-// 		}
-// 		return nil, err
-// 	}
-
-// 	// see if client exists
-// 	//yes, add id
-// 	//no, create it and add id
-
-// 	return id, nil
-// }
 
 func (updateJob *JobModel) UpdateJob(data forms.UpdateJobCmd) (Job, error) {
 	collection := dbConnect.Use(databaseName, "job")

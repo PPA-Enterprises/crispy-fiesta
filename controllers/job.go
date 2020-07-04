@@ -10,6 +10,28 @@ var jobModel = new(models.JobModel)
 
 type JobController struct{}
 
+func (createJob *JobController) CreateJob(c *gin.Context) {
+	var data forms.SubmitJobCmd
+
+	if c.BindJSON(&data) != nil {
+		c.JSON(406,
+			gin.H{"success": false, "message": "Provide relevant fields"})
+		c.Abort()
+		return
+	}
+
+	result, err := jobModel.CreateJob(data)
+
+	if err != nil {
+		c.JSON(400, gin.H{"message": "Problem creating client."})
+		c.Abort()
+		return
+	}
+
+	c.JSON(201, gin.H{"message": "Created Job successfully", "_id job": result[0].InsertedID, "_id client": result[1].InsertedID})
+
+}
+
 // func (j *JobController) Create(c *gin.Context) {
 // 	var data forms.SubmitJobCmd
 // 	if c.BindJSON(&data) != nil {
