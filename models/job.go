@@ -57,6 +57,10 @@ func (createJob *JobModel) CreateJob(data forms.SubmitJobCmd) ([2]*mongo.InsertO
 		panic(err)
 	}
 
+	if err = session.StartTransaction(); err != nil {
+		panic(err)
+	}
+
 	var inProgress [1]primitive.ObjectID
 	inProgress[0] = result[0].InsertedID.(primitive.ObjectID)
 	var completed []primitive.ObjectID
