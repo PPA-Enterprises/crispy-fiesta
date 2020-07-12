@@ -1,8 +1,8 @@
 package main
 
 import (
-	//"github.com/PPA-Enterprises/crispy-fiesta/controllers"
-	//"github.com/PPA-Enterprises/crispy-fiesta/helpers"
+	"github.com/PPA-Enterprises/crispy-fiesta/controllers"
+	"github.com/PPA-Enterprises/crispy-fiesta/helpers"
 	"github.com/gin-gonic/gin"
 )
 
@@ -11,7 +11,7 @@ func main() {
 
 	v1 := router.Group("/api/v1")
 	{
-		/*hello := new(controllers.HelloWorldController)
+		hello := new(controllers.HelloWorldController)
 		user := new(controllers.UserController)
 		job := new(controllers.JobController)
 		client := new(controllers.ClientController)
@@ -23,7 +23,7 @@ func main() {
 		v1.PUT("/job", job.Update)
 		v1.POST("/client", client.CreateClient)
 		v1.GET("/client/:id", client.GetClientById)
-		v1.GET("/client", client.GetAllClients)*/
+		v1.GET("/client", client.GetAllClients)
 	}
 
 	router.NoRoute(func(c *gin.Context) {
@@ -32,7 +32,7 @@ func main() {
 
 	router.Run()
 }
-/*
+
 //middlewares
 func TokenAuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -44,4 +44,4 @@ func TokenAuthMiddleware() gin.HandlerFunc {
 		}
 		c.Next()
 	}
-}*/
+}
