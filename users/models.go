@@ -8,6 +8,17 @@ type user struct {
 	IsVerified bool `json:"is_verified" bson:"is_verified"`
 }
 
-func fromSubmitJobCmd(data signupUserCommand) *user {
-	return &
+// TODO: hash password here
+func tryFromSubmitJobCmd(data signupUserCommand) (*user, error) {
+	return &user{
+		Name: data.Name,
+		Email: data.Email,
+		Password: data.Password,
+	}, nil
+}
+
+func (u *user) signup() (*ID, error) {
+	//coll := dbConnect.Use(name, "user")
+	// if user exists, return err
+	// insert user, return id
 }
