@@ -3,7 +3,7 @@ package main
 import (
 	//"github.com/PPA-Enterprises/crispy-fiesta/controllers"
 	//"github.com/PPA-Enterprises/crispy-fiesta/helpers"
-	"github.com/PPA-Enterprises/crispy-fiesta/common"
+	"internal/common"
 	"github.com/gin-gonic/gin"
 )
 

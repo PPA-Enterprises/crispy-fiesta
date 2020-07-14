@@ -8,3 +8,6 @@ require (
 	go.mongodb.org/mongo-driver v1.3.4
 	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9
 )
+
+require internal/common v1.0.0
+replace internal/common => ./internal/common
