@@ -3,15 +3,17 @@ package main
 import (
 	//"github.com/PPA-Enterprises/crispy-fiesta/controllers"
 	//"github.com/PPA-Enterprises/crispy-fiesta/helpers"
+	"github.com/PPA-Enterprises/crispy-fiesta/common"
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
 	router := gin.Default()
+	common.Init("mongodb://localhost:27017")
 
-	v1 := router.Group("/api/v1")
+	/*v1 := router.Group("/api/v1")
 	{
-		/*hello := new(controllers.HelloWorldController)
+		hello := new(controllers.HelloWorldController)
 		user := new(controllers.UserController)
 		job := new(controllers.JobController)
 		client := new(controllers.ClientController)
@@ -23,8 +25,8 @@ func main() {
 		v1.PUT("/job", job.Update)
 		v1.POST("/client", client.CreateClient)
 		v1.GET("/client/:id", client.GetClientById)
-		v1.GET("/client", client.GetAllClients)*/
-	}
+		v1.GET("/client", client.GetAllClients)
+	}*/
 
 	router.NoRoute(func(c *gin.Context) {
 		c.JSON(404, gin.H{"message": "Not Found."})
