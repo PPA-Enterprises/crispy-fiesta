@@ -3,14 +3,14 @@ package main
 import (
 	//"github.com/PPA-Enterprises/crispy-fiesta/controllers"
 	//"github.com/PPA-Enterprises/crispy-fiesta/helpers"
-	"internal/common"
+	"internal/db"
 	"internal/users"
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
 	router := gin.Default()
-	common.Init("mongodb://localhost:27017")
+	db.Init("mongodb://localhost:27017")
 
 	/*v1 := router.Group("/api/v1")
 	{

@@ -7,15 +7,13 @@ require (
 	github.com/gin-gonic/gin v1.6.3
 	go.mongodb.org/mongo-driver v1.3.4
 	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9
+	github.com/matthewhartstonge/argon2 v0.1.4 // indirect
+	internal/common v1.0.0
+	internal/users v1.0.0
+	internal/db v1.0.0
 )
 
-require internal/common v1.0.0
 
 replace internal/common => ./internal/common
-
-require (
-	github.com/matthewhartstonge/argon2 v0.1.4 // indirect
-	internal/users v1.0.0
-)
-
+replace internal/db => ./internal/db
 replace internal/users => ./internal/users

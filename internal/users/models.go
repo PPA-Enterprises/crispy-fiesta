@@ -2,6 +2,7 @@ package users
 
 import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	passwordUtils "internal/common"
 )
 
 type userModel struct {
@@ -12,12 +13,16 @@ type userModel struct {
 	IsVerified bool `json:"is_verified" bson:"is_verified"`
 }
 
-// TODO: hash password here
-func tryFromSubmitJobCmd(data signupUserCommand) (*userModel, error) {
+func tryFromSignupUserCmd(data signupUserCommand) (*userModel, error) {
+	encrypted, err := passwordUtils.HashFromPlaintext(data.Password)
+	if err != nil {
+		return nil, err
+	}
+
 	return &userModel{
 		Name: data.Name,
 		Email: data.Email,
-		Password: data.Password,
+		Password: encrypted,
 	}, nil
 }
 
