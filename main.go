@@ -4,6 +4,7 @@ import (
 	//"github.com/PPA-Enterprises/crispy-fiesta/controllers"
 	//"github.com/PPA-Enterprises/crispy-fiesta/helpers"
 	"internal/common"
+	"internal/users"
 	"github.com/gin-gonic/gin"
 )
 
@@ -27,6 +28,11 @@ func main() {
 		v1.GET("/client/:id", client.GetClientById)
 		v1.GET("/client", client.GetAllClients)
 	}*/
+
+	v1 := router.Group("/api/v1")
+	{
+		v1.POST("/signup", users.Signup)
+	}
 
 	router.NoRoute(func(c *gin.Context) {
 		c.JSON(404, gin.H{"message": "Not Found."})

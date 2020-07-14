@@ -1,6 +1,10 @@
 package users
 
-type user struct {
+import (
+	"go.mongodb.org/mongo-driver/bson/primitive"
+)
+
+type userModel struct {
 	ID primitive.ObjectID `json:"_id,omitempty" bson:"_id,omitempty"`
 	Name string `json:"name" bson:"name"`
 	Email string `json:"email" bson:"email"`
@@ -9,16 +13,16 @@ type user struct {
 }
 
 // TODO: hash password here
-func tryFromSubmitJobCmd(data signupUserCommand) (*user, error) {
-	return &user{
+func tryFromSubmitJobCmd(data signupUserCommand) (*userModel, error) {
+	return &userModel{
 		Name: data.Name,
 		Email: data.Email,
 		Password: data.Password,
 	}, nil
 }
 
-func (u *user) signup() (*ID, error) {
+/*func (u *userModel) signup() (*ID, error) {
 	//coll := dbConnect.Use(name, "user")
 	// if user exists, return err
 	// insert user, return id
-}
+}*/
