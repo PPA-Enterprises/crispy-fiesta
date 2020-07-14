@@ -3,6 +3,7 @@ package common
 import (
 	"context"
 	"time"
+	"fmt"
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -15,14 +16,19 @@ type DBConnection struct {
 var dbConnect *DBConnection
 
 func Init(host string) {
+	fmt.Println("hellow init")
 	dbConnect = NewConnection(host)
 }
 
 func NewConnection(host string) (conn *DBConnection) {
 
 	//TODO: Auth
+	//TODO: Client does panic when there is no databse running. We dont want the
+	//app to be running unless it has access to databse
 	client, err := mongo.NewClient(options.Client().ApplyURI(host))
-	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+	if err != nil { panic(err) }
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
 	err = client.Connect(ctx)
 
 	if err != nil {
