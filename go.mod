@@ -11,3 +11,5 @@ require (
 
 require internal/common v1.0.0
 replace internal/common => ./internal/common
+require internal/users v1.0.0
+replace internal/users => ./internal/users
