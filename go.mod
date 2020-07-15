@@ -10,6 +10,7 @@ require (
 	github.com/matthewhartstonge/argon2 v0.1.4 // indirect
 	internal/common v1.0.0
 	internal/users v1.0.0
+	internal/jobs v1.0.0
 	internal/db v1.0.0
 	internal/uid v1.0.0
 )
@@ -18,4 +19,5 @@ require (
 replace internal/common => ./internal/common
 replace internal/db => ./internal/db
 replace internal/users => ./internal/users
+replace internal/jobs => ./internal/jobs
 replace internal/uid => ./internal/uid
