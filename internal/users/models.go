@@ -41,7 +41,7 @@ func (u *userModel) signup(ctx context.Context) (UID.ID, error) {
 	}
 
 	res, err := coll.InsertOne(ctx, u); if err != nil {
-		return nil, err
+		return nil, errors.New("Server Error")
 	}
 	return UID.IdFromInterface(res.InsertedID)
 }

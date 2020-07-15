@@ -3,6 +3,7 @@ import (
 	"fmt"
 	"context"
 	"time"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
@@ -13,14 +14,23 @@ func Signup(c *gin.Context) {
 
 	var data signupUserCommand
 	if c.BindJSON(&data) != nil {
-		c.JSON(406, gin.H{"msg": ""})
+		c.JSON(http.StatusNotAcceptable,
+		gin.H{"success": false, "message": "Provide relevant fields"})
 		c.Abort()
 		return
 	}
 
 	newUser, err := tryFromSignupUserCmd(&data); if err != nil {
 		//500, hashing failed
+		c.JSON(http.StatusInternalServerError,
+			gin.H{"success": false, "message": err.Error()})
+		return
 	}
-	newUser.signup(ctx)
-	c.JSON(201, gin.H{"msg":""})
+	id, err := newUser.signup(ctx); if err != nil {
+		c.JSON(http.StatusInternalServerError,
+			gin.H{"success": false, "message": err.Error()})
+		return
+	}
+	c.JSON(http.StatusCreated,
+		gin.H{"success": true, "payload": id.String(), "message": "User Created"});
 }
