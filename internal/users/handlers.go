@@ -21,12 +21,14 @@ func signup(c *gin.Context) {
 	newUser, err := tryFromSignupUserCmd(&data); if err != nil {
 		c.JSON(err.Code,
 			gin.H{"success": false, "message": err.Error()})
+		c.Abort()
 		return
 	}
 
 	id, err := newUser.signup(ctx); if err != nil {
 		c.JSON(err.Code,
 			gin.H{"success": false, "message": err.Error()})
+		c.Abort()
 		return
 	}
 	c.JSON(http.StatusCreated,
@@ -34,8 +36,8 @@ func signup(c *gin.Context) {
 }
 
 func login(c *gin.Context) {
-	//ctx, cancel := context.WithTimeout(c, 5*time.Second)
-	//defer cancel()
+	ctx, cancel := context.WithTimeout(c, 5*time.Second)
+	defer cancel()
 
 	var credentials loginUserCommand
 	if c.BindJSON(&credentials) != nil {
@@ -44,5 +46,14 @@ func login(c *gin.Context) {
 		c.Abort()
 		return
 	}
+
+	jwt, err := authenticate(ctx, credentials); if err != nil {
+		c.JSON(err.Code,
+			gin.H{"success": false, "message": err.Error()})
+		c.Abort()
+		return
+	}
+	c.JSON(http.StatusOK,
+		gin.H{"success": true, "payload": jwt, "message": "User Authenticated"});
 
 }

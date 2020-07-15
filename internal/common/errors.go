@@ -16,7 +16,28 @@ func (e *ResponseError) Error() string {
 func EmailAlreadyExistsError() *ResponseError {
 	return &ResponseError{
 		Code: http.StatusConflict,
-		reason: "Email Already exists",
+		reason: "Email Already Exists",
+	}
+}
+
+func EmailDoesNotExistError() *ResponseError {
+	return &ResponseError{
+		Code: http.StatusNotFound,
+		reason: "Email Does Not Exist",
+	}
+}
+
+func InvalidCredentials() *ResponseError {
+	return &ResponseError{
+		Code: http.StatusUnauthorized,
+		reason: "Wrong Email or Password",
+	}
+}
+
+func JwtError(err error) *ResponseError {
+	return &ResponseError{
+		Code: http.StatusInternalServerError,
+		reason: err.Error(),
 	}
 }
 

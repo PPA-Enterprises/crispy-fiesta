@@ -7,7 +7,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	passwordUtils "internal/common"
 	errors "internal/common"
-	//jwtUtils "internal/common"
+	jwtUtils "internal/common"
 	"internal/db"
 	"internal/uid"
 )
@@ -47,21 +47,28 @@ func (self *userModel) signup(ctx context.Context) (UID.ID, *errors.ResponseErro
 	return UID.IdFromInterface(res.InsertedID)
 }
 
-/*func (self *userModel) jwt() (string, error) {
+//TODO: In case we want to add anything else to the jwt
+func (self *userModel) jwt() (string, error) {
+	return jwtUtils.CreateToken(self.ID.Hex())
+}
 
-}*/
-
-func authenticate(ctx context.Context, credentials loginUserCommand) {
+func authenticate(ctx context.Context, credentials loginUserCommand) (string, *errors.ResponseError){
 	user, err := UserByEmail(ctx, credentials.Email); if err != nil {
 		//email doesnt exist
+		return string(""), errors.EmailDoesNotExistError()
 	}
 
 	ok, err := passwordUtils.VerifyPassword(credentials.Password, user.Password)
 	if !ok {
 		//passwords dont match
+		return string(""), errors.InvalidCredentials()
 	}
 	//get jwt
-	//jwt, err := jwtUtils.CreateToken
+	jwt, err := user.jwt(); if err != nil {
+		//failed to create jwt
+		return string(""), errors.JwtError(err)
+	}
+	return jwt, nil
 }
 
 func UserByEmail(ctx context.Context, email string) (userModel, error) {
