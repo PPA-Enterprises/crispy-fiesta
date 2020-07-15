@@ -5,5 +5,5 @@ import (
 )
 
 func UserRoutesRegister(router *gin.RouterGroup) {
-	router.POST("/", Signup)
+	router.POST("/", signup)
 }

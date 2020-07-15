@@ -7,6 +7,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/bson"
 	passwordUtils "internal/common"
+	//jwtUtils "internal/common"
 	"internal/db"
 	"internal/uid"
 )
@@ -46,6 +47,23 @@ func (self *userModel) signup(ctx context.Context) (UID.ID, error) {
 	return UID.IdFromInterface(res.InsertedID)
 }
 
+/*func (self *userModel) jwt() (string, error) {
+
+}*/
+
+func authenticate(ctx context.Context, credentials loginUserCommand) {
+	user, err := UserByEmail(ctx, credentials.Email); if err != nil {
+		//email doesnt exist
+	}
+
+	ok, err := passwordUtils.VerifyPassword(credentials.Password, user.Password)
+	if !ok {
+		//passwords dont match
+	}
+	//get jwt
+	//jwt, err := jwtUtils.CreateToken
+}
+
 func UserByEmail(ctx context.Context, email string) (userModel, error) {
 	coll := db.Connection().Use(db.DefaultDatabase, "user")
 
@@ -60,3 +78,4 @@ func EmailExists(ctx context.Context, email string) bool {
 	}
 	return true
 }
+

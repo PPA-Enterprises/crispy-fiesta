@@ -10,11 +10,11 @@ type ID interface {
 }
 
 type uid struct {
-	ObjectID primitive.ObjectID
+	objectID primitive.ObjectID
 }
 
 func (self uid) String() string {
-	return self.ObjectID.String()
+	return self.objectID.Hex()
 }
 
 func IdFromInterface(id interface{}) (ID, error) {
@@ -23,5 +23,5 @@ func IdFromInterface(id interface{}) (ID, error) {
 	if !err {
 		return nil, errors.New("Failed to get ID")
 	}
-	return uid{ObjectID: res}, nil
+	return uid{objectID: res}, nil
 }
