@@ -10,7 +10,8 @@ import (
 
 func main() {
 	router := gin.Default()
-	db.Init("mongodb://localhost:27017")
+	conn := db.Init("mongodb://localhost:27017")
+	defer conn.Disconnect()
 
 	/*v1 := router.Group("/api/v1")
 	{

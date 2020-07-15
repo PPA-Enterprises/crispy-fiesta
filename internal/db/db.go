@@ -9,13 +9,14 @@ import (
 )
 
 type DBConnection struct {
-	Client *mongo.Client
+	client *mongo.Client
 }
 
 var dbConnect *DBConnection
 
-func Init(host string) {
+func Init(host string) *DBConnection {
 	dbConnect = NewConnection(host)
+	return dbConnect
 }
 
 func Connection() *DBConnection {
@@ -49,7 +50,12 @@ func NewConnection(host string) (conn *DBConnection) {
 }
 
 func (conn *DBConnection) Use(dbName, tableName string) *mongo.Collection {
-	return conn.Client.Database(dbName).Collection(tableName)
+	return conn.client.Database(dbName).Collection(tableName)
+}
+
+func (conn *DBConnection) Disconnect() {
+	err := conn.client.Disconnect(context.Background())
+	if err != nil { panic(err) }
 }
 
 func (conn *DBConnection) Session(opts ...*options.SessionOptions) (*mongo.Session, error) {
@@ -59,6 +65,6 @@ func (conn *DBConnection) Session(opts ...*options.SessionOptions) (*mongo.Sessi
 	} else {
 		sessionOpts = options.MergeSessionOptions(opts...)
 	}
-	session, err := conn.Client.StartSession(sessionOpts)
+	session, err := conn.client.StartSession(sessionOpts)
 	return &session, err
 }
