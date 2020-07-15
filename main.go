@@ -30,7 +30,7 @@ func main() {
 		v1.GET("/client", client.GetAllClients)
 	}*/
 
-	v1 := router.Group("/api")
+	v1 := router.Group("/api/v1")
 	userRoutes.UserRoutesRegister(v1.Group("/users"))
 
 	router.NoRoute(func(c *gin.Context) {
