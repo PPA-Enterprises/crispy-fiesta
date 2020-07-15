@@ -13,8 +13,8 @@ type uid struct {
 	ObjectID primitive.ObjectID
 }
 
-func (id uid) String() string {
-	return id.ObjectID.String()
+func (self uid) String() string {
+	return self.ObjectID.String()
 }
 
 func IdFromInterface(id interface{}) (ID, error) {

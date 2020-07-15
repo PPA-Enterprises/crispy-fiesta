@@ -32,15 +32,15 @@ func tryFromSignupUserCmd(data *signupUserCommand) (*userModel, error) {
 	}, nil
 }
 
-func (u *userModel) signup(ctx context.Context) (UID.ID, error) {
+func (self *userModel) signup(ctx context.Context) (UID.ID, error) {
 	coll := db.Connection().Use(db.DefaultDatabase, "user")
 
-	if EmailExists(ctx, u.Email) {
+	if EmailExists(ctx, self.Email) {
 		//user already in use
 		return nil, errors.New("Email already exists")
 	}
 
-	res, err := coll.InsertOne(ctx, u); if err != nil {
+	res, err := coll.InsertOne(ctx, self); if err != nil {
 		return nil, errors.New("Server Error")
 	}
 	return UID.IdFromInterface(res.InsertedID)
