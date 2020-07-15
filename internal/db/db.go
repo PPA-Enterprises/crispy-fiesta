@@ -18,6 +18,10 @@ func Init(host string) {
 	dbConnect = NewConnection(host)
 }
 
+func Connection() *DBConnection {
+	return dbConnect
+}
+
 func NewConnection(host string) (conn *DBConnection) {
 
 	//TODO: Auth

@@ -11,9 +11,11 @@ require (
 	internal/common v1.0.0
 	internal/users v1.0.0
 	internal/db v1.0.0
+	internal/uid v1.0.0
 )
 
 
 replace internal/common => ./internal/common
 replace internal/db => ./internal/db
 replace internal/users => ./internal/users
+replace internal/uid => ./internal/uid
