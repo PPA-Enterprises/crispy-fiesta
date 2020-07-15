@@ -2,11 +2,11 @@ package users
 
 import (
 	"context"
-	"errors"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/bson"
 	passwordUtils "internal/common"
+	errors "internal/common"
 	//jwtUtils "internal/common"
 	"internal/db"
 	"internal/uid"
@@ -20,10 +20,10 @@ type userModel struct {
 	IsVerified bool `json:"is_verified" bson:"is_verified"`
 }
 
-func tryFromSignupUserCmd(data *signupUserCommand) (*userModel, error) {
+func tryFromSignupUserCmd(data *signupUserCommand) (*userModel, *errors.ResponseError) {
 	encrypted, err := passwordUtils.HashFromPlaintext(data.Password)
 	if err != nil {
-		return nil, err
+		return nil, errors.ArgonHashError(err)
 	}
 
 	return &userModel{
@@ -33,16 +33,16 @@ func tryFromSignupUserCmd(data *signupUserCommand) (*userModel, error) {
 	}, nil
 }
 
-func (self *userModel) signup(ctx context.Context) (UID.ID, error) {
+func (self *userModel) signup(ctx context.Context) (UID.ID, *errors.ResponseError) {
 	coll := db.Connection().Use(db.DefaultDatabase, "user")
 
 	if EmailExists(ctx, self.Email) {
 		//user already in use
-		return nil, errors.New("Email already exists")
+		return nil, errors.EmailAlreadyExistsError()
 	}
 
 	res, err := coll.InsertOne(ctx, self); if err != nil {
-		return nil, errors.New("Server Error")
+		return nil, errors.DatabaseError(err)
 	}
 	return UID.IdFromInterface(res.InsertedID)
 }

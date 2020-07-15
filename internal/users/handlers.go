@@ -19,14 +19,13 @@ func signup(c *gin.Context) {
 	}
 
 	newUser, err := tryFromSignupUserCmd(&data); if err != nil {
-		//500, hashing failed
-		c.JSON(http.StatusInternalServerError,
+		c.JSON(err.Code,
 			gin.H{"success": false, "message": err.Error()})
 		return
 	}
 
 	id, err := newUser.signup(ctx); if err != nil {
-		c.JSON(http.StatusInternalServerError,
+		c.JSON(err.Code,
 			gin.H{"success": false, "message": err.Error()})
 		return
 	}
