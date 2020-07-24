@@ -26,8 +26,7 @@ func NewClient(name, phone string) *Client {
 	return &clientModel{
 		Name: name,
 		Phone: phone,
-		InProgress: []primitive.ObjectID{},
-		Completed: []primitive.ObjectID{},
+		Jobs: []primitive.ObjectID{},
 	}
 }
 
@@ -41,9 +40,16 @@ func ClientByPhone(ctx context.Context, phone string) (*Client, error) {
 	}
 	return foundClient, nil
 }
-/*
+
 func (self *clientModel) AttatchJobID(oid primitive.ObjectID) {
 	//search for id, insert if not already in the array
 	// linear search for now
-	for _, id
-}*/
+	const matched int = 0
+	for _, id := range self.Jobs {
+		result := bytes.compare([]byte(oid), []byte(id))
+		if result == matched {
+			return
+		}
+	}
+	self.Jobs = append(self.Jobs, oid)
+}
