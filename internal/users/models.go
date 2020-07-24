@@ -34,7 +34,7 @@ func tryFromSignupUserCmd(data *signupUserCommand) (*userModel, *errors.Response
 }
 
 func (self *userModel) signup(ctx context.Context) (UID.ID, *errors.ResponseError) {
-	coll := db.Connection().Use(db.DefaultDatabase, "user")
+	coll := db.Connection().Use(db.DefaultDatabase, "users")
 
 	if EmailExists(ctx, self.Email) {
 		//user already in use
@@ -44,7 +44,7 @@ func (self *userModel) signup(ctx context.Context) (UID.ID, *errors.ResponseErro
 	res, err := coll.InsertOne(ctx, self); if err != nil {
 		return nil, errors.DatabaseError(err)
 	}
-	return UID.IdFromInterface(res.InsertedID)
+	return UID.TryFromInterface(res.InsertedID)
 }
 
 //TODO: In case we want to add anything else to the jwt

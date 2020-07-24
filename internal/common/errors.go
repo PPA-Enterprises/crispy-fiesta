@@ -61,3 +61,10 @@ func ArgonHashError(err error) *ResponseError {
 		reason: err.Error(),
 	}
 }
+
+func PutFailed(err error) *ResponseError {
+	return &ResponseError{
+		Code: http.StatusNotFound,
+		reason: err.Error(),
+	}
+}

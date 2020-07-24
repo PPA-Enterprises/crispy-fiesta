@@ -17,9 +17,13 @@ func (self uid) String() string {
 	return self.objectID.Hex()
 }
 
-func IdFromInterface(id interface{}) (ID, *errors.ResponseError) {
+func TryFromInterface(id interface{}) (ID, *errors.ResponseError) {
 	if res, ok := id.(primitive.ObjectID); ok {
 		return uid{objectID: res}, nil
 	}
 	return nil, errors.UidTypeAssertionError()
+}
+
+func FromOid(oid primitive.ObjectID) ID {
+	return uid{objectID: oid}
 }

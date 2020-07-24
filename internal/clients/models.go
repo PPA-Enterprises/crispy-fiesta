@@ -4,6 +4,7 @@ import (
 	"context"
 	"bytes"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	errors "internal/common"
 	"internal/db"
@@ -30,15 +31,15 @@ func NewClient(name, phone string) *Client {
 	}
 }
 
-func ClientByPhone(ctx context.Context, phone string) (*Client, error) {
+func ClientByPhone(ctx context.Context, phone string) (*Client) {
 	coll := db.Connection().Use(db.DefaultDatabase, "client")
 
 	var foundClient clientModel
 	err := coll.FindOne(ctx, bson.D{{"phone", phone}}).Decode(&foundClient)
 	if err != nil {
-		return nil, err
+		return nil
 	}
-	return foundClient, nil
+	return foundClient
 }
 
 func (self *clientModel) AttatchJobID(oid primitive.ObjectID) {
@@ -52,4 +53,28 @@ func (self *clientModel) AttatchJobID(oid primitive.ObjectID) {
 		}
 	}
 	self.Jobs = append(self.Jobs, oid)
+}
+
+func (self *clientModel) create(ctx context.Context) (UID.ID, *errors.ResponseError) {
+	coll := db.Connection().Use(db.DefaultDatabase, "clients")
+	res, err := coll.InsertOne(ctx, self); if err != nil {
+		return nil, errors.DatabaseError(err)
+	}
+	return UID.IdFromInterface(res.InsertedID)
+}
+
+func (self *clientModel) put(ctx context.Context) errors.ResponseError {
+	coll := db.Connection().Use(db.DefaultDatabase, "clients")
+	opts := options.FindOneAndReplace()
+	opts = opts.SetUpsert(true)
+
+	err := coll.FindOneAndReplace(ctx, bson.D{{"_id", self.ID}}).Err()
+	if err == mongo.ErrNoDocuments {
+		return nil
+	}
+
+	if err != nil {
+		return errors.PutFailed(err)
+	}
+	return nil
 }
