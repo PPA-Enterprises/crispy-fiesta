@@ -8,6 +8,7 @@ import (
 	errors "internal/common"
 	"internal/db"
 	"internal/uid"
+	"internal/jobs"
 )
 
 type Client interface {
@@ -18,8 +19,7 @@ type clientModel struct {
 	ID primitive.ObjectID `json:"_id,omitempty" bson:"_id,omitempty"`
 	Name string `json:"name" bson:"name"`
 	Phone string `json:"phone" bson:"phone"`
-	InProgress []primitive.ObjectID `json:"in_progress" bson:"in_progress"`
-	Completed []primitive.ObjectID `json:"completed" bson:"completed"`
+	Jobs []primitive.ObjectID `json:"jobs" bson:"jobs"`
 }
 
 func NewClient(name, phone string) *Client {

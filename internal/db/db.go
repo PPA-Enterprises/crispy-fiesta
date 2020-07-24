@@ -5,6 +5,8 @@ import (
 	"time"
 
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
@@ -67,4 +69,8 @@ func (conn *DBConnection) Session(opts ...*options.SessionOptions) (*mongo.Sessi
 	}
 	session, err := conn.client.StartSession(sessionOpts)
 	return &session, err
+}
+
+func Populate(ctx context.Context, coll *mongo.Collection, ids []primitive.ObjectID) (*mongo.Cursor, error) {
+	return coll.Find(ctx, bson.M{"_id": bson.M{"$in": ids}})
 }

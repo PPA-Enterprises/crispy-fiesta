@@ -11,6 +11,8 @@ import (
 	"internal/uid"
 )
 
+type Job interface {}
+
 type jobModel struct {
 	ID              primitive.ObjectID `json:"_id,omitempty"bson:"_id,omitempty"`
 	ClientName      string             `json:"client_info"bson:"client_info"`
