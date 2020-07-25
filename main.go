@@ -5,6 +5,7 @@ import (
 	//"github.com/PPA-Enterprises/crispy-fiesta/helpers"
 	"internal/db"
 	userRoutes "internal/users"
+	jobRoutes "internal/jobs"
 	"github.com/gin-gonic/gin"
 )
 
@@ -32,6 +33,7 @@ func main() {
 
 	v1 := router.Group("/api/v1")
 	userRoutes.UserRoutesRegister(v1.Group("/users"))
+	jobRoutes.JobRoutesRegister(v1.Group("/jobs"))
 
 	router.NoRoute(func(c *gin.Context) {
 		c.JSON(404, gin.H{"message": "Not Found."})
