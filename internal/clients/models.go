@@ -5,15 +5,16 @@ import (
 	"bytes"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	errors "internal/common"
 	"internal/db"
 	"internal/uid"
-	"internal/jobs"
 )
 
 type Client interface {
-	AttatchJobID(primitive.ObjectID) (*errors.ResponseError)
+	AttatchJobID(primitive.ObjectID)
+	Put(ctx context.Context) *errors.ResponseError
 }
 
 type clientModel struct {
@@ -23,7 +24,7 @@ type clientModel struct {
 	Jobs []primitive.ObjectID `json:"jobs" bson:"jobs"`
 }
 
-func NewClient(name, phone string) *Client {
+func NewClient(name, phone string) Client {
 	return &clientModel{
 		Name: name,
 		Phone: phone,
@@ -31,7 +32,7 @@ func NewClient(name, phone string) *Client {
 	}
 }
 
-func ClientByPhone(ctx context.Context, phone string) (*Client) {
+func ClientByPhone(ctx context.Context, phone string) (Client) {
 	coll := db.Connection().Use(db.DefaultDatabase, "client")
 
 	var foundClient clientModel
@@ -39,7 +40,7 @@ func ClientByPhone(ctx context.Context, phone string) (*Client) {
 	if err != nil {
 		return nil
 	}
-	return foundClient
+	return &foundClient
 }
 
 func (self *clientModel) AttatchJobID(oid primitive.ObjectID) {
@@ -47,7 +48,7 @@ func (self *clientModel) AttatchJobID(oid primitive.ObjectID) {
 	// linear search for now
 	const matched int = 0
 	for _, id := range self.Jobs {
-		result := bytes.compare([]byte(oid), []byte(id))
+		result := bytes.Compare([]byte(oid.String()), []byte(id.String()))
 		if result == matched {
 			return
 		}
@@ -60,15 +61,15 @@ func (self *clientModel) create(ctx context.Context) (UID.ID, *errors.ResponseEr
 	res, err := coll.InsertOne(ctx, self); if err != nil {
 		return nil, errors.DatabaseError(err)
 	}
-	return UID.IdFromInterface(res.InsertedID)
+	return UID.TryFromInterface(res.InsertedID)
 }
 
-func (self *clientModel) put(ctx context.Context) errors.ResponseError {
+func (self *clientModel) Put(ctx context.Context) *errors.ResponseError {
 	coll := db.Connection().Use(db.DefaultDatabase, "clients")
 	opts := options.FindOneAndReplace()
 	opts = opts.SetUpsert(true)
 
-	err := coll.FindOneAndReplace(ctx, bson.D{{"_id", self.ID}}).Err()
+	err := coll.FindOneAndReplace(ctx, bson.D{{"_id", self.ID}}, self).Err()
 	if err == mongo.ErrNoDocuments {
 		return nil
 	}

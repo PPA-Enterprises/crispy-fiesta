@@ -60,7 +60,7 @@ func (conn *DBConnection) Disconnect() {
 	if err != nil { panic(err) }
 }
 
-func (conn *DBConnection) Session(opts ...*options.SessionOptions) (*mongo.Session, error) {
+func (conn *DBConnection) Session(opts ...*options.SessionOptions) (mongo.Session, error) {
 	var sessionOpts *options.SessionOptions
 	if len(opts) <= 0 {
 		sessionOpts = options.Session()
@@ -68,7 +68,7 @@ func (conn *DBConnection) Session(opts ...*options.SessionOptions) (*mongo.Sessi
 		sessionOpts = options.MergeSessionOptions(opts...)
 	}
 	session, err := conn.client.StartSession(sessionOpts)
-	return &session, err
+	return session, err
 }
 
 func Populate(ctx context.Context, coll *mongo.Collection, ids []primitive.ObjectID) (*mongo.Cursor, error) {

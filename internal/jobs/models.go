@@ -5,7 +5,8 @@ import (
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	//"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/mongo"
 	errors "internal/common"
 	"internal/db"
 	"internal/uid"
@@ -25,26 +26,26 @@ type jobModel struct {
 
 func fromSubmitJobCmd(data *submitJobCmd) *jobModel {
 	return &jobModel{
-		ID: bson.NewObjectId()
+		ID: primitive.NewObjectID(),
 		ClientName: data.ClientName,
 		ClientPhone: data.ClientPhone,
 		CarInfo: data.CarInfo,
 		AppointmentInfo: data.AppointmentInfo,
-		Notes: data.Notes
+		Notes: data.Notes,
+	}
 }
 
-func (self *job) create(ctx context.Context) (*UID.ID, *errors.ResponseError) {
-	coll := db.Connection().Use(db.DefaultDatabase, "jobs")
+func (self *jobModel) create(ctx context.Context) (UID.ID, *errors.ResponseError) {
 	session, err := db.Connection().Session(); if err != nil {
 		//failed to make a session
 		return nil, errors.DatabaseError(err)
 	}
 	defer session.EndSession(ctx)
 
-	//ACID transaction
+	//transaction
 	res, err := session.WithTransaction(ctx, func(sessionCtx mongo.SessionContext) (interface{}, error) {
 		//if client exists, get it
-		var client *clients.Client
+		var client clients.Client
 		client = clients.ClientByPhone(sessionCtx, self.ClientPhone)
 
 		//if not, create a client
@@ -54,12 +55,12 @@ func (self *job) create(ctx context.Context) (*UID.ID, *errors.ResponseError) {
 		//update client array with job
 		client.AttatchJobID(self.ID)
 
-		//save job and client
-		err := client.put(sessionCtx); if err != nil {
+		//save job and client. Need Put for both to remain idempotent
+		err := client.Put(sessionCtx); if err != nil {
 			return nil, err
 		}
 
-		err := job.put(sessionCtx); if err != nil {
+		err = self.put(sessionCtx); if err != nil {
 			return nil, err
 		}
 
@@ -67,17 +68,21 @@ func (self *job) create(ctx context.Context) (*UID.ID, *errors.ResponseError) {
 	})
 
 	if err != nil {
-		nil, errors.DatabaseError(err)
+		return nil, errors.DatabaseError(err)
 	}
-	return res, nil
 
+	if id, ok := res.(UID.ID); ok {
+		return id, nil
+	}
+	return nil, errors.UidTypeAssertionError()
 }
-func (self *job) put(ctx context.Context) errors.ResponseError {
+
+func (self *jobModel) put(ctx context.Context) *errors.ResponseError {
 	coll := db.Connection().Use(db.DefaultDatabase, "jobs")
 	opts := options.FindOneAndReplace()
 	opts = opts.SetUpsert(true)
 
-	err := coll.FindOneAndReplace(ctx, bson.D{{"_id", self.ID}}).Err()
+	err := coll.FindOneAndReplace(ctx, bson.D{{"_id", self.ID}}, self).Err()
 	if err == mongo.ErrNoDocuments {
 		return nil
 	}
