@@ -30,6 +30,7 @@ func tryFromSignupUserCmd(data *signupUserCommand) (*userModel, *errors.Response
 		Name: data.Name,
 		Email: data.Email,
 		Password: encrypted,
+		IsVerified: true,
 	}, nil
 }
 
@@ -72,7 +73,7 @@ func authenticate(ctx context.Context, credentials loginUserCommand) (string, *e
 }
 
 func UserByEmail(ctx context.Context, email string) (userModel, error) {
-	coll := db.Connection().Use(db.DefaultDatabase, "user")
+	coll := db.Connection().Use(db.DefaultDatabase, "users")
 
 	var foundUser userModel
 	err := coll.FindOne(ctx, bson.D{{"email", email}}).Decode(&foundUser)
