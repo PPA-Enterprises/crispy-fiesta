@@ -26,6 +26,7 @@ type clientModel struct {
 
 func NewClient(name, phone string) Client {
 	return &clientModel{
+		ID: primitive.NewObjectID(),
 		Name: name,
 		Phone: phone,
 		Jobs: []primitive.ObjectID{},
@@ -33,7 +34,7 @@ func NewClient(name, phone string) Client {
 }
 
 func ClientByPhone(ctx context.Context, phone string) (Client) {
-	coll := db.Connection().Use(db.DefaultDatabase, "client")
+	coll := db.Connection().Use(db.DefaultDatabase, "clients")
 
 	var foundClient clientModel
 	err := coll.FindOne(ctx, bson.D{{"phone", phone}}).Decode(&foundClient)
@@ -47,6 +48,7 @@ func (self *clientModel) AttatchJobID(oid primitive.ObjectID) {
 	//search for id, insert if not already in the array
 	// linear search for now
 	const matched int = 0
+
 	for _, id := range self.Jobs {
 		result := bytes.Compare([]byte(oid.String()), []byte(id.String()))
 		if result == matched {

@@ -90,6 +90,7 @@ func (self *jobModel) create(ctx context.Context) (UID.ID, *errors.ResponseError
 	if client == nil {
 		client = clients.NewClient(self.ClientName, self.ClientPhone)
 	}
+
 	//update client array with job
 	client.AttatchJobID(self.ID)
 

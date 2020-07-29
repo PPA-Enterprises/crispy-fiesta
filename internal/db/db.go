@@ -3,7 +3,6 @@ package db
 import (
 	"context"
 	"time"
-	"fmt"
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -27,8 +26,6 @@ func Connection() *DBConnection {
 }
 
 func NewConnection(host string) (conn *DBConnection) {
-	fmt.Println(host)
-
 	//TODO: Auth
 	//client, err := mongo.NewClient(options.Client().SetReplicaSet(repl).ApplyURI(host))
 	client, err := mongo.NewClient(options.Client().ApplyURI(host))
