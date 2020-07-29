@@ -35,6 +35,10 @@ func fromSubmitJobCmd(data *submitJobCmd) *jobModel {
 	}
 }
 
+/*
+// TODO: Mongo Transactions can only be done on a Mongo cluster such as a replica set
+// Need additional infrastructure to support this
+
 func (self *jobModel) create(ctx context.Context) (UID.ID, *errors.ResponseError) {
 	session, err := db.Connection().Session(); if err != nil {
 		//failed to make a session
@@ -75,6 +79,30 @@ func (self *jobModel) create(ctx context.Context) (UID.ID, *errors.ResponseError
 		return id, nil
 	}
 	return nil, errors.UidTypeAssertionError()
+}*/
+
+func (self *jobModel) create(ctx context.Context) (UID.ID, *errors.ResponseError) {
+	//if client exists, get it
+	var client clients.Client
+	client = clients.ClientByPhone(sessionCtx, self.ClientPhone)
+
+	//if not, create a client
+	if client == nil {
+		client = clients.NewClient(self.ClientName, self.ClientPhone)
+	}
+	//update client array with job
+	client.AttatchJobID(self.ID)
+
+	//save job and client. Need Put for both to remain idempotent
+	err := client.Put(sessionCtx); if err != nil {
+		return nil, err
+	}
+
+	err = self.put(sessionCtx); if err != nil {
+		return nil, err
+	}
+
+	return UID.FromOid(self.ID), nil
 }
 
 func (self *jobModel) put(ctx context.Context) *errors.ResponseError {
