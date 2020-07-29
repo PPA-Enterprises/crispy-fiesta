@@ -69,7 +69,7 @@ func (self *clientModel) Put(ctx context.Context) *errors.ResponseError {
 	opts := options.FindOneAndReplace()
 	opts = opts.SetUpsert(true)
 
-	err := coll.FindOneAndReplace(ctx, bson.D{{"_id", self.ID}}, self).Err()
+	err := coll.FindOneAndReplace(ctx, bson.D{{"_id", self.ID}}, self, opts).Err()
 	if err == mongo.ErrNoDocuments {
 		return nil
 	}

@@ -12,7 +12,7 @@ import (
 func main() {
 	router := gin.Default()
 	//conn := db.Init("mongodb://localhost:27017?replicaSet=myRepl")
-	conn := db.Init("mongodb://localhost:27017", "myrepl")
+	conn := db.Init("mongodb://localhost:27017")
 	defer conn.Disconnect()
 
 	/*v1 := router.Group("/api/v1")

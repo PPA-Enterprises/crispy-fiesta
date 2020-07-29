@@ -84,7 +84,7 @@ func (self *jobModel) create(ctx context.Context) (UID.ID, *errors.ResponseError
 func (self *jobModel) create(ctx context.Context) (UID.ID, *errors.ResponseError) {
 	//if client exists, get it
 	var client clients.Client
-	client = clients.ClientByPhone(sessionCtx, self.ClientPhone)
+	client = clients.ClientByPhone(ctx, self.ClientPhone)
 
 	//if not, create a client
 	if client == nil {
@@ -94,11 +94,11 @@ func (self *jobModel) create(ctx context.Context) (UID.ID, *errors.ResponseError
 	client.AttatchJobID(self.ID)
 
 	//save job and client. Need Put for both to remain idempotent
-	err := client.Put(sessionCtx); if err != nil {
+	err := client.Put(ctx); if err != nil {
 		return nil, err
 	}
 
-	err = self.put(sessionCtx); if err != nil {
+	err = self.put(ctx); if err != nil {
 		return nil, err
 	}
 
@@ -110,7 +110,7 @@ func (self *jobModel) put(ctx context.Context) *errors.ResponseError {
 	opts := options.FindOneAndReplace()
 	opts = opts.SetUpsert(true)
 
-	err := coll.FindOneAndReplace(ctx, bson.D{{"_id", self.ID}}, self).Err()
+	err := coll.FindOneAndReplace(ctx, bson.D{{"_id", self.ID}}, self, opts).Err()
 	if err == mongo.ErrNoDocuments {
 		return nil
 	}

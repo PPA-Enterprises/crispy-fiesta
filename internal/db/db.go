@@ -17,8 +17,8 @@ type DBConnection struct {
 
 var dbConnect *DBConnection
 
-func Init(host string, repl string) *DBConnection {
-	dbConnect = NewConnection(host, repl)
+func Init(host string) *DBConnection {
+	dbConnect = NewConnection(host)
 	return dbConnect
 }
 
@@ -26,12 +26,12 @@ func Connection() *DBConnection {
 	return dbConnect
 }
 
-func NewConnection(host string, repl string) (conn *DBConnection) {
+func NewConnection(host string) (conn *DBConnection) {
 	fmt.Println(host)
 
 	//TODO: Auth
-	client, err := mongo.NewClient(options.Client().SetReplicaSet(repl).ApplyURI(host))
-	//client, err := mongo.NewClient(options.Client().ApplyURI(host))
+	//client, err := mongo.NewClient(options.Client().SetReplicaSet(repl).ApplyURI(host))
+	client, err := mongo.NewClient(options.Client().ApplyURI(host))
 	if err != nil { panic(err) }
 
 	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
@@ -40,9 +40,7 @@ func NewConnection(host string, repl string) (conn *DBConnection) {
 	err = client.Connect(ctx)
 	if err != nil { panic(err)}
 
-	//TODO: Client does panic when there is no databse running. We dont want the
-	//app to be running unless it has access to databse...surely there is a better
-	//way
+	//ensure connection was successful
 	pingCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
