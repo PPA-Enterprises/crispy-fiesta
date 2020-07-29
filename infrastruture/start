@@ -1,0 +1,2 @@
+#!/usr/bin/bash
+docker exec -i -t infrastruture_mongo_1 mongo localhost --eval "rs.initiate();rs.add('mongo-2.myrepl');rs.addArb('mongo-3.myrepl');"

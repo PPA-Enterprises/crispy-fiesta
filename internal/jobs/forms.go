@@ -1,7 +1,7 @@
 package jobs
 
 type submitJobCmd struct {
-	ClientName      string `json:"client_info" binding:"required"`
+	ClientName      string `json:"client_name" binding:"required"`
 	ClientPhone     string `json:"client_phone" binding:"required"`
 	CarInfo         string `json:"car_info" binding:"required"`
 	AppointmentInfo string `json:"appointment_info" binding:"required"`

@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 	"time"
+	"fmt"
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -16,8 +17,8 @@ type DBConnection struct {
 
 var dbConnect *DBConnection
 
-func Init(host string) *DBConnection {
-	dbConnect = NewConnection(host)
+func Init(host string, repl string) *DBConnection {
+	dbConnect = NewConnection(host, repl)
 	return dbConnect
 }
 
@@ -25,13 +26,15 @@ func Connection() *DBConnection {
 	return dbConnect
 }
 
-func NewConnection(host string) (conn *DBConnection) {
+func NewConnection(host string, repl string) (conn *DBConnection) {
+	fmt.Println(host)
 
 	//TODO: Auth
-	client, err := mongo.NewClient(options.Client().ApplyURI(host))
+	client, err := mongo.NewClient(options.Client().SetReplicaSet(repl).ApplyURI(host))
+	//client, err := mongo.NewClient(options.Client().ApplyURI(host))
 	if err != nil { panic(err) }
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
 	defer cancel()
 
 	err = client.Connect(ctx)
@@ -40,7 +43,7 @@ func NewConnection(host string) (conn *DBConnection) {
 	//TODO: Client does panic when there is no databse running. We dont want the
 	//app to be running unless it has access to databse...surely there is a better
 	//way
-	pingCtx, cancel := context.WithTimeout(ctx, 1*time.Second)
+	pingCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
 	err = client.Ping(pingCtx, nil)
