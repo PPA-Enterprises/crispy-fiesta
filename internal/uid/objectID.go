@@ -1,8 +1,7 @@
 package UID
 import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
-
-	errors "internal/common"
+	"internal/common/errors"
 )
 
 type ID interface {

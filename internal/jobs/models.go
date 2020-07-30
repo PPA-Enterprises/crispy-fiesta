@@ -7,7 +7,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo"
-	errors "internal/common"
+	"internal/common/errors"
 	"internal/db"
 	"internal/uid"
 	clientTypes "internal/clients/types"

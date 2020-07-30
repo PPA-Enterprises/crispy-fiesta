@@ -5,9 +5,9 @@ import (
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/bson"
-	passwordUtils "internal/common"
-	errors "internal/common"
-	jwtUtils "internal/common"
+	passwordUtils "internal/common/password"
+	"internal/common/errors"
+	jwtUtils "internal/common/token"
 	"internal/db"
 	"internal/uid"
 )

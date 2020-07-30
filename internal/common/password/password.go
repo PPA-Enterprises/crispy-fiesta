@@ -1,4 +1,4 @@
-package common
+package password
 
 import (
 	"github.com/matthewhartstonge/argon2"

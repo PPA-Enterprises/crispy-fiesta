@@ -3,7 +3,7 @@ package types
 import (
 	"context"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	errors "internal/common"
+	"internal/common/errors"
 	jobTypes "internal/jobs/types"
 )
 
