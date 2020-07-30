@@ -34,6 +34,21 @@ func fromSubmitJobCmd(data *submitJobCmd) *jobModel {
 	}
 }
 
+func tryFromUpdateJobCmd(data *updateJobCmd) (*jobModel, *errors.ResponseError) {
+	oid, err := primitive.ObjectIDFromHex(data.ID); if err != nil {
+		return nil, errors.InvalidOID()
+	}
+
+	return &jobModel{
+		ID: oid,
+		ClientName: data.ClientName,
+		ClientPhone: data.ClientPhone,
+		CarInfo: data.CarInfo,
+		AppointmentInfo: data.AppointmentInfo,
+		Notes: data.Notes,
+	}, nil
+}
+
 /*
 // TODO: Mongo Transactions can only be done on a Mongo cluster such as a replica set
 // Need additional infrastructure to support this
@@ -98,21 +113,25 @@ func (self *jobModel) create(ctx context.Context) (UID.ID, *errors.ResponseError
 		return nil, err
 	}
 
-	err = self.put(ctx); if err != nil {
+	err = self.put(ctx, true); if err != nil {
 		return nil, err
 	}
 
 	return UID.FromOid(self.ID), nil
 }
 
-func (self *jobModel) put(ctx context.Context) *errors.ResponseError {
+func (self *jobModel) put(ctx context.Context, upsert bool) *errors.ResponseError {
 	coll := db.Connection().Use(db.DefaultDatabase, "jobs")
 	opts := options.FindOneAndReplace()
-	opts = opts.SetUpsert(true)
+	opts = opts.SetUpsert(upsert)
 
 	err := coll.FindOneAndReplace(ctx, bson.D{{"_id", self.ID}}, self, opts).Err()
 	if err == mongo.ErrNoDocuments {
-		return nil
+		if upsert {
+			return nil
+		} else {
+			return errors.PutFailed(err)
+		}
 	}
 
 	if err != nil {

@@ -68,3 +68,10 @@ func PutFailed(err error) *ResponseError {
 		reason: err.Error(),
 	}
 }
+
+func InvalidOID() *ResponseError {
+	return &ResponseError{
+		Code: http.StatusBadRequest,
+		reason: "Invalid Object ID",
+	}
+}

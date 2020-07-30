@@ -30,3 +30,33 @@ func submitJob(c *gin.Context) {
 		gin.H{"success": true, "payload": oid.String(), "message": "Job Created"})
 }
 
+func update(c *gin.Context) {
+	ctx, cancel := context.WithTimeout(c, 5*time.Second)
+	defer cancel()
+
+	var data updateJobCmd
+	if c.BindJSON(&data) != nil {
+		c.JSON(http.StatusNotAcceptable,
+		gin.H{"success": false, "message": "Provide relevant fields"})
+		c.Abort()
+		return
+	}
+
+	update, err := tryFromUpdateJobCmd(&data); if err != nil {
+		c.JSON(err.Code,
+			gin.H{"success": false, "message": err.Error()})
+		c.Abort()
+		return
+	}
+
+	err = update.put(ctx, false); if err != nil {
+		c.JSON(err.Code,
+			gin.H{"success": false, "message": err.Error()})
+		c.Abort()
+		return
+	}
+
+	c.JSON(http.StatusAccepted,
+		gin.H{"success": true, "message": "Job Updated"})
+
+}
