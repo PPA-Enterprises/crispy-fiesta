@@ -10,10 +10,9 @@ import (
 	errors "internal/common"
 	"internal/db"
 	"internal/uid"
+	clientTypes "internal/clients/types"
 	"internal/clients"
 )
-
-type Job interface {}
 
 type jobModel struct {
 	ID              primitive.ObjectID `json:"_id,omitempty"bson:"_id,omitempty"`
@@ -83,7 +82,7 @@ func (self *jobModel) create(ctx context.Context) (UID.ID, *errors.ResponseError
 
 func (self *jobModel) create(ctx context.Context) (UID.ID, *errors.ResponseError) {
 	//if client exists, get it
-	var client clients.Client
+	var client clientTypes.Client
 	client = clients.ClientByPhone(ctx, self.ClientPhone)
 
 	//if not, create a client

@@ -10,12 +10,8 @@ import (
 	errors "internal/common"
 	"internal/db"
 	"internal/uid"
+	"internal/clients/types"
 )
-
-type Client interface {
-	AttatchJobID(primitive.ObjectID)
-	Put(ctx context.Context) *errors.ResponseError
-}
 
 type clientModel struct {
 	ID primitive.ObjectID `json:"_id,omitempty" bson:"_id,omitempty"`
@@ -24,7 +20,7 @@ type clientModel struct {
 	Jobs []primitive.ObjectID `json:"jobs" bson:"jobs"`
 }
 
-func NewClient(name, phone string) Client {
+func NewClient(name, phone string) types.Client {
 	return &clientModel{
 		ID: primitive.NewObjectID(),
 		Name: name,
@@ -33,7 +29,7 @@ func NewClient(name, phone string) Client {
 	}
 }
 
-func ClientByPhone(ctx context.Context, phone string) (Client) {
+func ClientByPhone(ctx context.Context, phone string) types.Client {
 	coll := db.Connection().Use(db.DefaultDatabase, "clients")
 
 	var foundClient clientModel
