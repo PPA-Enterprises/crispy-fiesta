@@ -11,6 +11,7 @@ import (
 	"internal/db"
 	"internal/uid"
 	"internal/clients/types"
+	jobTypes "internal/jobs/types"
 )
 
 type clientModel struct {
@@ -18,6 +19,13 @@ type clientModel struct {
 	Name string `json:"name" bson:"name"`
 	Phone string `json:"phone" bson:"phone"`
 	Jobs []primitive.ObjectID `json:"jobs" bson:"jobs"`
+}
+
+type populatedClientModel struct {
+	ID primitive.ObjectID `json:"_id"`
+	Name string `json:"name"`
+	Phone string `json:"phone"`
+	Jobs []jobTypes.Job `json:"jobs"`
 }
 
 func NewClient(name, phone string) types.Client {
@@ -92,4 +100,24 @@ func clientByID(id string, ctx context.Context) (*clientModel, *errors.ResponseE
 		return nil, errors.DatabaseError(err)
 	}
 	return &client, nil
+}
+
+func (self *clientModel) populate(ctx context.Context) (*populatedClientModel, *errors.ResponseError) {
+	coll := db.Connection().Use(db.DefaultDatabase, "jobs")
+	cursor, err := db.Populate(ctx, coll, self.Jobs); if err != nil {
+		return nil, errors.DatabaseError(err)
+	}
+	defer cursor.Close(ctx)
+
+	var jobs []jobTypes.Job
+	if err = cursor.All(ctx, &jobs); err != nil {
+		return nil, errors.DatabaseError(err)
+	}
+
+	return &populatedClientModel{
+		ID: self.ID,
+		Name: self.Name,
+		Phone: self.Phone,
+		Jobs: jobs,
+	}, nil
 }
