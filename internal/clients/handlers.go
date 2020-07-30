@@ -71,7 +71,7 @@ func update(c *gin.Context) {
 
 }
 
-func userSearch(c *gin.Context) {
+func fuzzyClientSearch(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(c, 5*time.Second)
 	defer cancel()
 
@@ -91,13 +91,14 @@ func userSearch(c *gin.Context) {
 		return
 	}
 
-	results, serachErr := fuzzySearch(ctx, query, iQuantity); if err != nil {
+	results, serachErr := fuzzySearch(ctx, query, iQuantity); if serachErr != nil {
 		c.JSON(serachErr.Code,
 			gin.H{"success": false, "message": serachErr.Error()})
 		c.Abort()
 		return
 	}
+
 	c.JSON(http.StatusOK,
-	gin.H{"success": true, "payload": results, "message": "Job Updated"})
+	gin.H{"success": true, "payload": results})
 
 }
