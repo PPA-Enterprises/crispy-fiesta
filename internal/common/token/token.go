@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
+	"github.com/gin-gonic/gin"
 )
 
 func CreateToken(userid string) (string, error) {
@@ -59,4 +60,16 @@ func TokenValid(r *http.Request) error {
 		return err
 	}
 	return nil
+}
+
+func TokenAuthMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		err := TokenValid(c.Request)
+		if err != nil {
+			c.JSON(401, gin.H{"message": "Not authenticated."})
+			c.Abort()
+			return
+		}
+		c.Next()
+	}
 }
