@@ -8,6 +8,7 @@ import (
 	jobRoutes "internal/jobs"
 	clientRoutes "internal/clients"
 	"github.com/gin-gonic/gin"
+	"github.com/gin-contrib/cors"
 )
 
 func main() {
@@ -32,6 +33,7 @@ func main() {
 		v1.GET("/client/:id", client.GetClientById)
 		v1.GET("/client", client.GetAllClients)
 	}*/
+	router.Use(cors.Default())
 
 	v1 := router.Group("/api/v1")
 	userRoutes.UserRoutesRegister(v1.Group("/users"))

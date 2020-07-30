@@ -21,6 +21,26 @@ type clientModel struct {
 	Jobs []primitive.ObjectID `json:"jobs" bson:"jobs"`
 }
 
+func tryFromUpdateClientCmd(data *updateClientCmd) (*clientModel, *errors.ResponseError) {
+	clientOID, err := primitive.ObjectIDFromHex(data.ID); if err != nil {
+		return nil, errors.InvalidOID()
+	}
+	return &clientModel{
+		ID: clientOID,
+		Name: data.Name,
+		Phone: data.Phone,
+		Jobs: normalize(data.Jobs),
+	}, nil
+}
+
+func normalize(j []jobTypes.Job) []primitive.ObjectID {
+	oids := make([]primitive.ObjectID, 0)
+	for _, job := range j {
+		oids = append(oids, job.ID)
+	}
+	return oids
+}
+
 func NewClient(name, phone string) types.Client {
 	return &clientModel{
 		ID: primitive.NewObjectID(),
