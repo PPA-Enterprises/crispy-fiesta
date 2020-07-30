@@ -6,6 +6,7 @@ import (
 	"internal/db"
 	userRoutes "internal/users"
 	jobRoutes "internal/jobs"
+	clientRoutes "internal/clients"
 	"github.com/gin-gonic/gin"
 )
 
@@ -35,6 +36,7 @@ func main() {
 	v1 := router.Group("/api/v1")
 	userRoutes.UserRoutesRegister(v1.Group("/users"))
 	jobRoutes.JobRoutesRegister(v1.Group("/jobs"))
+	clientRoutes.ClientRoutesRegister(v1.Group("/clients"))
 
 	router.NoRoute(func(c *gin.Context) {
 		c.JSON(404, gin.H{"message": "Not Found."})

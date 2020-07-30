@@ -13,7 +13,7 @@ func getClientByID(c *gin.Context) {
 	defer cancel()
 
 	id := c.Param("id") //returns empty string if not there
-	if len(id) > 0 {
+	if len(id) <= 0 {
 		c.JSON(http.StatusBadRequest,
 		gin.H{"success": false, "message": "Provide an id"})
 		c.Abort()
