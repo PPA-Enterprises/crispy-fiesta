@@ -138,3 +138,17 @@ func fuzzySearch (ctx context.Context, query string, quantity int) ([]clientMode
 	}
 	return clients, nil
 }
+
+func populateClients(ctx context.Context, clients []clientModel) []types.PopulatedClientModel {
+
+	populatedClients := make([]types.PopulatedClientModel, 0, len(clients))
+	for _, c := range clients {
+		client, err := c.Populate(ctx)
+		//just skip bad records
+		if err == nil {
+			populatedClients = append(populatedClients, *client)
+		}
+	}
+	return populatedClients
+
+}
