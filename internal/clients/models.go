@@ -21,13 +21,6 @@ type clientModel struct {
 	Jobs []primitive.ObjectID `json:"jobs" bson:"jobs"`
 }
 
-type populatedClientModel struct {
-	ID primitive.ObjectID `json:"_id"`
-	Name string `json:"name"`
-	Phone string `json:"phone"`
-	Jobs []jobTypes.Job `json:"jobs"`
-}
-
 func NewClient(name, phone string) types.Client {
 	return &clientModel{
 		ID: primitive.NewObjectID(),
@@ -70,14 +63,18 @@ func (self *clientModel) create(ctx context.Context) (UID.ID, *errors.ResponseEr
 	return UID.TryFromInterface(res.InsertedID)
 }
 
-func (self *clientModel) Put(ctx context.Context) *errors.ResponseError {
+func (self *clientModel) Put(ctx context.Context, upsert bool) *errors.ResponseError {
 	coll := db.Connection().Use(db.DefaultDatabase, "clients")
 	opts := options.FindOneAndReplace()
 	opts = opts.SetUpsert(true)
 
 	err := coll.FindOneAndReplace(ctx, bson.D{{"_id", self.ID}}, self, opts).Err()
 	if err == mongo.ErrNoDocuments {
-		return nil
+		if upsert {
+			return nil
+		} else {
+			return errors.PutFailed(err)
+		}
 	}
 
 	if err != nil {
@@ -86,19 +83,7 @@ func (self *clientModel) Put(ctx context.Context) *errors.ResponseError {
 	return nil
 }
 
-func clientByPhone(phone string, ctx context.Context) (*clientModel, *errors.ResponseError) {
-	coll := db.Connection().Use(db.DefaultDatabase, "clients")
-
-	var client clientModel
-	err := coll.FindOne(ctx, bson.D{{"phone", phone}}).Decode(&client)
-
-	if err != nil {
-		return nil, errors.DatabaseError(err)
-	}
-	return &client, nil
-}
-
-func (self *clientModel) populate(ctx context.Context) (*populatedClientModel, *errors.ResponseError) {
+func (self *clientModel) Populate(ctx context.Context) (*types.PopulatedClientModel, *errors.ResponseError) {
 	coll := db.Connection().Use(db.DefaultDatabase, "jobs")
 	cursor, err := db.Populate(ctx, coll, self.Jobs); if err != nil {
 		return nil, errors.DatabaseError(err)
@@ -110,7 +95,7 @@ func (self *clientModel) populate(ctx context.Context) (*populatedClientModel, *
 		return nil, errors.DatabaseError(err)
 	}
 
-	return &populatedClientModel{
+	return &types.PopulatedClientModel{
 		ID: self.ID,
 		Name: self.Name,
 		Phone: self.Phone,

@@ -20,14 +20,14 @@ func getClientByPhone(c *gin.Context) {
 		return
 	}
 
-	client, err := clientByPhone(phone, ctx); if err != nil {
-		c.JSON(err.Code,
-			gin.H{"success": false, "message": err.Error()})
+	client := ClientByPhone(ctx, phone); if client == nil {
+		c.JSON(http.StatusNotFound,
+			gin.H{"success": false, "message": "No client found"})
 		c.Abort()
 		return
 	}
 
-	delivarableClient, err := client.populate(ctx); if err != nil {
+	delivarableClient, err := client.Populate(ctx); if err != nil {
 		c.JSON(err.Code,
 			gin.H{"success": false, "message": err.Error()})
 		c.Abort()
