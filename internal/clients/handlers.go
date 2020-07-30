@@ -8,19 +8,19 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func getClientByID(c *gin.Context) {
+func getClientByPhone(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(c, 5*time.Second)
 	defer cancel()
 
-	id := c.Param("id") //returns empty string if not there
-	if len(id) <= 0 {
+	phone := c.Param("phone") //returns empty string if not there
+	if len(phone) <= 0 {
 		c.JSON(http.StatusBadRequest,
 		gin.H{"success": false, "message": "Provide an id"})
 		c.Abort()
 		return
 	}
 
-	client, err := clientByID(id, ctx); if err != nil {
+	client, err := clientByPhone(phone, ctx); if err != nil {
 		c.JSON(err.Code,
 			gin.H{"success": false, "message": err.Error()})
 		c.Abort()

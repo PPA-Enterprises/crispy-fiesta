@@ -86,15 +86,11 @@ func (self *clientModel) Put(ctx context.Context) *errors.ResponseError {
 	return nil
 }
 
-func clientByID(id string, ctx context.Context) (*clientModel, *errors.ResponseError) {
+func clientByPhone(phone string, ctx context.Context) (*clientModel, *errors.ResponseError) {
 	coll := db.Connection().Use(db.DefaultDatabase, "clients")
 
-	oid, err := primitive.ObjectIDFromHex(id); if err != nil {
-		return nil, errors.InvalidOID()
-	}
-
 	var client clientModel
-	err = coll.FindOne(ctx, bson.D{{"_id", oid}}).Decode(&client)
+	err := coll.FindOne(ctx, bson.D{{"phone", phone}}).Decode(&client)
 
 	if err != nil {
 		return nil, errors.DatabaseError(err)

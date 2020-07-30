@@ -5,5 +5,5 @@ import (
 )
 
 func ClientRoutesRegister(router *gin.RouterGroup) {
-	router.GET("/:id", getClientByID)
+	router.GET("phone/:phone", getClientByPhone)
 }
