@@ -150,5 +150,20 @@ func populateClients(ctx context.Context, clients []clientModel) []types.Populat
 		}
 	}
 	return populatedClients
-
 }
+
+func clientByID(ctx context.Context, id string) (*clientModel, *errors.ResponseError) {
+	coll := db.Connection().Use(db.DefaultDatabase, "clients")
+
+	oid, err := primitive.ObjectIDFromHex(id); if err != nil {
+		return nil, errors.InvalidOID()
+	}
+
+	var foundClient clientModel
+	err = coll.FindOne(ctx, bson.D{{"_id", oid}}).Decode(&foundClient)
+	if err != nil {
+		return nil, errors.DoesNotExist()
+	}
+	return &foundClient, nil
+}
+

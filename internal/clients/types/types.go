@@ -19,3 +19,9 @@ type Client interface {
 	Put(ctx context.Context, upsert bool) *errors.ResponseError
 	Populate(ctx context.Context) (*PopulatedClientModel, *errors.ResponseError)
 }
+
+type DeliverableClient struct {
+	ID primitive.ObjectID `json:"_id"`
+	Name string `json:"name"`
+	Phone string `json:"phone"`
+}

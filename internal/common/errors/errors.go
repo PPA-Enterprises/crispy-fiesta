@@ -75,3 +75,10 @@ func InvalidOID() *ResponseError {
 		reason: "Invalid Object ID",
 	}
 }
+
+func DoesNotExist() *ResponseError {
+	return &ResponseError{
+		Code: http.StatusNotFound,
+		reason: "Does Not exist",
+	}
+}
