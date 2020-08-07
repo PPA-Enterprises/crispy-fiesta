@@ -4,11 +4,19 @@ import { Routes, RouterModule } from '@angular/router';
 
 export const Full_ROUTES: Routes = [
   {
-    path: 'page',
-    loadChildren: () => import('../../page/page.module').then(m => m.PageModule)
-  },
-  {
     path: 'home',
     loadChildren: () => import('../../home/home.module').then(m => m.HomeModule)
-  }
+  },
+  {
+    path: 'jobs',
+    loadChildren: () => import('../../jobs/jobs.module').then(m => m.JobsModule)
+  },
+  {
+    path: 'clients',
+    loadChildren: () => import('../../clients/clients.module').then(m => m.ClientsModule)
+  },
+  {
+    path: 'create-job',
+    loadChildren: () => import('../../create-job/create-job.module').then(m => m.CreateJobModule)
+  },
 ];

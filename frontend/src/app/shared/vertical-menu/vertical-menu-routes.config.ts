@@ -6,7 +6,10 @@ export const ROUTES: RouteInfo[] = [
     path: '/home', title: 'Home', icon: 'ft-home', class: 'dropdown nav-item', isExternalLink: false, submenu: []
   },
   {
-    path: '/page', title: 'Page', icon: 'ft-home', class: '', badge: '', badgeClass: '', isExternalLink: false, submenu: []
+    path: '/clients', title: 'Clients', icon: 'ft-home', class: 'dropdown nav-item', isExternalLink: false, submenu: []
+  },
+  {
+    path: '/jobs', title: 'Jobs', icon: 'ft-home', class: 'dropdown nav-item', isExternalLink: false, submenu: []
   },
 //   {
 //     path: '', title: 'Menu Levels', icon: 'ft-align-left', class: 'has-sub', badge: '3', badgeClass: 'badge badge-pill badge-danger float-right mr-1 mt-1', isExternalLink: false,

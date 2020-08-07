@@ -2,11 +2,15 @@ import { RouteInfo } from '../vertical-menu/vertical-menu.metadata';
 
 export const HROUTES: RouteInfo[] = [
   {
+    path: '/home', title: 'Home', icon: 'ft-home', class: 'dropdown nav-item', isExternalLink: false, submenu: []
+  },
+  {
     path: '/page', title: 'Page', icon: 'ft-home', class: 'dropdown nav-item', isExternalLink: false, submenu: []
   },
   {
-    path: '/home', title: 'Home', icon: 'ft-home', class: 'dropdown nav-item', isExternalLink: false, submenu: []
+    path: '/jobs', title: 'Jobs', icon: 'ft-home', class: 'dropdown nav-item', isExternalLink: false, submenu: []
   },
+
 //   {
 //     path: '', title: 'Menu Levels', icon: 'ft-align-left', class: 'dropdown nav-item has-sub', badge: '', badgeClass: '', isExternalLink: false,
 //     submenu: [

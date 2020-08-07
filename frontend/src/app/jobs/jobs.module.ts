@@ -2,22 +2,22 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from "@angular/common";
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
-import { HomeRoutingModule } from "./home-routing.module";
+import { JobsRoutingModule } from "./jobs-routing.module";
 
-import { HomeComponent } from "./home.component";
+import { JobsComponent } from "./jobs.component";
 
 
 @NgModule({
   imports: [
     CommonModule,
-    HomeRoutingModule,
+    JobsRoutingModule,
     ReactiveFormsModule,
     FormsModule,
   ],
   exports: [],
   declarations: [
-    HomeComponent,
+    JobsComponent,
   ],
   providers: [],
 })
-export class HomeModule { }
+export class JobsModule { }
