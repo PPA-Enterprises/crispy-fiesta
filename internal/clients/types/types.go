@@ -21,7 +21,7 @@ type Client interface {
 }
 
 type DeliverableClient struct {
-	ID primitive.ObjectID `json:"_id"`
-	Name string `json:"name"`
-	Phone string `json:"phone"`
+	ID primitive.ObjectID `json:"_id" bson:"_id,omitempty"`
+	Name string `json:"name" bson:"name"`
+	Phone string `json:"phone" bson:"phone"`
 }

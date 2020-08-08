@@ -5,8 +5,9 @@ import (
 )
 
 func ClientRoutesRegister(router *gin.RouterGroup) {
+	router.GET("/client/:id", getClientByID)
 	router.GET("/phone/:phone", getClientByPhone)
 	router.PUT("/", update)
+	router.GET("/", getLatestClients)
 	router.GET("/search", fuzzyClientSearch)
-	router.GET("/:id", getClientByID)
 }

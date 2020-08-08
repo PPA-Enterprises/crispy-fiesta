@@ -115,7 +115,7 @@ func (self *clientModel) Populate(ctx context.Context) (*types.PopulatedClientMo
 		return nil, errors.DatabaseError(err)
 	}
 
-	return &types.PopulatedClientModel{
+	return &types.Popu{latedClientModel{
 		ID: self.ID,
 		Name: self.Name,
 		Phone: self.Phone,
@@ -165,5 +165,24 @@ func clientByID(ctx context.Context, id string) (*clientModel, *errors.ResponseE
 		return nil, errors.DoesNotExist()
 	}
 	return &foundClient, nil
+}
+
+func latest(ctx context.Context, quantity int64) ([]types.DeliverableClient, *errors.ResponseError) {
+	coll := db.Connection().Use(db.DefaultDatabase, "clients")
+
+	findOptions := options.Find()
+	findOptions.SetLimit(quantity)
+	findOptions.SetSort(bson.D{{"_id", -1}})
+	//filter := bson.D{{"jobs", false}}
+
+	cursor, err := coll.Find(ctx, findOptions)
+	defer cursor.Close(ctx)
+
+	var clients []types.DeliverableClient
+	if err = cursor.All(ctx, &clients); err != nil {
+		return nil, errors.DatabaseError(err)
+	}
+
+	return clients, nil
 }
 

@@ -139,3 +139,18 @@ func (self *jobModel) put(ctx context.Context, upsert bool) *errors.ResponseErro
 	}
 	return nil
 }
+
+func jobByID(ctx context.Context, id string) (*jobModel, *errors.ResponseError) {
+	coll := db.Connection().Use(db.DefaultDatabase, "jobs")
+
+	oid, err := primitive.ObjectIDFromHex(id); if err != nil {
+		return nil, errors.InvalidOID()
+	}
+
+	var foundJob jobModel
+	err = coll.FindOne(ctx, bson.D{{"_id", oid}}).Decode(&foundJob)
+	if err != nil {
+		return nil, errors.DoesNotExist()
+	}
+	return &foundJob, nil
+}
