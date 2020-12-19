@@ -5,9 +5,9 @@ export const ROUTES: RouteInfo[] = [
   {
     path: '/home', title: 'Home', icon: 'ft-home', class: 'dropdown nav-item', isExternalLink: false, submenu: []
   },
-  {
-    path: '/clients', title: 'Clients', icon: 'ft-home', class: 'dropdown nav-item', isExternalLink: false, submenu: []
-  },
+  // {
+  //   path: '/clients', title: 'Clients', icon: 'ft-home', class: 'dropdown nav-item', isExternalLink: false, submenu: []
+  // },
   {
     path: '/jobs', title: 'Jobs', icon: 'ft-home', class: 'dropdown nav-item', isExternalLink: false, submenu: []
   },

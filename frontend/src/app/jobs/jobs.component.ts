@@ -26,33 +26,15 @@ import { JobService } from '../shared/services/job.service'
 })
 
 export class JobsComponent implements OnInit {
-//   job: Job;
-//   model = new JobForm();
-//   submitted = false;
+  newJobs: any[] = [
+    { name: "Tristan Hull", date: "December 12th, 2020", car: "2003 Saturn Vue" }, { name: "Joshua Benz", date: "December 17th, 2020", car: "2010 Ford Focus" }, { name: "Frank Swartz", date: "December 6th, 2020", car: "2019 Ford Mustang" },
+  ];
 
   constructor(private jobService: JobService) {
-//     // this.model = {
-//     //   fname: 'Mark',
-//     //   lname: 'Otto',
-//     //   phone: ''
-//     // }
    }
 
   ngOnInit() {
 
   }
-
-//   onSubmit(form) {
-
-//     this.job = {
-//       client_name: this.model.fname + " " + this.model.lname,
-//       client_phone: this.model.phone,
-//       car_info: this.model.carInfo,
-//       appointment_info: this.model.apptInfo,
-//       notes: this.model.notes
-//     }
-//     this.jobService.createJob(this.job).subscribe(data => { console.log(data)});
-//   }
-
 
 }
