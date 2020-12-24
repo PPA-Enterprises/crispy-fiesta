@@ -11,10 +11,10 @@ export const Full_ROUTES: Routes = [
     path: 'jobs',
     loadChildren: () => import('../../jobs/jobs.module').then(m => m.JobsModule)
   },
-  // {
-  //   path: 'clients',
-  //   loadChildren: () => import('../../clients/clients.module').then(m => m.ClientsModule)
-  // },
+  {
+    path: 'clients',
+    loadChildren: () => import('../../clients/clients.module').then(m => m.ClientsModule)
+  },
   {
     path: 'create-job',
     loadChildren: () => import('../../create-job/create-job.module').then(m => m.CreateJobModule)
