@@ -1,5 +1,6 @@
 import { Component, ViewChild, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators, NgForm } from '@angular/forms';
+import { Router, ActivatedRoute, ParamMap } from '@angular/router';
 import { JobService } from '../shared/services/job.service'
 
 export class JobForm {
@@ -12,11 +13,14 @@ export class JobForm {
 }
 
 export class Job {
+  public id: number;
   public client_name: string
   public client_phone: string;
   public car_info: string;
   public appointment_info: string;
   public notes: string;
+  public tag: string;
+  public date: string;
 }
 
 @Component({
@@ -27,31 +31,89 @@ export class Job {
 
 export class EditJobComponent implements OnInit {
   job: Job;
+  id: number;
+  private sub: any;
   model = new JobForm();
   submitted = false;
+  name: string[];
+  notClosed = true;
 
-  constructor(private jobService: JobService) {
-    // this.model = {
-    //   fname: 'Mark',
-    //   lname: 'Otto',
-    //   phone: ''
-    // }
+  constructor(private jobService: JobService, private route: ActivatedRoute, private router: Router) {
+    this.sub = this.route.params.subscribe(params => {
+      this.id = +params['id'];
+    });
+    this.job = this.jobService.getJobById(this.id);
+    if(this.job.tag == "CLOSED") {
+      this.notClosed = false;
+    }
+    this.name = this.job.client_name.split(" ");
+    this.model = {
+      fname: this.name[0],
+      lname: this.name[1],
+      phone: this.job.client_phone,
+      carInfo: this.job.car_info,
+      apptInfo: this.job.appointment_info,
+      notes: this.job.notes
+    }
   }
 
   ngOnInit() {
 
   }
 
-  onSubmit(form) {
+  ngOnDestroy() {
+    this.sub.unsubscribe();
+  }
 
+  onSubmit(form) {
     this.job = {
+      id: this.job.id,
       client_name: this.model.fname + " " + this.model.lname,
       client_phone: this.model.phone,
       car_info: this.model.carInfo,
       appointment_info: this.model.apptInfo,
-      notes: this.model.notes
+      notes: this.model.notes,
+      tag: "OPEN",
+      date: this.job.date,
     }
-    this.jobService.createJob(this.job).subscribe(data => { console.log(data)});
+
+    if (this.jobService.editJobById(this.id, this.job).id == this.id) {
+      this.router.navigate(['/jobs']);
+    } else {
+      console.log("ERROR CREATING JOB!")
+    }
+
+
+  }
+
+  sendToTintWork() {
+    console.log("Before:" + this.job);
+    this.job = {
+      id: this.job.id,
+      client_name: this.model.fname + " " + this.model.lname,
+      client_phone: this.model.phone,
+      car_info: this.model.carInfo,
+      appointment_info: this.model.apptInfo,
+      notes: this.model.notes,
+      tag: "CLOSED",
+      date: this.job.date,
+    }
+
+    if (this.jobService.editJobById(this.id, this.job).id = this.id) {
+      console.log("After:" + this.job);
+      this.router.navigate(['/jobs']);
+    } else {
+      console.log("ERROR CREATING JOB!");
+    }
+
+  }
+
+  delete() {
+    if(this.jobService.deleteJobById(this.job.id) == this.id) {
+      this.router.navigate(['/jobs']);
+    } else {
+      console.log("ERROR DELETING JOB!");
+    }
   }
 
 

@@ -2,22 +2,16 @@ import { Component, ViewChild, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators, NgForm } from '@angular/forms';
 import { JobService } from '../shared/services/job.service'
 
-// export class JobForm {
-//   public fname: string;
-//   public lname: string;
-//   public phone: string;
-//   public carInfo: string;
-//   public apptInfo: string;
-//   public notes: string;
-// }
-
-// export class Job {
-//   public client_name: string
-//   public client_phone: string;
-//   public car_info: string;
-//   public appointment_info: string;
-//   public notes: string;
-// }
+export class Job {
+  public id: number;
+  public client_name: string
+  public client_phone: string;
+  public car_info: string;
+  public appointment_info: string;
+  public notes: string;
+  public tag: string;
+  public date: string;
+}
 
 @Component({
   selector: 'app-page',
@@ -26,15 +20,25 @@ import { JobService } from '../shared/services/job.service'
 })
 
 export class JobsComponent implements OnInit {
-  newJobs: any[] = [
-    { name: "Tristan Hull", date: "December 12th, 2020", car: "2003 Saturn Vue" }, { name: "Joshua Benz", date: "December 17th, 2020", car: "2010 Ford Focus" }, { name: "Frank Swartz", date: "December 6th, 2020", car: "2019 Ford Mustang" },
-  ];
-
+  newJobs: Job[] = [];
+  openJobs: Job[] = [];
+  closedJobs: Job[] = [];
+  allJobs: Job[] = [];
   constructor(private jobService: JobService) {
+    this.allJobs = this.jobService.getAllJobs();
+
+    for(let job of this.allJobs) {
+      if(job.tag == "NEW") {
+        this.newJobs.push(job);
+      } else if(job.tag == "OPEN"){
+        this.openJobs.push(job);
+      } else {
+        this.closedJobs.push(job);
+      }
+    }
    }
 
   ngOnInit() {
-
   }
 
 }

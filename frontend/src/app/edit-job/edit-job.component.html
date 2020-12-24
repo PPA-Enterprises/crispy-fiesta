@@ -103,10 +103,24 @@
       </div>
     </div>
   
-    <div class="row">
-      <div class="col-12">
+    <div class="row" *ngIf="notClosed; else closed">
+      <div class="col">
+        <button class="btn btn-danger btn-block btn-lg" (click)="delete()">Delete</button>
+      </div>
+      <div class="col">
         <button class="btn btn-primary btn-block btn-lg" type="submit">Save</button>
       </div>
+      <div class="col">
+        <button class="btn btn-success btn-block btn-lg" (click)="sendToTintWork()">Send to TintWork</button>
+      </div>
     </div>
+
+    <ng-template #closed>
+      <div class="row">
+        <div class="col">
+          <button class="btn btn-danger btn-block btn-lg" [routerLink]="'/jobs'">Back</button>
+        </div>
+      </div>
+    </ng-template>
   
   </form>

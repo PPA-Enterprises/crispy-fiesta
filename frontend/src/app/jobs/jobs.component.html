@@ -1,9 +1,14 @@
 <div class="row">
+    <div class="col-12 mb-1">
+    <div class="content-header">Jobs</div>
+    </div>
+</div>
+<div class="row">
     <div class="col-6">
         <div class="card">
             <div class="card-header">
                 <h4 class="card-title text-success">New Jobs</h4>
-                <button class="btn btn-round btn-info pull-right" [routerLink]="'/home'">Create Job</button>
+                <button class="btn btn-round btn-info pull-right" [routerLink]="'/create-job'">Create Job</button>
             </div>
             <div class="card-content">
                 <div class="card-body">
@@ -17,11 +22,11 @@
                             </tr>
                             </thead>
                             <tbody>
-                            <tr class="cursor-pointer" *ngFor="let newJob of newJobs" [routerLink]="'/home'">
-                                <th scope="row">{{ newJob.date }}</th>
-                                <td>{{ newJob.car }}</td>
-                                <td>{{ newJob.name }}</td>
-                                <td class="text-success">NEW</td>
+                            <tr class="cursor-pointer" *ngFor="let job of newJobs" [routerLink]="['/edit-job', job.id]">
+                                <th scope="row">{{ job.date }}</th>
+                                <td>{{ job.car_info }}</td>
+                                <td>{{ job.client_name }}</td>
+                                <td class="text-success">{{ job.tag }}</td>
                             </tr>
                         </tbody>
                     </table>
@@ -46,18 +51,49 @@
                             </tr>
                             </thead>
                             <tbody>
-                            <tr class="cursor-pointer" *ngFor="let newJob of newJobs" [routerLink]="'/home'">
-                                <th scope="row">{{ newJob.date }}</th>
-                                <td>{{ newJob.car }}</td>
-                                <td>{{ newJob.name }}</td>
-                                <td class="text-primary">OPEN</td>
+                            <tr class="cursor-pointer" *ngFor="let job of openJobs" [routerLink]="['/edit-job', job.id]">
+                                <th scope="row">{{ job.date }}</th>
+                                <td>{{ job.car_info }}</td>
+                                <td>{{ job.client_name }}</td>
+                                <td class="text-primary">{{ job.tag }}</td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
             </div>
         </div>
+    </div>
 </div>
-
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header mb-4">
+                <h4 class="card-title text-danger">Closed Jobs</h4>
+            </div>
+            <div class="card-content">
+                <div class="card-body">
+                    <table class="table table-striped table-hover">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th>Date Created</th>
+                                <th>Car</th>
+                                <th>Client Name</th>
+                                <th>Status</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr class="cursor-pointer" *ngFor="let job of closedJobs" [routerLink]="['/edit-job', job.id]">
+                                <th scope="row">{{ job.date }}</th>
+                                <td>{{ job.car_info }}</td>
+                                <td>{{ job.client_name }}</td>
+                                <td class="text-danger">{{ job.tag }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
         
