@@ -47,6 +47,34 @@
         </div>
       </div>
     </div>
+
+    <div class="card">
+      <div class="card-header">
+          <h4 class="card-title">Jobs for {{ client.name }}</h4>
+      </div>
+      <div class="card-content">
+        <div class="card-body">
+          <table class="table table-striped table-hover">
+            <thead class="thead-dark">
+                <tr>
+                    <th>Date Created</th>
+                    <th>Car</th>
+                    <th>Client Name</th>
+                    <th>Status</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr class="cursor-pointer" *ngFor="let job of client.jobs" [routerLink]="['/edit-job', job.id]">
+                    <th scope="row">{{ job.date }}</th>
+                    <td>{{ job.car_info }}</td>
+                    <td>{{ job.client_name }}</td>
+                    <td class="text-success">{{ job.tag }}</td>
+                </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
   
     <div class="row">
       <div class="col">

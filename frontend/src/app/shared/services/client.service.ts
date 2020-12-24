@@ -32,7 +32,26 @@ export class ClientService {
             name: "Tristan Hull", 
             email: "tristan@kenpokicks.com", 
             phone: "6612081140", 
-            jobs: []
+            jobs: [{ 
+                id: 0,
+                client_name: "Tristan Hull",
+                client_phone: "661-208-1140",
+                date: "December 12th, 2020", 
+                car_info: "2003 Saturn Vue",
+                appointment_info: "The Appointment is at 12/27/2020 5:00pm",
+                notes: "These are some example notes",
+                tag: "OPEN"
+              },
+              { 
+                id: 1,
+                client_name: "Tristan Hull",
+                client_phone: "661-208-1140",
+                date: "December 12th, 2020", 
+                car_info: "2003 Saturn Vue",
+                appointment_info: "The Appointment is at 12/27/2020 5:00pm",
+                notes: "These are some example notes",
+                tag: "CLOSED"
+              },]
         }, 
         {
             id: 1, 
