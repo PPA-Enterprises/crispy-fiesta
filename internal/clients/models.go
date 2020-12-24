@@ -1,35 +1,37 @@
 package clients
 
 import (
-	"context"
 	"bytes"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo/options"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/bson/primitive"
+	"context"
+	"internal/clients/types"
 	"internal/common/errors"
 	"internal/db"
-	"internal/uid"
-	"internal/clients/types"
 	jobTypes "internal/jobs/types"
+	"internal/uid"
+
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type clientModel struct {
-	ID primitive.ObjectID `json:"_id,omitempty" bson:"_id,omitempty"`
-	Name string `json:"name" bson:"name"`
-	Phone string `json:"phone" bson:"phone"`
-	Jobs []primitive.ObjectID `json:"jobs" bson:"jobs"`
+	ID    primitive.ObjectID   `json:"_id,omitempty" bson:"_id,omitempty"`
+	Name  string               `json:"name" bson:"name"`
+	Phone string               `json:"phone" bson:"phone"`
+	Jobs  []primitive.ObjectID `json:"jobs" bson:"jobs"`
 }
 
 func tryFromUpdateClientCmd(data *updateClientCmd) (*clientModel, *errors.ResponseError) {
-	clientOID, err := primitive.ObjectIDFromHex(data.ID); if err != nil {
+	clientOID, err := primitive.ObjectIDFromHex(data.ID)
+	if err != nil {
 		return nil, errors.InvalidOID()
 	}
 	return &clientModel{
-		ID: clientOID,
-		Name: data.Name,
+		ID:    clientOID,
+		Name:  data.Name,
 		Phone: data.Phone,
-		Jobs: normalize(data.Jobs),
+		Jobs:  normalize(data.Jobs),
 	}, nil
 }
 
@@ -43,10 +45,10 @@ func normalize(j []jobTypes.Job) []primitive.ObjectID {
 
 func NewClient(name, phone string) types.Client {
 	return &clientModel{
-		ID: primitive.NewObjectID(),
-		Name: name,
+		ID:    primitive.NewObjectID(),
+		Name:  name,
 		Phone: phone,
-		Jobs: []primitive.ObjectID{},
+		Jobs:  []primitive.ObjectID{},
 	}
 }
 
@@ -77,7 +79,8 @@ func (self *clientModel) AttatchJobID(oid primitive.ObjectID) {
 
 func (self *clientModel) create(ctx context.Context) (UID.ID, *errors.ResponseError) {
 	coll := db.Connection().Use(db.DefaultDatabase, "clients")
-	res, err := coll.InsertOne(ctx, self); if err != nil {
+	res, err := coll.InsertOne(ctx, self)
+	if err != nil {
 		return nil, errors.DatabaseError(err)
 	}
 	return UID.TryFromInterface(res.InsertedID)
@@ -105,7 +108,8 @@ func (self *clientModel) Put(ctx context.Context, upsert bool) *errors.ResponseE
 
 func (self *clientModel) Populate(ctx context.Context) (*types.PopulatedClientModel, *errors.ResponseError) {
 	coll := db.Connection().Use(db.DefaultDatabase, "jobs")
-	cursor, err := db.Populate(ctx, coll, self.Jobs); if err != nil {
+	cursor, err := db.Populate(ctx, coll, self.Jobs)
+	if err != nil {
 		return nil, errors.DatabaseError(err)
 	}
 	defer cursor.Close(ctx)
@@ -115,16 +119,16 @@ func (self *clientModel) Populate(ctx context.Context) (*types.PopulatedClientMo
 		return nil, errors.DatabaseError(err)
 	}
 
-	return &types.Popu{latedClientModel{
-		ID: self.ID,
-		Name: self.Name,
+	return &types.PopulatedClientModel{
+		ID:    self.ID,
+		Name:  self.Name,
 		Phone: self.Phone,
-		Jobs: jobs,
+		Jobs:  jobs,
 	}, nil
 }
 
 //TODO: fuzzy search for client
-func fuzzySearch (ctx context.Context, query string, quantity int) ([]clientModel, *errors.ResponseError) {
+func fuzzySearch(ctx context.Context, query string, quantity int) ([]clientModel, *errors.ResponseError) {
 	coll := db.Connection().Use(db.DefaultDatabase, "clients")
 
 	filter := bson.D{{"name", primitive.Regex{Pattern: query, Options: "i"}}}
@@ -155,7 +159,8 @@ func populateClients(ctx context.Context, clients []clientModel) []types.Populat
 func clientByID(ctx context.Context, id string) (*clientModel, *errors.ResponseError) {
 	coll := db.Connection().Use(db.DefaultDatabase, "clients")
 
-	oid, err := primitive.ObjectIDFromHex(id); if err != nil {
+	oid, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
 		return nil, errors.InvalidOID()
 	}
 
@@ -185,4 +190,3 @@ func latest(ctx context.Context, quantity int64) ([]types.DeliverableClient, *er
 
 	return clients, nil
 }
-

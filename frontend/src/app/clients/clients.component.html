@@ -1,1 +1,48 @@
-clients!
+<div class="row">
+    <div class="col-12 mb-1">
+    <div class="content-header">Clients</div>
+    </div>
+</div>
+
+<section id="ngx-datatable-filter">
+    <div class="row">
+      <div class="col-12">
+        <div class="card">
+          <!-- <div class="card-header">
+            <h4 class="card-title">Search Clients</h4>
+          </div> -->
+          <div class="card-content">
+            <div class="card-body">
+  
+              <!-- ngx-datatable-filter -->
+              <fieldset class="form-group">
+                <label for="ngx-filter-ref">Search:
+                  <input id="ngx-filter-ref" class="form-control form-control-sm d-inline-block width-200" type="text"
+                    placeholder="Enter a Name" (keyup)="filterUpdate($event)" />
+                </label>
+              </fieldset>
+              <ngx-datatable class="bootstrap core-bootstrap" [columns]="columns" [columnMode]="ColumnMode.force"
+                [headerHeight]="50" [footerHeight]="50" rowHeight="auto" [limit]="10" [rows]="rows"
+                [scrollbarH]="false" [selected]="selected" [selectionType]="SelectionType.single"
+                (select)="onSelect($event)">
+                <ngx-datatable-column name="Name" prop="name" [width]="50">
+                  <ng-template let-row="row" let-name="value" ngx-datatable-cell-template>
+                    <div class="d-flex align-items-center">
+                      <div class="cell-line-height">
+                        <p class="font-medium-1 line-height-1 mb-0 cursor-pointer" [routerLink]="['/client', row.id]">{{ name }}</p>
+                      </div>
+                    </div>
+                  </ng-template>
+                </ngx-datatable-column>
+                <ngx-datatable-column name="Email" prop="email" [width]="50"></ngx-datatable-column>
+                <ngx-datatable-column name="Phone" prop="phone" [width]="50"></ngx-datatable-column>
+              </ngx-datatable>
+              <!-- ngx-datatable-filter -->
+  
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!--/ Filter Datatables -->

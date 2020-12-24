@@ -1,0 +1,59 @@
+<form class="needs-validation" #userForm="ngForm" (ngSubmit)="userForm.form.valid && onSubmit(userForm)">
+    <div class="row">
+      <div class="col-12">
+        <div class="content-header">Edit Client</div>
+      </div>
+    </div>
+  
+    <div class="row">
+      <div class="col-12">
+        <div class="card">
+          <div class="card-header">
+            <h4 class="card-title">Client Information</h4>
+          </div>
+          <div class="card-content">
+            <div class="card-body">
+  
+              <div class="form-row">
+                <div class="col-md-4 mb-4 form-group">
+                  <label for="validationTooltip01">First name</label>
+                  <input type="text" name="fname" class="form-control" id="validationTooltip01" placeholder="First name"
+                    [(ngModel)]="model.fname" #fname="ngModel"
+                    [ngClass]="{ 'is-invalid': userForm.submitted && fname.invalid, 'is-valid': userForm.submitted &&  !fname.invalid }"
+                    required>
+                  <div *ngIf="userForm.submitted && !fname.errors?.required" class="valid-tooltip">Looks good!</div>
+                </div>
+                <div class="col-md-4 mb-4 form-group">
+                  <label for="validationTooltip02">Last name</label>
+                  <input type="text" name="lname" class="form-control" id="validationTooltip02" placeholder="Last name"
+                    [(ngModel)]="model.lname" #lname="ngModel"
+                    [ngClass]="{ 'is-invalid': userForm.submitted && lname.invalid, 'is-valid': userForm.submitted && !lname.invalid }"
+                    required>
+                  <div *ngIf="userForm.submitted && !lname.errors?.required" class="valid-tooltip">Looks good!</div>
+                </div>
+                <div class="col-md-4 mb-4 form-group">
+                  <label for="validationTooltip03">Phone Number</label>
+                  <input type="text" name="phone" class="form-control" id="validationTooltip03" placeholder="Phone Number"
+                    [(ngModel)]="model.phone" #phone="ngModel"
+                    [ngClass]="{ 'is-invalid': userForm.submitted && phone.invalid, 'is-valid': userForm.submitted && !phone.invalid }"
+                    required>
+                  <div *ngIf="userForm.submitted && (phone.invalid || phone.errors?.required)" class="invalid-tooltip">
+                    Please provide a valid Phone Number.</div>
+                </div>
+              </div>
+  
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  
+    <div class="row">
+      <div class="col">
+        <button class="btn btn-danger btn-block btn-lg" (click)="delete()">Delete</button>
+      </div>
+      <div class="col">
+        <button class="btn btn-primary btn-block btn-lg" type="submit">Save</button>
+      </div>
+    </div>
+  </form>
