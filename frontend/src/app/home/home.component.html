@@ -13,7 +13,7 @@
             <div class="media">
             <div class="media-body text-left">
                 <h3 class="card-text">278</h3>
-                <span>New Projects</span>
+                <span>New Jobs</span>
             </div>
             <div class="media-right align-self-center">
                 <i class="ft-briefcase font-large-2 float-right"></i>
@@ -64,7 +64,7 @@
             <div class="media">
             <div class="media-body text-left">
                 <h3 class="card-text">423</h3>
-                <span>Support Tickets</span>
+                <span>Ratings Given</span>
             </div>
             <div class="media-right align-self-center">
                 <i class="ft-life-buoy font-large-2 float-right"></i>
@@ -87,7 +87,7 @@
             </div>
             <div class="media-body text-right">
                 <h3 class="card-text">278</h3>
-                <span>New Posts</span>
+                <span>New Ratings</span>
             </div>
             </div>
         </div>
@@ -120,8 +120,8 @@
                 <i class="ft-trending-up font-large-2 float-left"></i>
             </div>
             <div class="media-body text-right">
-                <h3 class="card-text">64.89 %</h3>
-                <span>Bounce Rate</span>
+                <h3 class="card-text">94.23  %</h3>
+                <span>Good Ratings</span>
             </div>
             </div>
         </div>
@@ -149,34 +149,127 @@
 </section>
 
 <div class="row">
-    <div class="col">
-        <div class="card card-inverse bg-">
-            <div class="card-header">
-                <h4 class="card-title text-success">New Jobs</h4>
-                <!-- <button class="btn btn-round btn-info pull-right" [routerLink]="'/create-job'">Create Job</button> -->
-            </div>
-            <div class="card-content">
-                <div class="card-body">
-                    <table class="table table-striped table-hover">
-                        <thead class="thead-dark">
-                            <tr>
-                                <th>Date Created</th>
-                                <th>Car</th>
-                                <th>Client Name</th>
-                                <th>Status</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <tr class="cursor-pointer" *ngFor="let newJob of newJobs" [routerLink]="'/edit-job'">
-                                <th scope="row">{{ newJob.date }}</th>
-                                <td>{{ newJob.car }}</td>
-                                <td>{{ newJob.name }}</td>
-                                <td class="text-success">NEW</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
+  <div class="col-12 mb-1">
+  <div class="content-header">Office Management</div>
+  </div>
+</div>
+
+<div class="row">
+    <section id="ngx-datatable-filter">
+                        <div class="row">
+                          <div class="col-12">
+                            <!-- Filter starts -->
+                            <div class="users-list-filter px-2">
+                              <form>
+                                <div class="row border rounded py-2 mb-2 mx-n2">
+                                  <div class="col-12 col-sm-6 col-lg-3">
+                                    <label for="users-list-verified">Verified</label>
+                                    <fieldset class="form-group">
+                                      <select id="users-list-verified" class="form-control">
+                                        <option value="">Any</option>
+                                        <option value="Yes">Yes</option>
+                                        <option value="No">No</option>
+                                      </select>
+                                    </fieldset>
+                                  </div>
+                      
+                                  <div class="col-12 col-sm-6 col-lg-3">
+                                    <label for="users-list-role">Role</label>
+                                    <fieldset class="form-group">
+                                      <select id="users-list-role" class="form-control">
+                                        <option value="">Any</option>
+                                        <option value="User">User</option>
+                                        <option value="Staff">Staff</option>
+                                      </select>
+                                    </fieldset>
+                                  </div>
+                      
+                                  <div class="col-12 col-sm-6 col-lg-3">
+                                    <label for="users-list-status">Status</label>
+                                    <fieldset class="form-group">
+                                      <select id="users-list-status" class="form-control">
+                                        <option value="">Any</option>
+                                        <option value="Active">Active</option>
+                                        <option value="Close">Close</option>
+                                        <option value="Banned">Banned</option>
+                                      </select>
+                                    </fieldset>
+                                  </div>
+                      
+                                  <div class="col-12 col-sm-6 col-lg-3 d-flex align-items-center">
+                                    <button type="reset" class="btn btn-primary btn-block users-list-clear glow mb-0">
+                                      Clear
+                                    </button>
+                                  </div>
+                                </div>
+                              </form>
+                            </div>
+                            <!-- Filter ends -->
+                          </div>
+                          <div class="col-12">
+                            <div class="card">
+                              <div class="card-content">
+                                <div class="card-body">
+                                  <!-- ngx-datatable-filter -->
+                                  <fieldset class="form-group">
+                                    <label>Show
+                                      <select name="users-list-select"
+                                        class="form-control form-control-sm d-inline-block width-100 p-right-25 pl-4 mx-1"
+                                        (click)="updateLimit($event)">
+                                        <option value="10">10</option>
+                                        <option value="25">25</option>
+                                        <option value="50">50</option>
+                                        <option value="100">100</option>
+                                      </select>
+                                      entries</label>
+                                    <label for="ngx-filter-ref" class="float-right">Search:
+                                      <input id="ngx-filter-ref" class="form-control form-control-sm d-inline-block width-200 ml-1"
+                                        type="text" (keyup)="filterUpdate($event)" />
+                                    </label>
+                                  </fieldset>
+                                  <ngx-datatable class="bootstrap core-bootstrap" [columnMode]="ColumnMode.force" [headerHeight]="50"
+                                    [footerHeight]="50" rowHeight="auto" [limit]="limitRef" [rows]="rows" [scrollbarH]="true"
+                                    [columns]="columns">
+                                    <ngx-datatable-column name="ID" prop="ID" [width]="50"></ngx-datatable-column>
+                                    <ngx-datatable-column name="Username" prop="Username" [width]="150">
+                                      <ng-template let-row="row" let-name="value" ngx-datatable-cell-template>
+                                        <div class="d-flex align-items-center">
+                                          <!-- <img class="rounded-circle mr-1" src="assets/img/portrait/small/{{
+                                              row.avatar
+                                            }}" height="32" width="32" alt="datatable-avatar" /> -->
+                      
+                                          <div class="cell-line-height">
+                                            <a class="line-height-1 mb-0" routerLink="/pages/users-view">{{ name }}</a>
+                                          </div>
+                                        </div>
+                                      </ng-template>
+                                    </ngx-datatable-column>
+                                    <ngx-datatable-column name="Name" prop="Name" [width]="150"></ngx-datatable-column>
+                                    <ngx-datatable-column name="Last Activity" prop="Last Activity" [width]="120"></ngx-datatable-column>
+                                    <ngx-datatable-column name="Verified" prop="Verified" [width]="70"></ngx-datatable-column>
+                                    <ngx-datatable-column name="Role" prop="Role" [width]="70"></ngx-datatable-column>
+                                    <ngx-datatable-column name="Status" prop="Status" [width]="70">
+                                      <ng-template let-status="value" ngx-datatable-cell-template>
+                                        <div class="badge" [ngClass]="{
+                                            'bg-light-success': status == 'Active',
+                                            'bg-light-danger': status == 'Banned',
+                                            'bg-light-warning': status == 'Close'
+                                          }">
+                                          {{ status }}
+                                        </div>
+                                      </ng-template>
+                                    </ngx-datatable-column>
+                                    <ngx-datatable-column name="Actions" [width]="50">
+                                      <ng-template ngx-datatable-cell-template>
+                                        <a routerLink="/pages/users-edit"><i class="ft-edit text-primary cursor-pointer"></i></a>
+                                      </ng-template>
+                                    </ngx-datatable-column>
+                                  </ngx-datatable>
+                                  <!-- ngx-datatable-filter -->
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </section>
 </div>

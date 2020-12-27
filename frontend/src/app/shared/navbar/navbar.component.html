@@ -20,7 +20,7 @@
             <div class="search-input-icon">
               <i class="ft-search font-medium-3"></i>
             </div>
-            <input [formControl]="control" #search class="input" type="text" placeholder="Explore Apex..." tabindex="0"
+            <input [formControl]="control" #search class="input" type="text" placeholder="Explore..." tabindex="0"
               autofocus data-search="template-search" [appAutocomplete]="autocomplete" (keyup.enter)="onEnter()" (keydown.esc)="onEscEvent()" (keyup)="onSearchKey($event)" />
             <div class="search-input-close" (click)="toggleSearchOpenClass(false)">
               <i class="ft-x font-medium-3"></i>
@@ -49,8 +49,8 @@
           <ul class="navbar-nav">
             <li class="nav-item">
               <div class="logo"><a class="logo-text" [routerLink]="['/']" *ngIf="config?.layout.menuPosition === 'Top'">
-                  <div class="logo-img"><img class="logo-img" alt="Apex logo" [src]="logoUrl"></div><span
-                    class="text">APEX</span>
+                  <!-- <div class="logo-img"><img class="logo-img" alt="Apex logo" [src]="logoUrl"></div><span
+                    class="text">APEX</span> -->
                 </a></div>
             </li>
           </ul>
@@ -95,7 +95,7 @@
                 </div>
               </li>
               <li class="scrollable-container" [perfectScrollbar]>
-                <a class="d-flex justify-content-between" href="javascript:void(0)">
+                <!-- <a class="d-flex justify-content-between" href="javascript:void(0)">
                   <div class="media d-flex align-items-center">
                     <div class="media-left">
                       <div class="mr-3">
@@ -254,7 +254,7 @@
                       <small class="noti-text">Liked your album: UI/UX Inspo</small>
                     </div>
                   </div>
-                </a>
+                </a> -->
               </li>
               <li class="dropdown-menu-footer">
                 <div class="noti-footer text-center cursor-pointer primary border-top text-bold-400 py-1">
@@ -270,7 +270,7 @@
                 <span class="text-right">Username</span><span
                   class="text-right text-muted font-small-3">Available</span>
               </div>
-              <img class="avatar" src="assets/img/portrait/small/avatar-s-1.png" alt="avatar" height="35" width="35" />
+              <!-- <img class="avatar" src="assets/img/portrait/small/avatar-s-1.png" alt="avatar" height="35" width="35" /> -->
             </a>
             <div class="dropdown-menu text-left dropdown-menu-right m-0 pb-0" aria-labelledby="dropdownBasic2"
               ngbDropdownMenu>
@@ -297,10 +297,10 @@
               </a>
             </div>
           </li>
-          <li class="nav-item d-none d-lg-block mr-2 mt-1">
+          <!-- <li class="nav-item d-none d-lg-block mr-2 mt-1">
             <a class="nav-link notification-sidebar-toggle" (click)="toggleNotificationSidebar();"><i
                 class="ft-align-right font-medium-3"></i></a>
-          </li>
+          </li> -->
         </ul>
       </div>
     </div>

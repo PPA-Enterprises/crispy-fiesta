@@ -1,61 +1,75 @@
-import { Component, ViewChild, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, ViewEncapsulation } from "@angular/core";
 //import { FormControl, FormGroup, Validators, NgForm } from '@angular/forms';
 import { JobService } from '../shared/services/job.service'
-
-// export class JobForm {
-//   public fname: string;
-//   public lname: string;
-//   public phone: string;
-//   public carInfo: string;
-//   public apptInfo: string;
-//   public notes: string;
-// }
-
-// export class Job {
-//   public client_name: string
-//   public client_phone: string;
-//   public car_info: string;
-//   public appointment_info: string;
-//   public notes: string;
-// }
+import { DatatableComponent, ColumnMode } from "@swimlane/ngx-datatable";
+import { usersListData } from "./data/users-list.data";
 
 @Component({
   selector: 'app-page',
   templateUrl: './home.component.html',
-  styleUrls: ['./home.component.scss']
+  styleUrls: ['./home.component.scss',
+  "../../assets/sass/libs/datatables.scss",],
+  encapsulation: ViewEncapsulation.None,
 })
 
 export class HomeComponent implements OnInit {
-  newJobs: any[] = [
-    { name: "Tristan Hull", date: "December 12th, 2020", car: "2003 Saturn Vue" }, { name: "Joshua Benz", date: "December 17th, 2020", car: "2010 Ford Focus" }, { name: "Frank Swartz", date: "December 6th, 2020", car: "2019 Ford Mustang" },
+  @ViewChild(DatatableComponent) table: DatatableComponent;
+
+  // row data
+  public rows = usersListData;
+  public ColumnMode = ColumnMode;
+  public limitRef = 10;
+
+  // column header
+  public columns = [
+    { name: "ID", prop: "ID" },
+    { name: "Username", prop: "Username" },
+    { name: "Name", prop: "Name" },
+    { name: "Last Activity", prop: "Last Activity" },
+    { name: "Verified", prop: "Verified" },
+    { name: "Role", prop: "Role" },
+    { name: "Status", prop: "Status" },
+    { name: "Actions", prop: "Actions" },
   ];
-  // job: Job;
-  // model = new JobForm();
-  // submitted = false;
 
-  constructor(private jobService: JobService) {
-    // this.model = {
-    //   fname: 'Mark',
-    //   lname: 'Otto',
-    //   phone: ''
-    // }
+  // private
+  private tempData = [];
+
+  constructor() {
+    this.tempData = usersListData;
   }
 
-  ngOnInit() {
+  // Public Methods
+  // -----------------------------------------------------------------------------------------------------
 
+  /**
+   * filterUpdate
+   *
+   * @param event
+   */
+  filterUpdate(event) {
+    const val = event.target.value.toLowerCase();
+
+    // filter our data
+    const temp = this.tempData.filter(function (d) {
+      return d.Username.toLowerCase().indexOf(val) !== -1 || !val;
+    });
+
+    // update the rows
+    this.rows = temp;
+    // Whenever the filter changes, always go back to the first page
+    this.table.offset = 0;
   }
 
-  // onSubmit(form) {
+  /**
+   * updateLimit
+   *
+   * @param limit
+   */
+  updateLimit(limit) {
+    this.limitRef = limit.target.value;
+  }
 
-  //   this.job = {
-  //     client_name: this.model.fname + " " + this.model.lname,
-  //     client_phone: this.model.phone,
-  //     car_info: this.model.carInfo,
-  //     appointment_info: this.model.apptInfo,
-  //     notes: this.model.notes
-  //   }
-  //   this.jobService.createJob(this.job).subscribe(data => { console.log(data)});
-  // }
-
+  ngOnInit(): void {}
 
 }

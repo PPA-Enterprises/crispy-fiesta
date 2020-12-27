@@ -24,9 +24,12 @@
             "styles": [
               "node_modules/perfect-scrollbar/css/perfect-scrollbar.css",
               "node_modules/prismjs/plugins/toolbar/prism-toolbar.css",
+              "node_modules/@swimlane/ngx-datatable/index.css",
+              "node_modules/@swimlane/ngx-datatable/assets/icons.css",
               "src/assets/css/animate.min.css",
               "src/assets/css/demo.css",
               "src/assets/sass/core.scss",
+              "src/assets/css/wizard.css",
               "src/styles.css"
             ],
             "scripts": [

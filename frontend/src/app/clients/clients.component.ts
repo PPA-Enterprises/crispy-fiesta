@@ -34,6 +34,7 @@ export class Client {
 })
 
 export class ClientsComponent {
+  @ViewChild(DatatableComponent) table: DatatableComponent;
     DatatableData: Client[] = this.clientService.getAllClients();
     // row data
     public rows = this.DatatableData;
@@ -48,8 +49,7 @@ export class ClientsComponent {
     ];
 
     public ColumnMode = ColumnMode;
-  
-    @ViewChild(DatatableComponent) table: DatatableComponent;
+
     @ViewChild('tableRowDetails') tableRowDetails: any;
     @ViewChild('tableResponsive') tableResponsive: any;
   
