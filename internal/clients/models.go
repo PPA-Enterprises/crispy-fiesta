@@ -44,7 +44,7 @@ func fromCreateClientCmd(data *createClientCmd) *newClient {
 	}
 }
 
-func emptyJobsClient(c *clientModel) *joblessClient {
+func emptyJobsClient(c *types.PopulatedClientModel) *joblessClient {
 	return &joblessClient {
 		ID: c.ID,
 		Name: c.Name,

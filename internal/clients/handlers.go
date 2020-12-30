@@ -54,6 +54,12 @@ func getClientByPhone(c *gin.Context) {
 		c.Abort(); return
 	}
 
+	if len(delivarableClient.Jobs) <= 0 {
+		c.JSON(http.StatusOK,
+			gin.H{"success": true, "payload": emptyJobsClient(delivarableClient)})
+		return
+	}
+
 	c.JSON(http.StatusOK,
 		gin.H{"success": true, "payload": delivarableClient})
 
@@ -76,16 +82,16 @@ func getClientByID(c *gin.Context) {
 		c.Abort(); return
 	}
 
-	if len(client.Jobs) <= 0 {
-		c.JSON(http.StatusOK,
-			gin.H{"success": true, "payload": emptyJobsClient(client)})
-		return
-	}
-
 	delivarableClient, err := client.Populate(ctx); if err != nil {
 		c.JSON(err.Code,
 			gin.H{"success": false, "message": err.Error()})
 		c.Abort(); return
+	}
+
+	if len(delivarableClient.Jobs) <= 0 {
+		c.JSON(http.StatusOK,
+			gin.H{"success": true, "payload": emptyJobsClient(delivarableClient)})
+		return
 	}
 
 	c.JSON(http.StatusOK,
