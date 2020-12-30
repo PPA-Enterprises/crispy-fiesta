@@ -22,6 +22,19 @@ type clientModel struct {
 	Jobs  []primitive.ObjectID `json:"jobs" bson:"jobs"`
 }
 
+type joblessClient struct {
+	Name  string               `json:"name" bson:"name"`
+	Phone string               `json:"phone" bson:"phone"`
+}
+
+func fromCreateClientCmd(data *createClientCmd) *joblessClient {
+	return &joblessClient{
+		Name: data.Name,
+		Phone: data.Phone,
+	}
+}
+
+
 func tryFromUpdateClientCmd(data *updateClientCmd) (*clientModel, *errors.ResponseError) {
 	clientOID, err := primitive.ObjectIDFromHex(data.ID)
 	if err != nil {
@@ -34,6 +47,7 @@ func tryFromUpdateClientCmd(data *updateClientCmd) (*clientModel, *errors.Respon
 		Jobs:  normalize(data.Jobs),
 	}, nil
 }
+
 
 func normalize(j []jobTypes.Job) []primitive.ObjectID {
 	oids := make([]primitive.ObjectID, 0)
@@ -78,6 +92,15 @@ func (self *clientModel) AttatchJobID(oid primitive.ObjectID) {
 }
 
 func (self *clientModel) create(ctx context.Context) (UID.ID, *errors.ResponseError) {
+	coll := db.Connection().Use(db.DefaultDatabase, "clients")
+	res, err := coll.InsertOne(ctx, self)
+	if err != nil {
+		return nil, errors.DatabaseError(err)
+	}
+	return UID.TryFromInterface(res.InsertedID)
+}
+
+func (self *joblessClient) createUniq(ctx context.Context) (UID.ID, *errors.ResponseError) {
 	coll := db.Connection().Use(db.DefaultDatabase, "clients")
 	res, err := coll.InsertOne(ctx, self)
 	if err != nil {
@@ -216,3 +239,4 @@ func fetch(ctx context.Context, fetchOpts *BulkFetch) ([]types.UnpopulatedClient
 	}
 	return clients, nil
 }
+

@@ -9,6 +9,26 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+func createUser(c *gin.Context) {
+	ctx, cancel := context.WithTimeout(c, 5*time.Second)
+	defer cancel()
+
+	var data createClientCmd
+	if c.BindJSON(&data) != nil {
+		c.JSON(http.StatusNotAcceptable,
+			gin.H{"success": false, "message": "Provide relevant fields"});
+		c.Abort(); return
+	}
+	newClient := fromCreateClientCmd(&data)
+	uid, err := newClient.createUniq(ctx); if err != nil {
+		c.JSON(err.Code,
+			gin.H{"success": false, "message": err.Error()});
+		c.Abort(); return
+	}
+	c.JSON(http.StatusCreated,
+		gin.H{"success": true, "payload": uid.String(), "message": "Client Created"})
+}
+
 func getClientByPhone(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(c, 5*time.Second)
 	defer cancel()
@@ -183,5 +203,6 @@ func getClients(c *gin.Context) {
 	empty := make([]string, 0)
 		c.JSON(http.StatusOK,
 			gin.H{"success": true, "payload": empty})
-
 }
+
+

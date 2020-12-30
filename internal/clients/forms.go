@@ -10,3 +10,8 @@ type updateClientCmd struct {
 	Phone string `json:"phone" binding:"required"`
 	Jobs []types.Job `json:"jobs" binding:"required"`
 }
+
+type createClientCmd struct {
+	Name string `json:"name" binding:"required"`
+	Phone string `json:"phone" binding:"required"`
+}
