@@ -5,6 +5,7 @@ import (
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	passwordUtils "internal/common/password"
 	"internal/common/errors"
 	jwtUtils "internal/common/token"
@@ -21,6 +22,12 @@ type userModel struct {
 	IsVerified bool `json:"is_verified" bson:"is_verified"`
 }
 
+type userUpdateModel struct {
+	ID primitive.ObjectID `json:"_id,omitempty" bson:"_id,omitempty"`
+	Name string `json:"name" bson:"name"`
+	Email string `json:"email" bson:"email"`
+}
+
 func tryFromSignupUserCmd(data *signupUserCommand) (*userModel, *errors.ResponseError) {
 	encrypted, err := passwordUtils.HashFromPlaintext(data.Password)
 	if err != nil {
@@ -32,6 +39,17 @@ func tryFromSignupUserCmd(data *signupUserCommand) (*userModel, *errors.Response
 		Email: data.Email,
 		Password: encrypted,
 		IsVerified: true,
+	}, nil
+}
+
+func tryFromUpdateUserCmd(data *userUpdateCommand) (*userUpdateModel, *errors.ResponseError) {
+	oid, err := primitive.ObjectIDFromHex(data.ID); if err != nil {
+		return nil, errors.InvalidOID()
+	}
+	return &userUpdateModel {
+		ID: oid,
+		Name: data.Name,
+		Email: data.Email,
 	}, nil
 }
 
@@ -100,4 +118,20 @@ func fetchUsers(ctx context.Context)([]types.DeliverableUser, *errors.ResponseEr
 		return nil, errors.DatabaseError(err)
 	}
 	return users, nil
+}
+
+func (self *userUpdateModel) patch(ctx context.Context, upsert bool) *errors.ResponseError {
+	coll := db.Connection().Use(db.DefaultDatabase, "users")
+	opts := options.FindOneAndUpdate().SetUpsert(upsert)
+
+	filter := bson.D{{"_id", self.ID}}
+	//update := bson.D{{"$set", bson.D{{"email", "newemail@example.com"}}}}
+	update := bson.D{{"$set", self}}
+	var updatedDocument bson.M
+	err := coll.FindOneAndUpdate(ctx, filter, update, opts).Decode(&updatedDocument)
+
+	if err != nil {
+		return errors.PutFailed(err)
+	}
+	return nil
 }

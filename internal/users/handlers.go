@@ -1,6 +1,5 @@
 package users
 import (
-	"fmt"
 	"context"
 	"time"
 	"net/http"
@@ -71,7 +70,6 @@ func getUsers(c *gin.Context) {
 		c.Abort()
 		return
 	}
-	fmt.Println(users)
 	if len(users) > 0 {
 		c.JSON(http.StatusOK,
 			gin.H{"success": true, "payload": users})
@@ -80,4 +78,34 @@ func getUsers(c *gin.Context) {
 		empty := make([]string, 0)
 		c.JSON(http.StatusOK,
 			gin.H{"success": true, "payload": empty})
+}
+
+//TODO: Return updated data or id?
+func update(c *gin.Context) {
+	ctx, cancel := context.WithTimeout(c, 5*time.Second)
+	defer cancel()
+
+	var data userUpdateCommand
+	if c.BindJSON(&data) != nil {
+		c.JSON(http.StatusNotAcceptable,
+		gin.H{"success": false, "message": "Provide relevant fields"})
+		c.Abort()
+		return
+	}
+
+	updatePatch, err := tryFromUpdateUserCmd(&data); if err != nil {
+		c.JSON(err.Code,
+			gin.H{"success": false, "message": err.Error()})
+		c.Abort()
+		return
+	}
+
+	patchErr := updatePatch.patch(ctx, false); if err != nil {
+		c.JSON(err.Code,
+			gin.H{"success": false, "message": patchErr.Error()})
+		c.Abort()
+		return
+	}
+	c.JSON(http.StatusCreated,
+		gin.H{"success": true, "message": "User Updated"});
 }
