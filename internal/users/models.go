@@ -109,7 +109,7 @@ func EmailExists(ctx context.Context, email string) bool {
 func fetchUsers(ctx context.Context)([]types.DeliverableUser, *errors.ResponseError) {
 	coll := db.Connection().Use(db.DefaultDatabase, "users")
 
-	cursor, err := coll.Find(ctx, bson.D{{"password",false}})
+	cursor, err := coll.Find(ctx, bson.D{{}})
 	defer cursor.Close(ctx)
 
 	var users []types.DeliverableUser
