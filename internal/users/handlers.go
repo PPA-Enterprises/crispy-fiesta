@@ -58,3 +58,18 @@ func login(c *gin.Context) {
 		gin.H{"success": true, "payload": jwt, "message": "User Authenticated"});
 
 }
+
+func getUsers(c *gin.Context) {
+	ctx, cancel := context.WithTimeout(c, 5*time.Second)
+	defer cancel()
+
+	users, err := fetchUsers(ctx)
+	if err != nil {
+		c.JSON(err.Code,
+			gin.H{"success": false, "message": err.Error()})
+		c.Abort()
+		return
+	}
+	c.JSON(http.StatusOK,
+		gin.H{"success": true, "payload": users})
+}

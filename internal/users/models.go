@@ -10,6 +10,7 @@ import (
 	jwtUtils "internal/common/token"
 	"internal/db"
 	"internal/uid"
+	"internal/users/types"
 )
 
 type userModel struct {
@@ -87,7 +88,7 @@ func EmailExists(ctx context.Context, email string) bool {
 	return true
 }
 
-func users(ctx context.Context)([]types.DeliverableUser, *errors.ResponseError) {
+func fetchUsers(ctx context.Context)([]types.DeliverableUser, *errors.ResponseError) {
 	coll := db.Connection().Use(db.DefaultDatabase, "users")
 
 	cursor, err := coll.Find(ctx, bson.D{{}})
