@@ -72,6 +72,12 @@ func getUsers(c *gin.Context) {
 		return
 	}
 	fmt.Println(users)
-	c.JSON(http.StatusOK,
-		gin.H{"success": true, "payload": users})
+	if len(users) > 0 {
+		c.JSON(http.StatusOK,
+			gin.H{"success": true, "payload": users})
+		return
+	}
+		empty := make([]string, 0)
+		c.JSON(http.StatusOK,
+			gin.H{"success": true, "payload": empty})
 }
