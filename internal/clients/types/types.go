@@ -15,10 +15,10 @@ type PopulatedClientModel struct {
 }
 
 type UnpopulatedClientModel struct {
-	ID primitive.ObjectID `json:"_id"`
-	Name string `json:"name"`
-	Phone string `json:"phone"`
-	Jobs []primitive.ObjectID `json:"jobs"`
+	ID primitive.ObjectID `json:"_id" bson:"_id"`
+	Name string `json:"name" bson:"name"`
+	Phone string `json:"phone" bson:"phone"`
+	Jobs []primitive.ObjectID `json:"jobs" bson"jobs"`
 }
 
 type Client interface {

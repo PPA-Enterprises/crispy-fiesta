@@ -223,7 +223,7 @@ func fetchAll(ctx context.Context, sort bool) ([]types.UnpopulatedClientModel, *
 	opts := options.Find()
 
 	if sort {
-		opts.SetSort(bson.D{{"_id", -1}})
+		//opts.SetSort(bson.D{{"_id", -1}})
 	}
 
 	cursor, err := coll.Find(ctx, opts)
