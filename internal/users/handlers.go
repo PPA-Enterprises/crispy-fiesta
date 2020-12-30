@@ -1,5 +1,6 @@
 package users
 import (
+	"fmt"
 	"context"
 	"time"
 	"net/http"
@@ -70,6 +71,7 @@ func getUsers(c *gin.Context) {
 		c.Abort()
 		return
 	}
+	fmt.Println(users)
 	c.JSON(http.StatusOK,
 		gin.H{"success": true, "payload": users})
 }
