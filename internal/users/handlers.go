@@ -116,3 +116,25 @@ func update(c *gin.Context) {
 	c.JSON(http.StatusCreated,
 	gin.H{"success": true, "payload": updatedDoc, "message": "User Updated"});
 }
+
+func delete(c *gin.Context) {
+	ctx, cancel := context.WithTimeout(c, 5*time.Second)
+	defer cancel()
+
+	id := c.Param("id")
+	if len(id) <= 0 {
+		c.JSON(http.StatusBadRequest,
+		gin.H{"success": false, "message": "Provide an id"})
+		c.Abort()
+		return
+	}
+
+	if err := deleteUser(ctx, id); err != nil {
+		c.JSON(err.Code,
+			gin.H{"success": false, "message": err.Error()})
+		c.Abort()
+		return
+	}
+	c.JSON(http.StatusOK,
+	gin.H{"success": true, "message": "User Removed"});
+}

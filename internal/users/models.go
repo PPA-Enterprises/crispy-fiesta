@@ -20,6 +20,7 @@ type userModel struct {
 	Email string `json:"email" bson:"email"`
 	Password string `json:"password" bson:"password"`
 	IsVerified bool `json:"is_verified" bson:"is_verified"`
+	IsDeleted bool `json:"is_deleted" bson:"is_deleted"`
 }
 
 type userUpdateModel struct {
@@ -39,6 +40,7 @@ func tryFromSignupUserCmd(data *signupUserCommand) (*userModel, *errors.Response
 		Email: data.Email,
 		Password: encrypted,
 		IsVerified: true,
+		IsDeleted: false,
 	}, nil
 }
 
@@ -78,6 +80,11 @@ func authenticate(ctx context.Context, credentials loginUserCommand) (string, *e
 		return string(""), errors.EmailDoesNotExistError()
 	}
 
+	if user.IsDeleted {
+		// User was deleted
+		return string(""), errors.EmailDoesNotExistError()
+	}
+
 	ok, err := passwordUtils.VerifyPassword(credentials.Password, user.Password)
 	if !ok {
 		//passwords dont match
@@ -109,7 +116,8 @@ func EmailExists(ctx context.Context, email string) bool {
 func fetchUsers(ctx context.Context)([]types.DeliverableUser, *errors.ResponseError) {
 	coll := db.Connection().Use(db.DefaultDatabase, "users")
 
-	cursor, err := coll.Find(ctx, bson.D{{}})
+	filter := bson.D{{"is_deleted", false}}
+	cursor, err := coll.Find(ctx, filter)
 	defer cursor.Close(ctx)
 
 	var users []types.DeliverableUser
@@ -123,7 +131,7 @@ func (self *userUpdateModel) patch(ctx context.Context, upsert bool) (*types.Del
 	coll := db.Connection().Use(db.DefaultDatabase, "users")
 	opts := options.FindOneAndUpdate().SetUpsert(upsert)
 
-	filter := bson.D{{"_id", self.ID}}
+	filter := bson.D{{"_id", self.ID}, {"is_deleted", false}}
 	update := bson.D{{"$set", self}}
 	var updatedDocument types.DeliverableUser
 	err := coll.FindOneAndUpdate(ctx, filter, update, opts).Decode(&updatedDocument)
@@ -137,4 +145,21 @@ func (self *userUpdateModel) patch(ctx context.Context, upsert bool) (*types.Del
 		return nil, errors.DatabaseError(err)
 	}
 	return &updatedDocument, nil
+}
+
+func deleteUser(ctx context.Context, id string) (*errors.ResponseError) {
+	coll := db.Connection().Use(db.DefaultDatabase, "users")
+	oid, err := primitive.ObjectIDFromHex(id); if err != nil {
+		return errors.InvalidOID()
+	}
+
+	filter := bson.D{{"_id", oid}}
+	update := bson.D{{"$set", bson.D{{"is_deleted", true}}}}
+	var updatedDocument types.DeliverableUser
+	dbErr := coll.FindOneAndUpdate(ctx, filter, update).Decode(&updatedDocument)
+
+	if dbErr != nil {
+		return errors.DeleteFailed()
+	}
+	return nil
 }
