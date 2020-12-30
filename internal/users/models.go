@@ -87,3 +87,15 @@ func EmailExists(ctx context.Context, email string) bool {
 	return true
 }
 
+func users(ctx context.Context)([]types.DeliverableUser, *errors.ResponseError) {
+	coll := db.Connection().Use(db.DefaultDatabase, "users")
+
+	cursor, err := coll.Find(ctx, bson.D{{}})
+	defer cursor.Close(ctx)
+
+	var users []types.DeliverableUser
+	if err = cursor.All(ctx, &users); err != nil {
+		return nil, errors.DatabaseError(err)
+	}
+	return users, nil
+}
