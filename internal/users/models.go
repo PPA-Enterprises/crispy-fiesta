@@ -42,8 +42,8 @@ func tryFromSignupUserCmd(data *signupUserCommand) (*userModel, *errors.Response
 	}, nil
 }
 
-func tryFromUpdateUserCmd(data *userUpdateCommand) (*userUpdateModel, *errors.ResponseError) {
-	oid, err := primitive.ObjectIDFromHex(data.ID); if err != nil {
+func tryFromUpdateUserCmd(data *userUpdateCommand, id string) (*userUpdateModel, *errors.ResponseError) {
+	oid, err := primitive.ObjectIDFromHex(id); if err != nil {
 		return nil, errors.InvalidOID()
 	}
 	return &userUpdateModel {
@@ -120,18 +120,23 @@ func fetchUsers(ctx context.Context)([]types.DeliverableUser, *errors.ResponseEr
 	return users, nil
 }
 
-func (self *userUpdateModel) patch(ctx context.Context, upsert bool) *errors.ResponseError {
+func (self *userUpdateModel) patch(ctx context.Context, upsert bool) (*types.DeliverableUser, *errors.ResponseError) {
 	coll := db.Connection().Use(db.DefaultDatabase, "users")
 	opts := options.FindOneAndUpdate().SetUpsert(upsert)
 
 	filter := bson.D{{"_id", self.ID}}
-	//update := bson.D{{"$set", bson.D{{"email", "newemail@example.com"}}}}
 	update := bson.D{{"$set", self}}
-	var updatedDocument bson.M
+	var updatedDocument types.DeliverableUser
 	err := coll.FindOneAndUpdate(ctx, filter, update, opts).Decode(&updatedDocument)
 
 	if err != nil {
-		return errors.PutFailed(err)
+		return nil, errors.PutFailed(err)
 	}
-	return nil
+
+	err = coll.FindOne(ctx, filter).Decode(&updatedDocument)
+	if err != nil {
+		return nil, errors.DatabaseError(err)
+	}
+
+	return &updatedDocument, nil
 }

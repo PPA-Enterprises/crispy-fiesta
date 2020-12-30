@@ -80,7 +80,6 @@ func getUsers(c *gin.Context) {
 			gin.H{"success": true, "payload": empty})
 }
 
-//TODO: Return updated data or id?
 func update(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(c, 5*time.Second)
 	defer cancel()
@@ -93,19 +92,27 @@ func update(c *gin.Context) {
 		return
 	}
 
-	updatePatch, err := tryFromUpdateUserCmd(&data); if err != nil {
+	id := c.Param("id")
+	if len(id) <= 0 {
+		c.JSON(http.StatusBadRequest,
+		gin.H{"success": false, "message": "Provide an id"})
+		c.Abort()
+		return
+	}
+
+	updatePatch, err := tryFromUpdateUserCmd(&data, id); if err != nil {
 		c.JSON(err.Code,
 			gin.H{"success": false, "message": err.Error()})
 		c.Abort()
 		return
 	}
 
-	patchErr := updatePatch.patch(ctx, false); if err != nil {
+	updatedDoc, patchErr := updatePatch.patch(ctx, false); if patchErr != nil {
 		c.JSON(err.Code,
 			gin.H{"success": false, "message": patchErr.Error()})
 		c.Abort()
 		return
 	}
 	c.JSON(http.StatusCreated,
-		gin.H{"success": true, "message": "User Updated"});
+	gin.H{"success": true, "payload": updatedDoc, "message": "User Updated"});
 }
