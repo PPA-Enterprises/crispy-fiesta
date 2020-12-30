@@ -114,7 +114,6 @@ func fetchUsers(ctx context.Context)([]types.DeliverableUser, *errors.ResponseEr
 
 	var users []types.DeliverableUser
 	if err = cursor.All(ctx, &users); err != nil {
-		//empty := make([]types.DeliverableUser, 0)
 		return nil, errors.DatabaseError(err)
 	}
 	return users, nil
@@ -137,6 +136,5 @@ func (self *userUpdateModel) patch(ctx context.Context, upsert bool) (*types.Del
 	if err != nil {
 		return nil, errors.DatabaseError(err)
 	}
-
 	return &updatedDocument, nil
 }
