@@ -174,6 +174,14 @@ func getClients(c *gin.Context) {
 		c.Abort(); return
 	}
 
-	c.JSON(http.StatusOK,
-		gin.H{"success": true, "payload": results})
+	if len(results) > 0 {
+		c.JSON(http.StatusOK,
+			gin.H{"success": true, "payload": results})
+		return
+	}
+
+	empty := make([]string, 0)
+		c.JSON(http.StatusOK,
+			gin.H{"success": true, "payload": empty})
+
 }
