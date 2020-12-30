@@ -34,7 +34,6 @@ func fromCreateClientCmd(data *createClientCmd) *joblessClient {
 	}
 }
 
-
 func tryFromUpdateClientCmd(data *updateClientCmd) (*clientModel, *errors.ResponseError) {
 	clientOID, err := primitive.ObjectIDFromHex(data.ID)
 	if err != nil {
@@ -102,6 +101,11 @@ func (self *clientModel) create(ctx context.Context) (UID.ID, *errors.ResponseEr
 
 func (self *joblessClient) createUniq(ctx context.Context) (UID.ID, *errors.ResponseError) {
 	coll := db.Connection().Use(db.DefaultDatabase, "clients")
+	exists := ClientByPhone(ctx, self.Phone)
+	if exists != nil {
+		return nil, errors.DoesNotExist()
+	}
+
 	res, err := coll.InsertOne(ctx, self)
 	if err != nil {
 		return nil, errors.DatabaseError(err)
