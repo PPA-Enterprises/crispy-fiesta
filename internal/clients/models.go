@@ -2,6 +2,7 @@ package clients
 
 import (
 	"bytes"
+	"fmt"
 	"context"
 	"internal/clients/types"
 	"internal/common/errors"
@@ -223,10 +224,10 @@ func fetchAll(ctx context.Context, sort bool) ([]types.UnpopulatedClientModel, *
 	opts := options.Find()
 
 	if sort {
-		//opts.SetSort(bson.D{{"_id", -1}})
+		opts.SetSort(bson.D{{"_id", -1}})
 	}
 
-	cursor, err := coll.Find(ctx, opts)
+	cursor, err := coll.Find(ctx, bson.D{{}}, opts)
 	defer cursor.Close(ctx)
 	var clients []types.UnpopulatedClientModel
 
@@ -253,13 +254,14 @@ func fetch(ctx context.Context, fetchOpts *BulkFetch) ([]types.UnpopulatedClient
 		findOptions.SetSort(bson.D{{"_id", -1}})
 	}
 
-	cursor, err := coll.Find(ctx, findOptions)
+	cursor, err := coll.Find(ctx, bson.D{{}}, findOptions)
 	defer cursor.Close(ctx)
 
 	var clients []types.UnpopulatedClientModel
 	if err = cursor.All(ctx, &clients); err != nil {
 		return nil, errors.DatabaseError(err)
 	}
+	fmt.Println(clients)
 	return clients, nil
 }
 
