@@ -176,7 +176,7 @@ func fetch(ctx context.Context, fetchOpts *BulkFetch) ([]types.DeliverableClient
 	coll := db.Connection().Use(db.DefaultDatabase, "clients")
 
 	findOptions := options.Find()
-	findOptions.SetLimit(quantity)
+	//findOptions.SetLimit(quantity)
 	findOptions.SetSort(bson.D{{"_id", -1}})
 	//filter := bson.D{{"jobs", false}}
 
