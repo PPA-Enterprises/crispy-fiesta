@@ -70,15 +70,19 @@ func getClientByID(c *gin.Context) {
 		c.Abort(); return
 	}
 
-	client, err := clientByID(ctx, id)
-	if err != nil {
+	client, err := clientByID(ctx, id); if err != nil {
 		c.JSON(err.Code,
 			gin.H{"success": false, "message": err.Error()})
 		c.Abort(); return
 	}
 
-	delivarableClient, err := client.Populate(ctx)
-	if err != nil {
+	if len(client.Jobs) <= 0 {
+		c.JSON(http.StatusOK,
+			gin.H{"success": true, "payload": emptyJobsClient(client)})
+		return
+	}
+
+	delivarableClient, err := client.Populate(ctx); if err != nil {
 		c.JSON(err.Code,
 			gin.H{"success": false, "message": err.Error()})
 		c.Abort(); return

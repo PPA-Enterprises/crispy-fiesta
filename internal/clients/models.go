@@ -22,17 +22,34 @@ type clientModel struct {
 	Jobs  []primitive.ObjectID `json:"jobs" bson:"jobs"`
 }
 
-type joblessClient struct {
+type newClient struct {
 	Name  string               `json:"name" bson:"name"`
 	Phone string               `json:"phone" bson:"phone"`
 	Jobs  []primitive.ObjectID `json:"jobs" bson:"jobs"`
 }
 
-func fromCreateClientCmd(data *createClientCmd) *joblessClient {
-	return &joblessClient{
+//need this cuz of bug
+type joblessClient struct {
+	ID primitive.ObjectID	`json:"_id"`
+	Name string				`json:"name"`
+	Phone string			`json:"phone"`
+	Jobs []string			`json:"jobs"`
+}
+
+func fromCreateClientCmd(data *createClientCmd) *newClient {
+	return &newClient{
 		Name: data.Name,
 		Phone: data.Phone,
 		Jobs: make([]primitive.ObjectID, 0),
+	}
+}
+
+func emptyJobsClient(c *clientModel) *joblessClient {
+	return &joblessClient {
+		ID: c.ID,
+		Name: c.Name,
+		Phone: c.Phone,
+		Jobs: make([]string, 0),
 	}
 }
 
@@ -101,7 +118,7 @@ func (self *clientModel) create(ctx context.Context) (UID.ID, *errors.ResponseEr
 	return UID.TryFromInterface(res.InsertedID)
 }
 
-func (self *joblessClient) createUniq(ctx context.Context) (UID.ID, *errors.ResponseError) {
+func (self *newClient) createUniq(ctx context.Context) (UID.ID, *errors.ResponseError) {
 	coll := db.Connection().Use(db.DefaultDatabase, "clients")
 	exists := ClientByPhone(ctx, self.Phone)
 	if exists != nil {
