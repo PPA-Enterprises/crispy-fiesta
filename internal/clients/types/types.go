@@ -14,6 +14,13 @@ type PopulatedClientModel struct {
 	Jobs []jobTypes.Job `json:"jobs"`
 }
 
+type UnpopulatedClientModel struct {
+	ID primitive.ObjectID `json:"_id"`
+	Name string `json:"name"`
+	Phone string `json:"phone"`
+	Jobs []primitive.ObjectID `json:"jobs"`
+}
+
 type Client interface {
 	AttatchJobID(primitive.ObjectID)
 	Put(ctx context.Context, upsert bool) *errors.ResponseError

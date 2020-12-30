@@ -172,18 +172,45 @@ func clientByID(ctx context.Context, id string) (*clientModel, *errors.ResponseE
 	return &foundClient, nil
 }
 
-func fetch(ctx context.Context, fetchOpts *BulkFetch) ([]types.DeliverableClient, *errors.ResponseError) {
+func fetchAll(ctx context.Context, sort bool) ([]types.UnpopulatedClientModel, *errors.ResponseError) {
+	coll := db.Connection().Use(db.DefaultDatabase, "clients")
+	opts := options.Find()
+
+	if sort {
+		opts.SetSort(bson.D{{"_id", -1}})
+	}
+
+	cursor, err := coll.Find(ctx, opts)
+	defer cursor.Close(ctx)
+	var clients []types.UnpopulatedClientModel
+
+	if err = cursor.All(ctx, &clients); err != nil {
+		return nil, errors.DatabaseError(err)
+	}
+
+	return clients, nil
+}
+
+func fetch(ctx context.Context, fetchOpts *BulkFetch) ([]types.UnpopulatedClientModel, *errors.ResponseError) {
+	if fetchOpts.All {
+		return fetchAll(ctx, fetchOpts.Sort)
+	}
+
 	coll := db.Connection().Use(db.DefaultDatabase, "clients")
 
-	findOptions := options.Find()
-	//findOptions.SetLimit(quantity)
-	findOptions.SetSort(bson.D{{"_id", -1}})
-	//filter := bson.D{{"jobs", false}}
+	findOptions := options.
+	Find().
+	SetSkip(int64(fetchOpts.Source)).
+	SetLimit(int64(fetchOpts.Next))
+
+	if fetchOpts.Sort {
+		findOptions.SetSort(bson.D{{"_id", -1}})
+	}
 
 	cursor, err := coll.Find(ctx, findOptions)
 	defer cursor.Close(ctx)
 
-	var clients []types.DeliverableClient
+	var clients []types.UnpopulatedClientModel
 	if err = cursor.All(ctx, &clients); err != nil {
 		return nil, errors.DatabaseError(err)
 	}
