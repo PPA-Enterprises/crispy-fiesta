@@ -172,7 +172,7 @@ func clientByID(ctx context.Context, id string) (*clientModel, *errors.ResponseE
 	return &foundClient, nil
 }
 
-func latest(ctx context.Context, quantity int64) ([]types.DeliverableClient, *errors.ResponseError) {
+func fetch(ctx context.Context, fetchOpts *BulkFetch) ([]types.DeliverableClient, *errors.ResponseError) {
 	coll := db.Connection().Use(db.DefaultDatabase, "clients")
 
 	findOptions := options.Find()

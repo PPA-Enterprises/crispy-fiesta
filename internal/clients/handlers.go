@@ -140,26 +140,50 @@ func fuzzyClientSearch(c *gin.Context) {
 		gin.H{"success": true, "payload": populateClients(ctx, results)})
 }
 
-// TODO: api/v1/clients?all=bool&sorted=bool&source=uint&next=uint
-func getLatestClients(c *gin.Context) {
+// TODO: api/v1/clients?all=bool&sort=bool&source=uint&next=uint
+func getClients(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(c, 5*time.Second)
 	defer cancel()
 
-	quantity := c.DefaultQuery("quantity", "100")
-	iQuantity, err := strconv.Atoi(quantity)
-	if err != nil {
-		c.JSON(http.StatusBadRequest,
-			gin.H{"success": false, "message": "Invalid Quantity"})
-		c.Abort()
-		return
-	}
+	options := BulkFetchOptions()
 
-	results, serachErr := latest(ctx, int64(iQuantity))
+	all := c.DefaultQuery("all", "false")
+	bAll, err := strconv.ParseBool(all); if err != nil {
+		c.JSON(http.StatusBadRequest,
+			gin.H{"success": false, "message": "Invalid all Param"})
+		c.Abort(); return
+	}
+	options.All = bAll
+
+	sort := c.DefaultQuery("sort", "false")
+	bSort, err := strconv.ParseBool(sort); if err != nil {
+		c.JSON(http.StatusBadRequest,
+			gin.H{"success": false, "message": "Invalid sort Param"})
+		c.Abort(); return
+	}
+	options.Sort = bSort
+
+	source := c.DefaultQuery("source", "0")
+	iSource, err := strconv.ParseUint(source, 10, 64); if err != nil {
+		c.JSON(http.StatusBadRequest,
+			gin.H{"success": false, "message": "Invalid Source Param"})
+		c.Abort(); return
+	}
+	options.Source = iSource
+
+	next := c.DefaultQuery("next", "10")
+	iNext, err := strconv.ParseUint(next, 10, 64); if err != nil {
+		c.JSON(http.StatusBadRequest,
+			gin.H{"success": false, "message": "Invalid Next Param"})
+		c.Abort(); return
+	}
+	options.Next = iNext
+
+	results, serachErr := fetch(ctx, options)
 	if serachErr != nil {
 		c.JSON(serachErr.Code,
 			gin.H{"success": false, "message": serachErr.Error()})
-		c.Abort()
-		return
+		c.Abort(); return
 	}
 
 	c.JSON(http.StatusOK,

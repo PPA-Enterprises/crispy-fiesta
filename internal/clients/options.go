@@ -2,15 +2,15 @@ package clients
 
 type BulkFetch struct {
 	All bool
-	Sorted bool
-	Source uint
-	Next uint
+	Sort bool
+	Source uint64
+	Next uint64
 }
 
 func BulkFetchOptions() *BulkFetch {
 	return &BulkFetch{
 		All: false,
-		Sorted: false,
+		Sort: false,
 		Source: 0,
 		Next: 10,
 	}
@@ -22,16 +22,17 @@ func (opts *BulkFetch) FetchAll() *BulkFetch {
 }
 
 func (opts *BulkFetch) FetchSorted() *BulkFetch {
-	opts.Sorted = true
+	opts.Sort = true
 	return opts
 }
 
-func (opts *BulkFetch) SetSource(source uint) *BulkFetch {
+func (opts *BulkFetch) SetSource(source uint64) *BulkFetch {
 	opts.Source = source
 	return opts
 }
 
-func (opts *BulkFetch) SetNext(next uint) *BulkFetch {
+func (opts *BulkFetch) SetNext(next uint64) *BulkFetch {
 	opts.Next = next
 	return opts
 }
+
