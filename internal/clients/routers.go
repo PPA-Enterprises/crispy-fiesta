@@ -10,4 +10,5 @@ func ClientRoutesRegister(router *gin.RouterGroup) {
 	router.PUT("/", update)
 	router.GET("/", getClients)
 	router.GET("/search/:query", fuzzyClientSearch)
+	router.POST("/", createClient)
 }
