@@ -24,8 +24,8 @@ type userModel struct {
 
 type userUpdateModel struct {
 	ID primitive.ObjectID `json:"_id,omitempty" bson:"_id,omitempty"`
-	Name string `json:"name" bson:"name"`
-	Email string `json:"email" bson:"email"`
+	Name string `json:"name" bson:"name,omitempty"`
+	Email string `json:"email" bson:"email,omitempty"`
 }
 
 func tryFromSignupUserCmd(data *signupUserCommand) (*userModel, *errors.ResponseError) {

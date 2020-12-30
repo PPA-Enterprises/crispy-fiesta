@@ -13,6 +13,6 @@ type loginUserCommand struct {
 
 type userUpdateCommand struct {
 	ID			string `json:"_id" binding:"required"`
-	Name		string `json:"name" binding:"required"`
-	Email		string `json:"email" binding:"required"`
+	Name		string `json:"name, omitempty"`
+	Email		string `json:"email, omitempty" binding:"required"`
 }
