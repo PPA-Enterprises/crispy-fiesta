@@ -2,7 +2,6 @@ package clients
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -205,7 +204,6 @@ func getClients(c *gin.Context) {
 		c.Abort(); return
 	}
 
-	fmt.Println(results)
 	if len(results) > 0 {
 		c.JSON(http.StatusOK,
 			gin.H{"success": true, "payload": results})

@@ -2,7 +2,6 @@ package clients
 
 import (
 	"bytes"
-	"fmt"
 	"context"
 	"internal/clients/types"
 	"internal/common/errors"
@@ -261,7 +260,6 @@ func fetch(ctx context.Context, fetchOpts *BulkFetch) ([]types.UnpopulatedClient
 	if err = cursor.All(ctx, &clients); err != nil {
 		return nil, errors.DatabaseError(err)
 	}
-	fmt.Println(clients)
 	return clients, nil
 }
 
