@@ -140,6 +140,7 @@ func fuzzyClientSearch(c *gin.Context) {
 		gin.H{"success": true, "payload": populateClients(ctx, results)})
 }
 
+// TODO: api/v1/clients?all=bool&sorted=bool&source=uint&next=uint
 func getLatestClients(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(c, 5*time.Second)
 	defer cancel()
