@@ -108,7 +108,7 @@ func update(c *gin.Context) {
 	}
 
 	updatedDoc, patchErr := updatePatch.patch(ctx, false); if patchErr != nil {
-		c.JSON(err.Code,
+		c.JSON(patchErr.Code,
 			gin.H{"success": false, "message": patchErr.Error()})
 		c.Abort()
 		return
