@@ -17,24 +17,21 @@ func getClientByPhone(c *gin.Context) {
 	if len(phone) <= 0 {
 		c.JSON(http.StatusBadRequest,
 			gin.H{"success": false, "message": "Provide an id"})
-		c.Abort()
-		return
+		c.Abort(); return
 	}
 
 	client := ClientByPhone(ctx, phone)
 	if client == nil {
 		c.JSON(http.StatusNotFound,
 			gin.H{"success": false, "message": "No client found"})
-		c.Abort()
-		return
+		c.Abort(); return
 	}
 
 	delivarableClient, err := client.Populate(ctx)
 	if err != nil {
 		c.JSON(err.Code,
 			gin.H{"success": false, "message": err.Error()})
-		c.Abort()
-		return
+		c.Abort(); return
 	}
 
 	c.JSON(http.StatusOK,
@@ -50,24 +47,21 @@ func getClientByID(c *gin.Context) {
 	if len(id) <= 0 {
 		c.JSON(http.StatusBadRequest,
 			gin.H{"success": false, "message": "Provide an id"})
-		c.Abort()
-		return
+		c.Abort(); return
 	}
 
 	client, err := clientByID(ctx, id)
 	if err != nil {
 		c.JSON(err.Code,
 			gin.H{"success": false, "message": err.Error()})
-		c.Abort()
-		return
+		c.Abort(); return
 	}
 
 	delivarableClient, err := client.Populate(ctx)
 	if err != nil {
 		c.JSON(err.Code,
 			gin.H{"success": false, "message": err.Error()})
-		c.Abort()
-		return
+		c.Abort(); return
 	}
 
 	c.JSON(http.StatusOK,
@@ -82,24 +76,21 @@ func update(c *gin.Context) {
 	if c.BindJSON(&data) != nil {
 		c.JSON(http.StatusNotAcceptable,
 			gin.H{"success": false, "message": "Provide relevant fields"})
-		c.Abort()
-		return
+		c.Abort(); return
 	}
 
 	update, err := tryFromUpdateClientCmd(&data)
 	if err != nil {
 		c.JSON(err.Code,
 			gin.H{"success": false, "message": err.Error()})
-		c.Abort()
-		return
+		c.Abort(); return
 	}
 
 	err = update.Put(ctx, false)
 	if err != nil {
 		c.JSON(err.Code,
 			gin.H{"success": false, "message": err.Error()})
-		c.Abort()
-		return
+		c.Abort(); return
 	}
 
 	c.JSON(http.StatusAccepted,
@@ -115,8 +106,7 @@ func fuzzyClientSearch(c *gin.Context) {
 	if len(query) <= 0 {
 		c.JSON(http.StatusBadRequest,
 			gin.H{"success": false, "message": "Provide a query"})
-		c.Abort()
-		return
+		c.Abort(); return
 	}
 
 	quantity := c.DefaultQuery("quantity", "100")
@@ -124,16 +114,14 @@ func fuzzyClientSearch(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusBadRequest,
 			gin.H{"success": false, "message": "Invalid Quantity"})
-		c.Abort()
-		return
+		c.Abort(); return
 	}
 
 	results, serachErr := fuzzySearch(ctx, query, iQuantity)
 	if serachErr != nil {
 		c.JSON(serachErr.Code,
 			gin.H{"success": false, "message": serachErr.Error()})
-		c.Abort()
-		return
+		c.Abort(); return
 	}
 
 	c.JSON(http.StatusOK,
