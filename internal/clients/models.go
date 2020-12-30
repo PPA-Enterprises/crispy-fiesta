@@ -25,12 +25,14 @@ type clientModel struct {
 type joblessClient struct {
 	Name  string               `json:"name" bson:"name"`
 	Phone string               `json:"phone" bson:"phone"`
+	Jobs  []primitive.ObjectID `json:"jobs" bson:"jobs"`
 }
 
 func fromCreateClientCmd(data *createClientCmd) *joblessClient {
 	return &joblessClient{
 		Name: data.Name,
 		Phone: data.Phone,
+		Jobs: make([]primitive.ObjectID, 0),
 	}
 }
 

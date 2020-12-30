@@ -31,4 +31,5 @@ type DeliverableClient struct {
 	ID primitive.ObjectID `json:"_id" bson:"_id,omitempty"`
 	Name string `json:"name" bson:"name"`
 	Phone string `json:"phone" bson:"phone"`
+	Jobs []jobTypes.Job `json:"jobs" bosn:"jobs"`
 }
