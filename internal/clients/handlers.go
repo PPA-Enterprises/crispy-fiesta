@@ -175,7 +175,7 @@ func fuzzyClientSearch(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK,
-		gin.H{"success": true, "payload": populateClients(ctx, results)})
+		gin.H{"success": true, "payload": results})
 }
 
 // TODO: api/v1/clients?all=bool&sort=bool&source=uint&next=uint
