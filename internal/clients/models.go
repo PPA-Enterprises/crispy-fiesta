@@ -174,10 +174,11 @@ func (self *clientModel) Populate(ctx context.Context) (*types.PopulatedClientMo
 }
 
 //TODO: fuzzy search for client
-func fuzzySearch(ctx context.Context, query string, quantity int) ([]clientModel, *errors.ResponseError) {
+func fuzzySearch(ctx context.Context, opts *FuzzySearch) ([]clientModel, *errors.ResponseError) {
 	coll := db.Connection().Use(db.DefaultDatabase, "clients")
 
-	filter := bson.D{{"name", primitive.Regex{Pattern: query, Options: "i"}}}
+	//filter := bson.D{{"name", primitive.Regex{Pattern: query, Options: "i"}}}
+	filter := bson.D{{}}
 
 	cursor, err := coll.Find(ctx, filter)
 	defer cursor.Close(ctx)

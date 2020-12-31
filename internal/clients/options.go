@@ -7,6 +7,22 @@ type BulkFetch struct {
 	Next uint64
 }
 
+type FuzzySearch struct {
+	Term string
+	Source uint64
+	Next uint64
+	Sort bool
+}
+
+func FuzzySearchOptions() *FuzzySearch {
+	return &FuzzySearch{
+		Term: "",
+		Source: 0,
+		Next: 10,
+		Sort: false,
+	}
+}
+
 func BulkFetchOptions() *BulkFetch {
 	return &BulkFetch{
 		All: false,
