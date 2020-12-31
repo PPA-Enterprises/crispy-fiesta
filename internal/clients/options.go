@@ -11,7 +11,6 @@ type FuzzySearch struct {
 	Term string
 	Source uint64
 	Next uint64
-	Sort bool
 }
 
 func FuzzySearchOptions() *FuzzySearch {
@@ -19,7 +18,6 @@ func FuzzySearchOptions() *FuzzySearch {
 		Term: "",
 		Source: 0,
 		Next: 10,
-		Sort: false,
 	}
 }
 

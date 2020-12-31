@@ -183,11 +183,10 @@ func fuzzySearch(ctx context.Context, opts *FuzzySearch) ([]types.UnpopulatedCli
 	SetSkip(int64(opts.Source)).
 	SetLimit(int64(opts.Next))
 
-	if opts.Sort {
-		findOptions.SetSort(bson.D{{"_id", -1}})
-	}
 
-	cursor, err := coll.Find(ctx, bson.D{{}}, findOptions)
+
+	filter := bson.D{{"name", primitive.Regex{Pattern: opts.Term, Options: "gi"}}}
+	cursor, err := coll.Find(ctx, filter, findOptions)
 	defer cursor.Close(ctx)
 
 	var clients []types.UnpopulatedClientModel

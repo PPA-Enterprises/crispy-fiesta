@@ -158,15 +158,6 @@ func fuzzyClientSearch(c *gin.Context) {
 	}
 	options.Next = iNext
 
-	sort := c.DefaultQuery("sort", "false")
-	bSort, err := strconv.ParseBool(sort); if err != nil {
-		c.JSON(http.StatusBadRequest,
-			gin.H{"success": false, "message": "Invalid sort Param"})
-		c.Abort(); return
-	}
-	options.Sort = bSort
-
-
 	results, serachErr := fuzzySearch(ctx, options)
 	if serachErr != nil {
 		c.JSON(serachErr.Code,
