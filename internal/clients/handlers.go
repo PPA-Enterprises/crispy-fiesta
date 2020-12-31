@@ -128,6 +128,7 @@ func update(c *gin.Context) {
 
 }
 
+//TODO: fuzzy search
 func fuzzyClientSearch(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(c, 5*time.Second)
 	defer cancel()
