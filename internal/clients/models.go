@@ -22,6 +22,37 @@ type clientModel struct {
 	Jobs  []primitive.ObjectID `json:"jobs" bson:"jobs"`
 }
 
+type newClient struct {
+	Name  string               `json:"name" bson:"name"`
+	Phone string               `json:"phone" bson:"phone"`
+	Jobs  []primitive.ObjectID `json:"jobs" bson:"jobs"`
+}
+
+//need this cuz of bug
+type joblessClient struct {
+	ID primitive.ObjectID	`json:"_id"`
+	Name string				`json:"name"`
+	Phone string			`json:"phone"`
+	Jobs []string			`json:"jobs"`
+}
+
+func fromCreateClientCmd(data *createClientCmd) *newClient {
+	return &newClient{
+		Name: data.Name,
+		Phone: data.Phone,
+		Jobs: make([]primitive.ObjectID, 0),
+	}
+}
+
+func emptyJobsClient(c *types.PopulatedClientModel) *joblessClient {
+	return &joblessClient {
+		ID: c.ID,
+		Name: c.Name,
+		Phone: c.Phone,
+		Jobs: make([]string, 0),
+	}
+}
+
 func tryFromUpdateClientCmd(data *updateClientCmd) (*clientModel, *errors.ResponseError) {
 	clientOID, err := primitive.ObjectIDFromHex(data.ID)
 	if err != nil {
@@ -34,6 +65,7 @@ func tryFromUpdateClientCmd(data *updateClientCmd) (*clientModel, *errors.Respon
 		Jobs:  normalize(data.Jobs),
 	}, nil
 }
+
 
 func normalize(j []jobTypes.Job) []primitive.ObjectID {
 	oids := make([]primitive.ObjectID, 0)
@@ -79,6 +111,20 @@ func (self *clientModel) AttatchJobID(oid primitive.ObjectID) {
 
 func (self *clientModel) create(ctx context.Context) (UID.ID, *errors.ResponseError) {
 	coll := db.Connection().Use(db.DefaultDatabase, "clients")
+	res, err := coll.InsertOne(ctx, self)
+	if err != nil {
+		return nil, errors.DatabaseError(err)
+	}
+	return UID.TryFromInterface(res.InsertedID)
+}
+
+func (self *newClient) createUniq(ctx context.Context) (UID.ID, *errors.ResponseError) {
+	coll := db.Connection().Use(db.DefaultDatabase, "clients")
+	exists := ClientByPhone(ctx, self.Phone)
+	if exists != nil {
+		return nil, errors.DoesNotExist()
+	}
+
 	res, err := coll.InsertOne(ctx, self)
 	if err != nil {
 		return nil, errors.DatabaseError(err)
@@ -172,21 +218,48 @@ func clientByID(ctx context.Context, id string) (*clientModel, *errors.ResponseE
 	return &foundClient, nil
 }
 
-func latest(ctx context.Context, quantity int64) ([]types.DeliverableClient, *errors.ResponseError) {
+func fetchAll(ctx context.Context, sort bool) ([]types.UnpopulatedClientModel, *errors.ResponseError) {
 	coll := db.Connection().Use(db.DefaultDatabase, "clients")
+	opts := options.Find()
 
-	findOptions := options.Find()
-	findOptions.SetLimit(quantity)
-	findOptions.SetSort(bson.D{{"_id", -1}})
-	//filter := bson.D{{"jobs", false}}
+	if sort {
+		opts.SetSort(bson.D{{"_id", -1}})
+	}
 
-	cursor, err := coll.Find(ctx, findOptions)
+	cursor, err := coll.Find(ctx, bson.D{{}}, opts)
 	defer cursor.Close(ctx)
+	var clients []types.UnpopulatedClientModel
 
-	var clients []types.DeliverableClient
 	if err = cursor.All(ctx, &clients); err != nil {
 		return nil, errors.DatabaseError(err)
 	}
 
 	return clients, nil
 }
+
+func fetch(ctx context.Context, fetchOpts *BulkFetch) ([]types.UnpopulatedClientModel, *errors.ResponseError) {
+	if fetchOpts.All {
+		return fetchAll(ctx, fetchOpts.Sort)
+	}
+
+	coll := db.Connection().Use(db.DefaultDatabase, "clients")
+
+	findOptions := options.
+	Find().
+	SetSkip(int64(fetchOpts.Source)).
+	SetLimit(int64(fetchOpts.Next))
+
+	if fetchOpts.Sort {
+		findOptions.SetSort(bson.D{{"_id", -1}})
+	}
+
+	cursor, err := coll.Find(ctx, bson.D{{}}, findOptions)
+	defer cursor.Close(ctx)
+
+	var clients []types.UnpopulatedClientModel
+	if err = cursor.All(ctx, &clients); err != nil {
+		return nil, errors.DatabaseError(err)
+	}
+	return clients, nil
+}
+

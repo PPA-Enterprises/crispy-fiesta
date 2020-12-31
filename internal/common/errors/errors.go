@@ -82,3 +82,10 @@ func DoesNotExist() *ResponseError {
 		reason: "Does Not exist",
 	}
 }
+
+func DeleteFailed() *ResponseError {
+	return &ResponseError{
+		Code: http.StatusNotFound,
+		reason: "Deletion Failed",
+	}
+}
