@@ -137,9 +137,6 @@ func fuzzyClientSearch(c *gin.Context) {
 	options := FuzzySearchOptions()
 
 	term := c.DefaultQuery("term", string(""))
-		c.JSON(http.StatusBadRequest,
-			gin.H{"success": false, "message": "Invalid term Param"})
-		c.Abort(); return
 	options.Term = term
 
 	source := c.DefaultQuery("source", "0")
