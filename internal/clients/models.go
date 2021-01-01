@@ -174,19 +174,22 @@ func (self *clientModel) Populate(ctx context.Context) (*types.PopulatedClientMo
 }
 
 //TODO: fuzzy search for client
+//https://github.com/mongodb/mongo-go-driver/blob/51421e413403fe3c9b0097147841f752421133e4/examples/documentation_examples/examples.go#L293
 func fuzzySearch(ctx context.Context, opts *FuzzySearch) ([]types.UnpopulatedClientModel, *errors.ResponseError) {
 	coll := db.Connection().Use(db.DefaultDatabase, "clients")
 
 	//filter := bson.D{{"name", primitive.Regex{Pattern: query, Options: "i"}}}
-	findOptions := options.
-	Find().
-	SetSkip(int64(opts.Source)).
-	SetLimit(int64(opts.Next))
+//	findOptions := options.
+//	Find()//.
+	//SetSkip(int64(opts.Source)).
+	//SetLimit(int64(opts.Next))
 
-
-
-	filter := bson.D{{"name", primitive.Regex{Pattern: opts.Term, Options: "gi"}}}
-	cursor, err := coll.Find(ctx, filter, findOptions)
+	//pattern := "/asdf/"
+	//filter := bson.D{{"name", bson.D{{"$regex", primitive.Regex{Pattern: "/"+opts.Term+"/"}}}}}
+	//filter := bson.M{"name":bson.M{"$regex":pattern}}
+	//filter := bson.D{{"name", primitive.Regex{Pattern:"^asdf$", Options:""}}}
+	filter := bson.D{{"name", "asdf"}}
+	cursor, err := coll.Find(ctx, filter)//, findOptions)
 	defer cursor.Close(ctx)
 
 	var clients []types.UnpopulatedClientModel
