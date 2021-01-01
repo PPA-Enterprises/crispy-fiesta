@@ -162,6 +162,13 @@ func fuzzyClientSearch(c *gin.Context) {
 		c.Abort(); return
 	}
 
+	if len(results) <= 0 {
+		empty := make([]string, 0)
+		c.JSON(http.StatusOK,
+			gin.H{"success": true, "payload": empty})
+		c.Abort(); return
+	}
+
 	c.JSON(http.StatusOK,
 		gin.H{"success": true, "payload": results})
 }
