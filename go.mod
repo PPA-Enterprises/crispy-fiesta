@@ -7,6 +7,7 @@ require (
 	github.com/gin-contrib/cors v1.3.1
 	github.com/gin-gonic/gin v1.6.3
 	github.com/kisielk/errcheck v1.2.0 // indirect
+	github.com/mxschmitt/golang-combinations v1.1.0 // indirect
 	go.mongodb.org/mongo-driver v1.3.5
 	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9
 	internal/clients v1.0.0

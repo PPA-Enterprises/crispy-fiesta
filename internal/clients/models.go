@@ -3,6 +3,8 @@ package clients
 import (
 	"bytes"
 	"context"
+	//"strings"
+	//"fmt"
 	"internal/clients/types"
 	"internal/common/errors"
 	"internal/db"
@@ -13,6 +15,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	//combinations "github.com/mxschmitt/golang-combinations"
 )
 
 type clientModel struct {
@@ -173,22 +176,50 @@ func (self *clientModel) Populate(ctx context.Context) (*types.PopulatedClientMo
 	}, nil
 }
 
-//TODO: fuzzy search for client
-func fuzzySearch(ctx context.Context, query string, quantity int) ([]clientModel, *errors.ResponseError) {
+/*
+//https://github.com/mongodb/mongo-go-driver/blob/51421e413403fe3c9b0097147841f752421133e4/examples/documentation_examples/examples.go#L293
+func fuzzySearch(ctx context.Context, opts *FuzzySearch) ([]types.UnpopulatedClientModel, *errors.ResponseError) {
 	coll := db.Connection().Use(db.DefaultDatabase, "clients")
 
-	filter := bson.D{{"name", primitive.Regex{Pattern: query, Options: "i"}}}
+	findOptions := options.
+	Find().
+	SetSkip(int64(opts.Source)).
+	SetLimit(int64(opts.Next))
 
-	cursor, err := coll.Find(ctx, filter)
+	regexQuery := powersetRegex(opts.Term)
+	fmt.Println(regexQuery)
+	filter := bson.D{{"name", primitive.Regex{Pattern: regexQuery, Options:"i"}}}
+	cursor, err := coll.Find(ctx, filter, findOptions)
 	defer cursor.Close(ctx)
 
-	var clients []clientModel
+	var clients []types.UnpopulatedClientModel
 	if err = cursor.All(ctx, &clients); err != nil {
 		return nil, errors.DatabaseError(err)
 	}
 	return clients, nil
 }
 
+func powersetRegex(term string) string {
+	var termArr = make([]string, 0, len(term))
+	termArr = append(termArr, "..")
+	for i:=0; i<len(term); i++ {
+		termArr = append(termArr, string(term[i]))
+	}
+	powerset := combinations.All(termArr)
+	powerset = powerset[1:]
+
+	regex := "^" + term + "$" + "|"
+	regex = regex + "("
+	for i:=len(powerset)-1; i>=0; i-- {
+		regexTerm := strings.Join(powerset[i], "")
+		regexTerm = "^" + regexTerm + "$"
+		regex = regex + "(" + regexTerm + ")" //+ "|"
+	}
+	regex = regex + "){1}" //+ "|"
+
+	return regex
+}
+*/
 func populateClients(ctx context.Context, clients []clientModel) []types.PopulatedClientModel {
 
 	populatedClients := make([]types.PopulatedClientModel, 0, len(clients))
