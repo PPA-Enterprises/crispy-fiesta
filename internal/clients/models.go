@@ -201,7 +201,7 @@ func fuzzySearch(ctx context.Context, opts *FuzzySearch) ([]types.UnpopulatedCli
 
 func powersetRegex(term string) string {
 	var termArr = make([]string, 0, len(term))
-	termArr = append(termArr, ".")
+	termArr = append(termArr, "..")
 	for i:=0; i<len(term); i++ {
 		termArr = append(termArr, string(term[i]))
 	}
