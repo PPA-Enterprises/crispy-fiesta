@@ -209,12 +209,30 @@ func powersetRegex(term string) string {
 	powerset = powerset[1:]
 
 	regex := "^" + term + "$" + "|"
-	for i:=0; i<len(powerset); i++ {
+	regex = regex + "("
+	for i:=len(powerset)-1; i>=0; i-- {
+		regexTerm := strings.Join(powerset[i], "")
+		regexTerm = "^" + regexTerm + "$"
+		regex = regex + "(" + regexTerm + ")" //+ "|"
+	}
+	regex = regex + "){1}" //+ "|"
+
+	/*for i:=len(powerset)-1; i>=0; i-- {
 		regexTerm := strings.Join(powerset[i], "")
 		regexTerm = "^" + regexTerm + "$"
 		regex = regex + regexTerm + "|"
+	}*/
+
+	/*termArr = termArr[1:]
+	powerset = combinations.All(termArr)
+	regex = regex + "("
+	for i:=0; i<len(powerset); i++ {
+		regexTerm := strings.Join(powerset[i], "")
+		regex = regex + "(" + regexTerm + ")" + "|"
 	}
-	return regex + term
+	regex = strings.TrimSuffix(regex, "|")
+	return regex + "){1}"*/
+	return regex
 }
 
 func populateClients(ctx context.Context, clients []clientModel) []types.PopulatedClientModel {
