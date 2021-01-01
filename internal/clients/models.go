@@ -3,8 +3,8 @@ package clients
 import (
 	"bytes"
 	"context"
-	"strings"
-	"fmt"
+	//"strings"
+	//"fmt"
 	"internal/clients/types"
 	"internal/common/errors"
 	"internal/db"
@@ -15,7 +15,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	combinations "github.com/mxschmitt/golang-combinations"
+	//combinations "github.com/mxschmitt/golang-combinations"
 )
 
 type clientModel struct {
@@ -176,7 +176,7 @@ func (self *clientModel) Populate(ctx context.Context) (*types.PopulatedClientMo
 	}, nil
 }
 
-//TODO: fuzzy search for client
+/*
 //https://github.com/mongodb/mongo-go-driver/blob/51421e413403fe3c9b0097147841f752421133e4/examples/documentation_examples/examples.go#L293
 func fuzzySearch(ctx context.Context, opts *FuzzySearch) ([]types.UnpopulatedClientModel, *errors.ResponseError) {
 	coll := db.Connection().Use(db.DefaultDatabase, "clients")
@@ -217,24 +217,9 @@ func powersetRegex(term string) string {
 	}
 	regex = regex + "){1}" //+ "|"
 
-	/*for i:=len(powerset)-1; i>=0; i-- {
-		regexTerm := strings.Join(powerset[i], "")
-		regexTerm = "^" + regexTerm + "$"
-		regex = regex + regexTerm + "|"
-	}*/
-
-	/*termArr = termArr[1:]
-	powerset = combinations.All(termArr)
-	regex = regex + "("
-	for i:=0; i<len(powerset); i++ {
-		regexTerm := strings.Join(powerset[i], "")
-		regex = regex + "(" + regexTerm + ")" + "|"
-	}
-	regex = strings.TrimSuffix(regex, "|")
-	return regex + "){1}"*/
 	return regex
 }
-
+*/
 func populateClients(ctx context.Context, clients []clientModel) []types.PopulatedClientModel {
 
 	populatedClients := make([]types.PopulatedClientModel, 0, len(clients))
