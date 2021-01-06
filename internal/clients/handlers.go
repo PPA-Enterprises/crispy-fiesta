@@ -122,7 +122,7 @@ func update(c *gin.Context) {
 		c.Abort(); return
 	}
 
-	updated, err := update.Patch(ctx, false)
+	updated, err := update.patch(ctx, false)
 	if err != nil {
 		c.JSON(err.Code,
 			gin.H{"success": false, "message": err.Error()})

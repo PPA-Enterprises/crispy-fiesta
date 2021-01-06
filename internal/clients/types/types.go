@@ -23,7 +23,7 @@ type UnpopulatedClientModel struct {
 
 type Client interface {
 	AttatchJobID(primitive.ObjectID)
-	Patch(ctx context.Context, upsert bool) (*PopulatedClientModel, *errors.ResponseError)
+	Put(ctx context.Context, upsert bool) (*errors.ResponseError)
 	Populate(ctx context.Context) (*PopulatedClientModel, *errors.ResponseError)
 }
 

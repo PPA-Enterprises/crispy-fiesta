@@ -13,7 +13,7 @@ import (
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	//"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	//combinations "github.com/mxschmitt/golang-combinations"
 )
@@ -132,7 +132,7 @@ func (self *newClient) createUniq(ctx context.Context) (UID.ID, *errors.Response
 	}
 	return UID.TryFromInterface(res.InsertedID)
 }
-/*
+
 func (self *clientModel) Put(ctx context.Context, upsert bool) *errors.ResponseError {
 	coll := db.Connection().Use(db.DefaultDatabase, "clients")
 	opts := options.FindOneAndReplace()
@@ -151,9 +151,9 @@ func (self *clientModel) Put(ctx context.Context, upsert bool) *errors.ResponseE
 		return errors.PutFailed(err)
 	}
 	return nil
-}*/
+}
 
-func (self *clientModel) Patch(ctx context.Context, upsert bool) (*types.PopulatedClientModel, *errors.ResponseError) {
+func (self *clientModel) patch(ctx context.Context, upsert bool) (*types.PopulatedClientModel, *errors.ResponseError) {
 	coll := db.Connection().Use(db.DefaultDatabase, "clients")
 	opts := options.FindOneAndUpdate().SetUpsert(upsert)
 

@@ -34,8 +34,8 @@ func fromSubmitJobCmd(data *submitJobCmd) *jobModel {
 	}
 }
 
-func tryFromUpdateJobCmd(data *updateJobCmd) (*jobModel, *errors.ResponseError) {
-	oid, err := primitive.ObjectIDFromHex(data.ID); if err != nil {
+func tryFromUpdateJobCmd(data *updateJobCmd, id string) (*jobModel, *errors.ResponseError) {
+	oid, err := primitive.ObjectIDFromHex(id); if err != nil {
 		return nil, errors.InvalidOID()
 	}
 
@@ -109,7 +109,7 @@ func (self *jobModel) create(ctx context.Context) (UID.ID, *errors.ResponseError
 	client.AttatchJobID(self.ID)
 
 	//save job and client. Need Put for both to remain idempotent
-	_, err := client.Patch(ctx, true); if err != nil {
+	err := client.Put(ctx, true); if err != nil {
 		return nil, err
 	}
 
@@ -119,7 +119,7 @@ func (self *jobModel) create(ctx context.Context) (UID.ID, *errors.ResponseError
 
 	return UID.FromOid(self.ID), nil
 }
-/*
+
 func (self *jobModel) put(ctx context.Context, upsert bool) *errors.ResponseError {
 	coll := db.Connection().Use(db.DefaultDatabase, "jobs")
 	opts := options.FindOneAndReplace()
@@ -138,9 +138,9 @@ func (self *jobModel) put(ctx context.Context, upsert bool) *errors.ResponseErro
 		return errors.PutFailed(err)
 	}
 	return nil
-}*/
+}
 
-func (self *jobModel) Patch(ctx context.Context, upsert bool) (*jobModel, errors.ResponseError) {
+func (self *jobModel) Patch(ctx context.Context, upsert bool) (*jobModel, *errors.ResponseError) {
 	coll := db.Connection().Use(db.DefaultDatabase, "jobs")
 	opts := options.FindOneAndUpdate().SetUpsert(upsert)
 

@@ -41,7 +41,14 @@ func update(c *gin.Context) {
 		c.Abort(); return
 	}
 
-	update, err := tryFromUpdateJobCmd(&data); if err != nil {
+	id := c.Param("id")
+	if len(id) <= 0 {
+		c.JSON(http.StatusBadRequest,
+		gin.H{"success": false, "message":"Provide and id"})
+		c.Abort(); return
+	}
+
+	update, err := tryFromUpdateJobCmd(&data, id); if err != nil {
 		c.JSON(err.Code,
 			gin.H{"success": false, "message": err.Error()})
 		c.Abort(); return
