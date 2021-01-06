@@ -13,7 +13,7 @@ import (
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
+	//"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	//combinations "github.com/mxschmitt/golang-combinations"
 )
@@ -153,13 +153,13 @@ func (self *clientModel) Put(ctx context.Context, upsert bool) *errors.ResponseE
 	return nil
 }*/
 
-func (self *clientModel) patch(ctx context.Context, upsert bool) (*types.DeliverableClient, *errors.ResponseError) {
+func (self *clientModel) Patch(ctx context.Context, upsert bool) (*types.PopulatedClientModel, *errors.ResponseError) {
 	coll := db.Connection().Use(db.DefaultDatabase, "clients")
 	opts := options.FindOneAndUpdate().SetUpsert(upsert)
 
 	filter := bson.D{{"_id", self.ID}}
 	update := bson.D{{"$set", self}}
-	var updatedDocument types.DeliverableClient
+	var updatedDocument clientModel
 	err := coll.FindOneAndUpdate(ctx, filter, update, opts).Decode(&updatedDocument)
 
 	if err != nil {
@@ -170,7 +170,7 @@ func (self *clientModel) patch(ctx context.Context, upsert bool) (*types.Deliver
 	if err != nil {
 		return nil, errors.DatabaseError(err)
 	}
-	return &updatedDocument, nil
+	return updatedDocument.Populate(ctx)
 }
 
 func (self *clientModel) Populate(ctx context.Context) (*types.PopulatedClientModel, *errors.ResponseError) {

@@ -1,8 +1,5 @@
 package clients
 
-import(
-	"internal/jobs/types"
-)
 
 type updateClientCmd struct {
 	Name string `json:"name", omitempty`

@@ -109,14 +109,20 @@ func update(c *gin.Context) {
 		c.Abort(); return
 	}
 
-	update, err := tryFromUpdateClientCmd(&data)
-	if err != nil {
+	id := c.Param("id")
+	if len(id) <= 0 {
+		c.JSON(http.StatusBadRequest,
+		gin.H{"success": false, "message": "Provide an id"})
+		c.Abort(); return
+	}
+
+	update, err := tryFromUpdateClientCmd(&data, id); if err != nil {
 		c.JSON(err.Code,
 			gin.H{"success": false, "message": err.Error()})
 		c.Abort(); return
 	}
 
-	err = update.Put(ctx, false)
+	updated, err := update.Patch(ctx, false)
 	if err != nil {
 		c.JSON(err.Code,
 			gin.H{"success": false, "message": err.Error()})
@@ -124,7 +130,7 @@ func update(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusAccepted,
-		gin.H{"success": true, "message": "Job Updated"})
+	gin.H{"success": true, "payload": updated, "message": "Job Updated"})
 
 }
 /*
