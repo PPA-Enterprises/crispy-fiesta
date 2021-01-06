@@ -25,6 +25,12 @@ type clientModel struct {
 	Jobs  []primitive.ObjectID `json:"jobs" bson:"jobs"`
 }
 
+type updateableClient struct {
+	ID    primitive.ObjectID   `json:"_id,omitempty" bson:"_id,omitempty"`
+	Name  string               `json:"name" bson:"name,omitempty"`
+	Phone string               `json:"phone" bson:"phone,omitempty"`
+}
+
 type newClient struct {
 	Name  string               `json:"name" bson:"name"`
 	Phone string               `json:"phone" bson:"phone"`
@@ -56,11 +62,11 @@ func emptyJobsClient(c *types.PopulatedClientModel) *joblessClient {
 	}
 }
 
-func tryFromUpdateClientCmd(data *updateClientCmd, id string) (*clientModel, *errors.ResponseError) {
+func tryFromUpdateClientCmd(data *updateClientCmd, id string) (*updateableClient, *errors.ResponseError) {
 	clientOID, err := primitive.ObjectIDFromHex(id); if err != nil {
 		return nil, errors.InvalidOID()
 	}
-	return &clientModel{
+	return &updateableClient{
 		ID:    clientOID,
 		Name:  data.Name,
 		Phone: data.Phone,
@@ -153,7 +159,7 @@ func (self *clientModel) Put(ctx context.Context, upsert bool) *errors.ResponseE
 	return nil
 }
 
-func (self *clientModel) patch(ctx context.Context, upsert bool) (*types.PopulatedClientModel, *errors.ResponseError) {
+func (self *updateableClient) patch(ctx context.Context, upsert bool) (*types.PopulatedClientModel, *errors.ResponseError) {
 	coll := db.Connection().Use(db.DefaultDatabase, "clients")
 	opts := options.FindOneAndUpdate().SetUpsert(upsert)
 

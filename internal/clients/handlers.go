@@ -130,7 +130,7 @@ func update(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusAccepted,
-	gin.H{"success": true, "payload": updated, "message": "Job Updated"})
+	gin.H{"success": true, "payload": updated, "message": "Client Updated"})
 
 }
 /*
