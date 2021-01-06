@@ -119,7 +119,7 @@ func (self *jobModel) create(ctx context.Context) (UID.ID, *errors.ResponseError
 
 	return UID.FromOid(self.ID), nil
 }
-
+/*
 func (self *jobModel) put(ctx context.Context, upsert bool) *errors.ResponseError {
 	coll := db.Connection().Use(db.DefaultDatabase, "jobs")
 	opts := options.FindOneAndReplace()
@@ -138,6 +138,26 @@ func (self *jobModel) put(ctx context.Context, upsert bool) *errors.ResponseErro
 		return errors.PutFailed(err)
 	}
 	return nil
+}*/
+
+func (self *jobModel) Patch(ctx context.Context, upsert bool) (*jobModel, errors.ResponseError) {
+	coll := db.Connection().Use(db.DefaultDatabase, "jobs")
+	opts := options.FindOneAndUpdate().SetUpsert(upsert)
+
+	filter := bson.D{{"_id", self.ID}}
+	update := bson.D{{"$set", self}}
+	var updatedDocument jobModel
+
+	err := coll.FindOneAndUpdate(ctx, filter, update, opts).Decode(&updatedDocument)
+	if err != nil {
+		return nil, errors.PutFailed(err)
+	}
+
+	err = coll.FindOne(ctx, filter).Decode(&updatedDocument)
+	if err != nil {
+		return nil, errors.DatabaseError(err)
+	}
+	return &updatedDocument, nil
 }
 
 func jobByID(ctx context.Context, id string) (*jobModel, *errors.ResponseError) {
