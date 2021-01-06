@@ -9,7 +9,6 @@ type submitJobCmd struct {
 }
 
 type updateJobCmd struct {
-	ID              string `json:"_id" binding:"required"`
 	ClientName      string `json:"client_name" omitempty`
 	ClientPhone     string `json:"client_phone" omitempty`
 	CarInfo         string `json:"car_info" omitempty`

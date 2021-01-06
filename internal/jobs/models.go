@@ -23,6 +23,14 @@ type jobModel struct {
 	Notes           string             `json:"notes"bson:"notes"`
 }
 
+type updateableJob struct {
+	ID              primitive.ObjectID `json:"_id,omitempty"bson:"_id,omitempty"`
+	ClientName      string             `json:"client_info"bson:"client_info,omitempty"`
+	ClientPhone		string             `json:"client_phone"bson:"client_phone,omitempty"`
+	CarInfo         string             `json:"car_info"bson:"car_info,omitempty"`
+	AppointmentInfo string             `json:"appointment_info"bson:"appointment_info,omitempty"`
+	Notes           string             `json:"notes"bson:"notes,omitempty"`
+}
 func fromSubmitJobCmd(data *submitJobCmd) *jobModel {
 	return &jobModel{
 		ID: primitive.NewObjectID(),
@@ -34,12 +42,12 @@ func fromSubmitJobCmd(data *submitJobCmd) *jobModel {
 	}
 }
 
-func tryFromUpdateJobCmd(data *updateJobCmd, id string) (*jobModel, *errors.ResponseError) {
+func tryFromUpdateJobCmd(data *updateJobCmd, id string) (*updateableJob, *errors.ResponseError) {
 	oid, err := primitive.ObjectIDFromHex(id); if err != nil {
 		return nil, errors.InvalidOID()
 	}
 
-	return &jobModel{
+	return &updateableJob{
 		ID: oid,
 		ClientName: data.ClientName,
 		ClientPhone: data.ClientPhone,
@@ -140,7 +148,7 @@ func (self *jobModel) put(ctx context.Context, upsert bool) *errors.ResponseErro
 	return nil
 }
 
-func (self *jobModel) Patch(ctx context.Context, upsert bool) (*jobModel, *errors.ResponseError) {
+func (self *updateableJob) Patch(ctx context.Context, upsert bool) (*jobModel, *errors.ResponseError) {
 	coll := db.Connection().Use(db.DefaultDatabase, "jobs")
 	opts := options.FindOneAndUpdate().SetUpsert(upsert)
 
