@@ -109,7 +109,7 @@ func (self *jobModel) create(ctx context.Context) (UID.ID, *errors.ResponseError
 	client.AttatchJobID(self.ID)
 
 	//save job and client. Need Put for both to remain idempotent
-	err := client.Put(ctx, true); if err != nil {
+	_, err := client.Patch(ctx, true); if err != nil {
 		return nil, err
 	}
 
