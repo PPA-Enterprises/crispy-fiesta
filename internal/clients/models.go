@@ -25,6 +25,12 @@ type clientModel struct {
 	Jobs  []primitive.ObjectID `json:"jobs" bson:"jobs"`
 }
 
+type updateableClient struct {
+	ID    primitive.ObjectID   `json:"_id,omitempty" bson:"_id,omitempty"`
+	Name  string               `json:"name" bson:"name,omitempty"`
+	Phone string               `json:"phone" bson:"phone,omitempty"`
+}
+
 type newClient struct {
 	Name  string               `json:"name" bson:"name"`
 	Phone string               `json:"phone" bson:"phone"`
@@ -56,16 +62,14 @@ func emptyJobsClient(c *types.PopulatedClientModel) *joblessClient {
 	}
 }
 
-func tryFromUpdateClientCmd(data *updateClientCmd) (*clientModel, *errors.ResponseError) {
-	clientOID, err := primitive.ObjectIDFromHex(data.ID)
-	if err != nil {
+func tryFromUpdateClientCmd(data *updateClientCmd, id string) (*updateableClient, *errors.ResponseError) {
+	clientOID, err := primitive.ObjectIDFromHex(id); if err != nil {
 		return nil, errors.InvalidOID()
 	}
-	return &clientModel{
+	return &updateableClient{
 		ID:    clientOID,
 		Name:  data.Name,
 		Phone: data.Phone,
-		Jobs:  normalize(data.Jobs),
 	}, nil
 }
 
@@ -153,6 +157,26 @@ func (self *clientModel) Put(ctx context.Context, upsert bool) *errors.ResponseE
 		return errors.PutFailed(err)
 	}
 	return nil
+}
+
+func (self *updateableClient) patch(ctx context.Context, upsert bool) (*types.PopulatedClientModel, *errors.ResponseError) {
+	coll := db.Connection().Use(db.DefaultDatabase, "clients")
+	opts := options.FindOneAndUpdate().SetUpsert(upsert)
+
+	filter := bson.D{{"_id", self.ID}}
+	update := bson.D{{"$set", self}}
+	var updatedDocument clientModel
+	err := coll.FindOneAndUpdate(ctx, filter, update, opts).Decode(&updatedDocument)
+
+	if err != nil {
+		return nil, errors.PutFailed(err)
+	}
+
+	err = coll.FindOne(ctx, filter).Decode(&updatedDocument)
+	if err != nil {
+		return nil, errors.DatabaseError(err)
+	}
+	return updatedDocument.Populate(ctx)
 }
 
 func (self *clientModel) Populate(ctx context.Context) (*types.PopulatedClientModel, *errors.ResponseError) {
