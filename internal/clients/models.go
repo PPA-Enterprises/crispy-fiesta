@@ -134,7 +134,7 @@ func (self *newClient) createUniq(ctx context.Context) (UID.ID, *errors.Response
 	}
 	return UID.TryFromInterface(res.InsertedID)
 }
-
+/*
 func (self *clientModel) Put(ctx context.Context, upsert bool) *errors.ResponseError {
 	coll := db.Connection().Use(db.DefaultDatabase, "clients")
 	opts := options.FindOneAndReplace()
@@ -153,6 +153,26 @@ func (self *clientModel) Put(ctx context.Context, upsert bool) *errors.ResponseE
 		return errors.PutFailed(err)
 	}
 	return nil
+}*/
+
+func (self *clientModel) patch(ctx context.Context, upsert bool) (*types.DeliverableClient, *errors.ResponseError) {
+	coll := db.Connection().Use(db.DefaultDatabase, "clients")
+	opts := options.FindOneAndUpdate().SetUpsert(upsert)
+
+	filter := bson.D{{"_id", self.ID}}
+	update := bson.D{{"$set", self}}
+	var updatedDocument types.DeliverableClient
+	err := coll.FindOneAndUpdate(ctx, filter, update, opts).Decode(&updatedDocument)
+
+	if err != nil {
+		return nil, errors.PutFailed(err)
+	}
+
+	err = coll.FindOne(ctx, filter).Decode(&updatedDocument)
+	if err != nil {
+		return nil, errors.DatabaseError(err)
+	}
+	return &updatedDocument, nil
 }
 
 func (self *clientModel) Populate(ctx context.Context) (*types.PopulatedClientModel, *errors.ResponseError) {
