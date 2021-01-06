@@ -6,6 +6,6 @@ import(
 
 func JobRoutesRegister(router *gin.RouterGroup) {
 	router.POST("/", submitJob)
-	router.PUT("/", update)
+	router.PATCH("/:id", update)
 	router.GET("/:id", getJobByID)
 }

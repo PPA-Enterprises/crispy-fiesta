@@ -38,26 +38,30 @@ func update(c *gin.Context) {
 	if c.BindJSON(&data) != nil {
 		c.JSON(http.StatusNotAcceptable,
 		gin.H{"success": false, "message": "Provide relevant fields"})
-		c.Abort()
-		return
+		c.Abort(); return
 	}
 
-	update, err := tryFromUpdateJobCmd(&data); if err != nil {
-		c.JSON(err.Code,
-			gin.H{"success": false, "message": err.Error()})
-		c.Abort()
-		return
+	id := c.Param("id")
+	if len(id) <= 0 {
+		c.JSON(http.StatusBadRequest,
+		gin.H{"success": false, "message":"Provide and id"})
+		c.Abort(); return
 	}
 
-	err = update.put(ctx, false); if err != nil {
+	update, err := tryFromUpdateJobCmd(&data, id); if err != nil {
 		c.JSON(err.Code,
 			gin.H{"success": false, "message": err.Error()})
-		c.Abort()
-		return
+		c.Abort(); return
+	}
+
+	updated, err := update.Patch(ctx, false); if err != nil {
+		c.JSON(err.Code,
+			gin.H{"success": false, "message": err.Error()})
+		c.Abort(); return
 	}
 
 	c.JSON(http.StatusAccepted,
-		gin.H{"success": true, "message": "Job Updated"})
+	gin.H{"success": true, "payload": updated, "message": "Job Updated"})
 }
 
 func getJobByID(c *gin.Context) {
