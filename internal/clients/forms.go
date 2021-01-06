@@ -5,10 +5,8 @@ import(
 )
 
 type updateClientCmd struct {
-	ID string `json:"_id" binding:"required"`
-	Name string `json:"name" binding:"required"`
-	Phone string `json:"phone" binding:"required"`
-	Jobs []types.Job `json:"jobs" binding:"required"`
+	Name string `json:"name", omitempty`
+	Phone string `json:"phone", omitempty`
 }
 
 type createClientCmd struct {

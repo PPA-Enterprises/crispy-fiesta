@@ -56,16 +56,14 @@ func emptyJobsClient(c *types.PopulatedClientModel) *joblessClient {
 	}
 }
 
-func tryFromUpdateClientCmd(data *updateClientCmd) (*clientModel, *errors.ResponseError) {
-	clientOID, err := primitive.ObjectIDFromHex(data.ID)
-	if err != nil {
+func tryFromUpdateClientCmd(data *updateClientCmd, id string) (*clientModel, *errors.ResponseError) {
+	clientOID, err := primitive.ObjectIDFromHex(id); if err != nil {
 		return nil, errors.InvalidOID()
 	}
 	return &clientModel{
 		ID:    clientOID,
 		Name:  data.Name,
 		Phone: data.Phone,
-		Jobs:  normalize(data.Jobs),
 	}, nil
 }
 
