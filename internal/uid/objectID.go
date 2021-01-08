@@ -6,6 +6,7 @@ import (
 
 type ID interface {
 	String() string
+	Oid() primitive.ObjectID
 }
 
 type uid struct {
@@ -14,6 +15,10 @@ type uid struct {
 
 func (self *uid) String() string {
 	return self.objectID.Hex()
+}
+
+func (self *uid) Oid() primitive.ObjectID {
+	return self.objectID
 }
 
 func TryFromInterface(id interface{}) (ID, *errors.ResponseError) {
