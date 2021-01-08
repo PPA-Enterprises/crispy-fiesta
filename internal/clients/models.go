@@ -3,8 +3,6 @@ package clients
 import (
 	"bytes"
 	"context"
-	//"strings"
-	//"fmt"
 	"internal/clients/types"
 	"internal/common/errors"
 	"internal/db"
@@ -15,7 +13,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	//combinations "github.com/mxschmitt/golang-combinations"
 )
 
 type clientModel struct {
@@ -23,72 +20,6 @@ type clientModel struct {
 	Name  string               `json:"name" bson:"name"`
 	Phone string               `json:"phone" bson:"phone"`
 	Jobs  []primitive.ObjectID `json:"jobs" bson:"jobs"`
-}
-
-type updateableClient struct {
-	ID    primitive.ObjectID   `json:"_id,omitempty" bson:"_id,omitempty"`
-	Name  string               `json:"name" bson:"name,omitempty"`
-	Phone string               `json:"phone" bson:"phone,omitempty"`
-}
-
-type newClient struct {
-	Name  string               `json:"name" bson:"name"`
-	Phone string               `json:"phone" bson:"phone"`
-	Jobs  []primitive.ObjectID `json:"jobs" bson:"jobs"`
-}
-
-//need this cuz of bug
-type joblessClient struct {
-	ID primitive.ObjectID	`json:"_id"`
-	Name string				`json:"name"`
-	Phone string			`json:"phone"`
-	Jobs []string			`json:"jobs"`
-}
-
-func fromCreateClientCmd(data *createClientCmd) *newClient {
-	return &newClient{
-		Name: data.Name,
-		Phone: data.Phone,
-		Jobs: make([]primitive.ObjectID, 0),
-	}
-}
-
-func emptyJobsClient(c *types.PopulatedClientModel) *joblessClient {
-	return &joblessClient {
-		ID: c.ID,
-		Name: c.Name,
-		Phone: c.Phone,
-		Jobs: make([]string, 0),
-	}
-}
-
-func tryFromUpdateClientCmd(data *updateClientCmd, id string) (*updateableClient, *errors.ResponseError) {
-	clientOID, err := primitive.ObjectIDFromHex(id); if err != nil {
-		return nil, errors.InvalidOID()
-	}
-	return &updateableClient{
-		ID:    clientOID,
-		Name:  data.Name,
-		Phone: data.Phone,
-	}, nil
-}
-
-
-func normalize(j []jobTypes.Job) []primitive.ObjectID {
-	oids := make([]primitive.ObjectID, 0)
-	for _, job := range j {
-		oids = append(oids, job.ID)
-	}
-	return oids
-}
-
-func NewClient(name, phone string) types.Client {
-	return &clientModel{
-		ID:    primitive.NewObjectID(),
-		Name:  name,
-		Phone: phone,
-		Jobs:  []primitive.ObjectID{},
-	}
 }
 
 func ClientByPhone(ctx context.Context, phone string) types.Client {
@@ -125,20 +56,6 @@ func (self *clientModel) create(ctx context.Context) (UID.ID, *errors.ResponseEr
 	return UID.TryFromInterface(res.InsertedID)
 }
 
-func (self *newClient) createUniq(ctx context.Context) (UID.ID, *errors.ResponseError) {
-	coll := db.Connection().Use(db.DefaultDatabase, "clients")
-	exists := ClientByPhone(ctx, self.Phone)
-	if exists != nil {
-		return nil, errors.DoesNotExist()
-	}
-
-	res, err := coll.InsertOne(ctx, self)
-	if err != nil {
-		return nil, errors.DatabaseError(err)
-	}
-	return UID.TryFromInterface(res.InsertedID)
-}
-
 func (self *clientModel) Put(ctx context.Context, upsert bool) *errors.ResponseError {
 	coll := db.Connection().Use(db.DefaultDatabase, "clients")
 	opts := options.FindOneAndReplace()
@@ -157,26 +74,6 @@ func (self *clientModel) Put(ctx context.Context, upsert bool) *errors.ResponseE
 		return errors.PutFailed(err)
 	}
 	return nil
-}
-
-func (self *updateableClient) patch(ctx context.Context, upsert bool) (*types.PopulatedClientModel, *errors.ResponseError) {
-	coll := db.Connection().Use(db.DefaultDatabase, "clients")
-	opts := options.FindOneAndUpdate().SetUpsert(upsert)
-
-	filter := bson.D{{"_id", self.ID}}
-	update := bson.D{{"$set", self}}
-	var updatedDocument clientModel
-	err := coll.FindOneAndUpdate(ctx, filter, update, opts).Decode(&updatedDocument)
-
-	if err != nil {
-		return nil, errors.PutFailed(err)
-	}
-
-	err = coll.FindOne(ctx, filter).Decode(&updatedDocument)
-	if err != nil {
-		return nil, errors.DatabaseError(err)
-	}
-	return updatedDocument.Populate(ctx)
 }
 
 func (self *clientModel) Populate(ctx context.Context) (*types.PopulatedClientModel, *errors.ResponseError) {
@@ -244,18 +141,6 @@ func powersetRegex(term string) string {
 	return regex
 }
 */
-func populateClients(ctx context.Context, clients []clientModel) []types.PopulatedClientModel {
-
-	populatedClients := make([]types.PopulatedClientModel, 0, len(clients))
-	for _, c := range clients {
-		client, err := c.Populate(ctx)
-		//just skip bad records
-		if err == nil {
-			populatedClients = append(populatedClients, *client)
-		}
-	}
-	return populatedClients
-}
 
 func clientByID(ctx context.Context, id string) (*clientModel, *errors.ResponseError) {
 	coll := db.Connection().Use(db.DefaultDatabase, "clients")
