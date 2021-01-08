@@ -15,10 +15,10 @@ type Job struct {
 }
 
 type LogableJob struct {
-	ID string
-	ClientName string
-	ClientPhone string
-	CarInfo string
-	AppointmentInfo string
-	Notes string
+	ID				string `m:"Identifier"`
+	ClientName		string `m:"Client Name"`
+	ClientPhone		string `m:"Client Phone"`
+	CarInfo			string `m:"Car Info"`
+	AppointmentInfo string `m:"Appointment Info"`
+	Notes			string `m:"Notes"`
 }

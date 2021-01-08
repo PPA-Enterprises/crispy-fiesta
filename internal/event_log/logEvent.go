@@ -66,12 +66,16 @@ func (self *logEvent) failed() *loggedEvent {
 	}
 }
 
-func LogCreatedJob(job *jobTypes.LogableJob, editor *types.Editor) types.LogableEvent {
+func LogCreatedJob(job *jobTypes.LogableJob, editor *types.Editor) (types.LogableEvent, error) {
+	changes, err := structToMap(job, "m"); if err != nil {
+		return nil, err
+
+	}
 	return &types.loggedEvent {
 		EventType: created,
 		Timestamp: time.Now().Unix(),
 		Editor: editor.Name,
 		EditorID: editor.Oid,
 		Changes: changes,
-	}
+	}, nil
 }
