@@ -1,19 +1,23 @@
 package event_log
+
 import (
-	//"time"
+	"time"
 	"context"
-	"internal/event_log/types"
 	"internal/db"
+	"internal/event_log/types"
+	jobTypes "internal/jobs/types"
 	"internal/uid"
+	"time"
+
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type event = string
+type field = string
 const(
-	created = "Created"
-	edited = "Edited"
-	deleted = "Deleted"
-	failed = "Failed to Log"
+	created event = "Created"
+	edited event = "Edited"
+	deleted event = "Deleted"
 )
 
 type change struct {
@@ -59,5 +63,15 @@ func (self *logEvent) failed() *loggedEvent {
 		EditorID: self.EditorID,
 		Persisted: false,
 		Changes: self.Changes,
+	}
+}
+
+func LogCreatedJob(job *jobTypes.LogableJob, editor *types.Editor) types.LogableEvent {
+	return &types.loggedEvent {
+		EventType: created,
+		Timestamp: time.Now().Unix(),
+		Editor: editor.Name,
+		EditorID: editor.Oid,
+		Changes: changes,
 	}
 }

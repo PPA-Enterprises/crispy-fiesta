@@ -13,3 +13,12 @@ type Job struct {
 	AppointmentInfo string             `json:"appointment_info"bson:"appointment_info"`
 	Notes           string             `json:"notes"bson:"notes"`
 }
+
+type LogableJob struct {
+	ID string
+	ClientName string
+	ClientPhone string
+	CarInfo string
+	AppointmentInfo string
+	Notes string
+}

@@ -1,6 +1,9 @@
 package types
 
-import ("context")
+import (
+	"context"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+)
 type LoggableEvent interface {
 	Log(ctx context.Context, collection string) *Deliverable
 }
@@ -12,6 +15,11 @@ type Deliverable interface {
 type change struct {
 	Old string
 	New string
+}
+
+type Editor struct {
+	Oid primitive.ObjectID
+	Name string
 }
 
 type NormalizedLoggedEvent struct {

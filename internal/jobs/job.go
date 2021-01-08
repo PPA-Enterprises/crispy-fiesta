@@ -11,6 +11,7 @@ import (
 	"internal/uid"
 	clientTypes "internal/clients/types"
 	"internal/clients"
+	"internal/jobs/types"
 )
 
 type jobModel struct {
@@ -122,6 +123,17 @@ func (self *jobModel) put(ctx context.Context, upsert bool) *errors.ResponseErro
 		return errors.PutFailed(err)
 	}
 	return nil
+}
+
+func (self *jobModel) logable() *types.LogableJob {
+	return &types.LogableJob {
+		ID: self.ID.Hex(),
+		ClientName: self.ClientName,
+		ClientPhone: self.ClientPhone,
+		CarInfo: self.CarInfo,
+		AppointmentInfo: self.AppointmentInfo,
+		Notes: self.Notes,
+	}
 }
 
 func jobByID(ctx context.Context, id string) (*jobModel, *errors.ResponseError) {
