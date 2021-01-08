@@ -57,6 +57,7 @@ func (self *logEvent) failed() *loggedEvent {
 		Timestamp: self.Timestamp,
 		Editor: self.Editor,
 		EditorID: self.EditorID,
+		Persisted: false,
 		Changes: self.Changes,
 	}
 }

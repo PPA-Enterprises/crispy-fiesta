@@ -20,5 +20,6 @@ type NormalizedLoggedEvent struct {
 	Timestamp int64 `json:"timestamp" bson:"timestamp"`
 	Editor string `json:"editor" bson:"editor"`
 	EditorID string `json:"editor_id" bson:"editor_id"`
+	Persisted bool `json:"persisted" bson:"persisted"`
 	Changes map[string]change `json:"changes" bson:"changes"`
 }
