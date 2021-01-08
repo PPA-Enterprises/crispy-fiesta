@@ -22,4 +22,3 @@ type NormalizedLoggedEvent struct {
 	EditorID string `json:"editor_id" bson:"editor_id"`
 	Changes map[string]change `json:"changes" bson:"changes"`
 }
-

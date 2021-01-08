@@ -1,4 +1,9 @@
 package event_log
+import (
+	//"time"
+	"internal/event_log/types"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+)
 
 type loggedEvent struct {
 	ID primitive.ObjectID `json:"_id" bson:"_id"`
@@ -7,4 +12,14 @@ type loggedEvent struct {
 	Editor string `json:"editor" bson:"editor"`
 	EditorID primitive.ObjectID `json:"editor_id" bson:"editor_id"`
 	Changes map[field]change `json:"changes" bson:"changes"`
+}
+func (self *loggedEvent) normalize() *types.NormalizedLoggedEvent {
+	return &types.NormalizedLoggedEvent {
+		ID: self.ID.Hex(),
+		EventType: self.EventType,
+		Timestamp: self.Timestamp,
+		Editor: self.Editor,
+		EditorID: self.EditorID.Hex(),
+		changes: self.Changes,
+	}
 }

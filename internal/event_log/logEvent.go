@@ -33,16 +33,30 @@ func (self *logEvent) Log(ctx context.Context, collection string) *types.Deliver
 	coll := db.Connection.Use(db.DefaultDatabase, collection)
 	res, err := coll.InsertOne(ctx, self); if err != nil {
 		//failed to log
+		return self.failed()
 	}
 
 	uid, uidErr := UID.TryFromInterface(res.InsertedID); if uidErr != nil {
 		//failed to log
+		return self.failed()
 	}
 
 	var savedLogEvent loggedEvent
 	err = coll.FindOne(ctx, bson.D{{"_id", uid.Oid()}}).Decode(&savedLogEvent)
 	if err != nil {
 		//failed to fetch log
+		return self.failed()
 	}
-	return savedLogEvent
+	return &savedLogEvent
+}
+
+func (self *logEvent) failed() *loggedEvent {
+	return &loggedEvent{
+		ID: primitive.ObjectID.NilObjectID,
+		EventType: self.EventType,
+		Timestamp: self.Timestamp,
+		Editor: self.Editor,
+		EditorID: self.EditorID,
+		Changes: self.Changes,
+	}
 }
