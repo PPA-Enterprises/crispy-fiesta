@@ -85,3 +85,39 @@ func LogCreated(ctx context.Context, data interface{}, editor *types.Editor) *ty
 	}
 	return event.log(ctx, editor.Collection).normalize()
 }
+
+
+//TODO: look into Reflection
+func LogUpdated(ctx context.Context, prev interface{}, next interface{}, editor *types.Editor) *types.NormalizedLoggedEvent {
+	var prevChangesMap map[string]interface{}
+	var nextChangesMap map[string]interface{}
+	var err error
+
+	vPrev, ok := prev.(*jobTypes.LogableJob); if ok {
+		prevChangesMap, err = structToMap(vPrev, "m"); if err != nil {
+			return nil
+		}
+	}
+	vNext, ok := prev.(*jobTypes.LogableJob); if ok {
+		nextChangesMap, err = structToMap(vNext, "m"); if err != nil {
+			return nil
+		}
+	}
+
+	changes := make(map[field]types.Change)
+	for key, value := range nextChangesMap {
+		if nextChangesMap[key] != prevChangesMap[key] {
+			changes[key] = nextChangesMap[key]
+		}
+		changes[key] = types.Change{Old:nil, New:value}
+	}
+
+	event := &logEvent {
+		EventType: edited,
+		Timestamp: time.Now().Unix(),
+		Editor: editor.Name,
+		EditorID: editor.Oid,
+		Changes: changes,
+	}
+	return event.log(ctx, editor.Collection).normalize()
+}

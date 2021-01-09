@@ -7,6 +7,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"internal/common/errors"
 	"internal/db"
+	"internal/event_log"
 )
 
 type updateableJob struct {
@@ -39,9 +40,10 @@ func (self *updateableJob) Patch(ctx context.Context, upsert bool) (*jobModel, *
 
 	filter := bson.D{{"_id", self.ID}}
 	update := bson.D{{"$set", self}}
+	var oldDocument jobModel
 	var updatedDocument jobModel
 
-	err := coll.FindOneAndUpdate(ctx, filter, update, opts).Decode(&updatedDocument)
+	err := coll.FindOneAndUpdate(ctx, filter, update, opts).Decode(&oldDocument)
 	if err != nil {
 		return nil, errors.PutFailed(err)
 	}
@@ -50,5 +52,8 @@ func (self *updateableJob) Patch(ctx context.Context, upsert bool) (*jobModel, *
 	if err != nil {
 		return nil, errors.DatabaseError(err)
 	}
+
+	loggedJob := event_log.LogUpdated(ctx, oldDocument.logable(), updatedDocument.logable(), editor)
+	_ = appendLog(ctx, &updatedDocument, loggedJob)
 	return &updatedDocument, nil
 }
