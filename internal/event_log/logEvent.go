@@ -2,13 +2,15 @@ package event_log
 
 import (
 	"context"
-	"time"
 	"internal/db"
-	"internal/uid"
 	"internal/event_log/types"
 	jobTypes "internal/jobs/types"
-	"go.mongodb.org/mongo-driver/bson/primitive"
+	"internal/uid"
+	"reflect"
+	"time"
+
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type event = string
@@ -98,7 +100,7 @@ func LogUpdated(ctx context.Context, prev interface{}, next interface{}, editor 
 			return nil
 		}
 	}
-	vNext, ok := prev.(*jobTypes.LogableJob); if ok {
+	vNext, ok := next.(*jobTypes.LogableJob); if ok {
 		nextChangesMap, err = structToMap(vNext, "m"); if err != nil {
 			return nil
 		}
@@ -106,10 +108,9 @@ func LogUpdated(ctx context.Context, prev interface{}, next interface{}, editor 
 
 	changes := make(map[field]types.Change)
 	for key, value := range nextChangesMap {
-		if nextChangesMap[key] != prevChangesMap[key] {
-			changes[key] = nextChangesMap[key]
+		if !reflect.DeepEqual(nextChangesMap[key], prevChangesMap[key]) {
+			changes[key] = types.Change{Old:prevChangesMap[key], New:value}
 		}
-		changes[key] = types.Change{Old:nil, New:value}
 	}
 
 	event := &logEvent {

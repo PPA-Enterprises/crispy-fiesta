@@ -58,7 +58,12 @@ func update(c *gin.Context) {
 		c.Abort(); return
 	}
 
-	updated, err := update.Patch(ctx, false); if err != nil {
+	editor := eventLogTypes.Editor {
+		Oid: update.ID,
+		Name: "Bob",
+		Collection: "Bob123",
+	}
+	updated, err := update.Patch(ctx, &editor, false); if err != nil {
 		c.JSON(err.Code,
 			gin.H{"success": false, "message": err.Error()})
 		c.Abort(); return

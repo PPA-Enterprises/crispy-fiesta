@@ -2,12 +2,14 @@ package jobs
 
 import (
 	"context"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo/options"
 	"internal/common/errors"
 	"internal/db"
 	"internal/event_log"
+	eventLogTypes "internal/event_log/types"
+
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type updateableJob struct {
@@ -34,7 +36,7 @@ func tryFromUpdateJobCmd(data *updateJobCmd, id string) (*updateableJob, *errors
 	}, nil
 }
 
-func (self *updateableJob) Patch(ctx context.Context, upsert bool) (*jobModel, *errors.ResponseError) {
+func (self *updateableJob) Patch(ctx context.Context, editor *eventLogTypes.Editor, upsert bool) (*jobModel, *errors.ResponseError) {
 	coll := db.Connection().Use(db.DefaultDatabase, "jobs")
 	opts := options.FindOneAndUpdate().SetUpsert(upsert)
 
