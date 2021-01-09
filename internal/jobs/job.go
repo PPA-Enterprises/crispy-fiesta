@@ -107,7 +107,7 @@ func (self *jobModel) create(ctx context.Context, editor *eventLogTypes.Editor) 
 
 	//TODO: update logs on client
 	loggedJob := event_log.LogCreated(ctx, self.logable(), editor)
-	_ = self.appendLog(ctx, loggedJob)
+	_ = appendLog(ctx, self, loggedJob)
 	return UID.FromOid(self.ID), nil
 }
 
@@ -140,29 +140,6 @@ func (self *jobModel) logable() *types.LogableJob {
 		AppointmentInfo: self.AppointmentInfo,
 		Notes: self.Notes,
 	}
-}
-
-func (self *jobModel) appendLog(ctx context.Context, event *eventLogTypes.NormalizedLoggedEvent) *errors.ResponseError {
-	//append log to job history
-	self.Log = append(self.Log, *event)
-	coll := db.Connection().Use(db.DefaultDatabase, "jobs")
-	opts := options.FindOneAndUpdate().SetUpsert(false)
-
-	filter := bson.D{{"_id", self.ID}}
-	updateLog := bson.D{{"$set", bson.D{{"log", self.Log}}}}
-	var updatedDocument jobModel
-
-	err := coll.FindOneAndUpdate(ctx, filter, updateLog, opts).Decode(&updatedDocument)
-	if err != nil {
-		return errors.PutFailed(err)
-	}
-
-	err = coll.FindOne(ctx, filter).Decode(&updatedDocument)
-	if err != nil {
-		return errors.DatabaseError(err)
-	}
-	self.Log = updatedDocument.Log
-	return nil
 }
 
 func jobByID(ctx context.Context, id string) (*jobModel, *errors.ResponseError) {
