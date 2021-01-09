@@ -46,6 +46,7 @@ func (self *logEvent) log(ctx context.Context, collection string) *loggedEvent {
 		//failed to fetch log
 		return self.failed()
 	}
+	savedLogEvent.Persisted = true
 	return &savedLogEvent
 }
 
