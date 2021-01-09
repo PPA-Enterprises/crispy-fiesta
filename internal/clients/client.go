@@ -33,7 +33,7 @@ func ClientByPhone(ctx context.Context, phone string) types.Client {
 	return &foundClient
 }
 
-func (self *clientModel) AttatchJobID(oid primitive.ObjectID) {
+func (self *clientModel) AttatchJobID(ctx context.Context, oid primitive.ObjectID) *errors.ResponseError {
 	//search for id, insert if not already in the array
 	// linear search for now
 	const matched int = 0
@@ -41,10 +41,11 @@ func (self *clientModel) AttatchJobID(oid primitive.ObjectID) {
 	for _, id := range self.Jobs {
 		result := bytes.Compare([]byte(oid.String()), []byte(id.String()))
 		if result == matched {
-			return
+			return errors.JobAlreadyExistsError()
 		}
 	}
 	self.Jobs = append(self.Jobs, oid)
+	return self.put(ctx, true)
 }
 
 func (self *clientModel) create(ctx context.Context) (UID.ID, *errors.ResponseError) {
@@ -56,7 +57,7 @@ func (self *clientModel) create(ctx context.Context) (UID.ID, *errors.ResponseEr
 	return UID.TryFromInterface(res.InsertedID)
 }
 
-func (self *clientModel) Put(ctx context.Context, upsert bool) *errors.ResponseError {
+func (self *clientModel) put(ctx context.Context, upsert bool) *errors.ResponseError {
 	coll := db.Connection().Use(db.DefaultDatabase, "clients")
 	opts := options.FindOneAndReplace()
 	opts = opts.SetUpsert(true)
@@ -64,6 +65,7 @@ func (self *clientModel) Put(ctx context.Context, upsert bool) *errors.ResponseE
 	err := coll.FindOneAndReplace(ctx, bson.D{{"_id", self.ID}}, self, opts).Err()
 	if err == mongo.ErrNoDocuments {
 		if upsert {
+			//client was created
 			return nil
 		} else {
 			return errors.PutFailed(err)
@@ -73,6 +75,7 @@ func (self *clientModel) Put(ctx context.Context, upsert bool) *errors.ResponseE
 	if err != nil {
 		return errors.PutFailed(err)
 	}
+	//client was updated with an appended job
 	return nil
 }
 
