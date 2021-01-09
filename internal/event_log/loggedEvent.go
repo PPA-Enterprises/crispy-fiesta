@@ -14,7 +14,7 @@ type loggedEvent struct {
 	Persisted bool `json:"persisted" bson:"persisted"`
 	Changes map[field]change `json:"changes" bson:"changes"`
 }
-func (self *loggedEvent) normalize() *types.NormalizedLoggedEvent {
+func (self *loggedEvent) Normalize() *types.NormalizedLoggedEvent {
 	return &types.NormalizedLoggedEvent {
 		ID: self.ID.Hex(),
 		EventType: self.EventType,

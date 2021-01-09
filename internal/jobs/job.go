@@ -10,6 +10,8 @@ import (
 	"internal/db"
 	"internal/uid"
 	clientTypes "internal/clients/types"
+	eventLogTypes "internal/event_log/types"
+	"internal/event_log"
 	"internal/clients"
 	"internal/jobs/types"
 )
@@ -21,6 +23,7 @@ type jobModel struct {
 	CarInfo         string             `json:"car_info"bson:"car_info"`
 	AppointmentInfo string             `json:"appointment_info"bson:"appointment_info"`
 	Notes           string             `json:"notes"bson:"notes"`
+	Log				[]types.NormalizedLoggedEvent `json:"log"bson:"log"`
 }
 
 func fromSubmitJobCmd(data *submitJobCmd) *jobModel {
@@ -80,7 +83,7 @@ func (self *jobModel) create(ctx context.Context) (UID.ID, *errors.ResponseError
 	return nil, errors.UidTypeAssertionError()
 }*/
 
-func (self *jobModel) create(ctx context.Context) (UID.ID, *errors.ResponseError) {
+func (self *jobModel) create(ctx context.Context, editor *types.Editor) (UID.ID, *errors.ResponseError) {
 	//if client exists, get it
 	var client clientTypes.Client
 	client = clients.ClientByPhone(ctx, self.ClientPhone)
@@ -102,6 +105,9 @@ func (self *jobModel) create(ctx context.Context) (UID.ID, *errors.ResponseError
 		return nil, err
 	}
 
+	//TODO: update logs on client
+	loggedJob := event_log.LogCreatedJob(ctx, self.logable(), editor)
+	_ = self.appendLog(ctx, loggedJob)
 	return UID.FromOid(self.ID), nil
 }
 
@@ -134,6 +140,28 @@ func (self *jobModel) logable() *types.LogableJob {
 		AppointmentInfo: self.AppointmentInfo,
 		Notes: self.Notes,
 	}
+}
+
+func (self *jobModel) appendLog(ctx context.Context, event types.NormalizedLoggedEvent) *errors.ResponseError {
+	//append log to job history
+	coll := db.Connection().Use(db.DefaultDatabase, "jobs")
+	opts := options.FindOneAndUpdate().SetUpsert(false)
+
+	filter := bson.D{{"_id", self.ID}}
+	updateLog := bson.D{{"$set", bson.M{"log": self.log}}}
+	var updatedDocument jobModel
+
+	err := coll.FindOneAndUpdate(ctx, filter, updateLog, opts).Decode(&updatedDocument)
+	if err != nil {
+		return errors.PutFailed(err)
+	}
+
+	err = coll.FindOne(ctx, filter).Decode(&updatedDocument)
+	if err != nil {
+		return errors.DatabaseError(err)
+	}
+	self.Log = updatedDocument.Log
+	return nil
 }
 
 func jobByID(ctx context.Context, id string) (*jobModel, *errors.ResponseError) {

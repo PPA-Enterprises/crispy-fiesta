@@ -66,10 +66,9 @@ func (self *logEvent) failed() *loggedEvent {
 	}
 }
 
-func LogCreatedJob(job *jobTypes.LogableJob, editor *types.Editor) (types.LogableEvent, error) {
+func LogCreatedJob(ctx context.Context, job *jobTypes.LogableJob, editor *types.Editor) types.NormalizedLoggedEvent {
 	changes, err := structToMap(job, "m"); if err != nil {
 		return nil, err
-
 	}
 	return &types.loggedEvent {
 		EventType: created,
