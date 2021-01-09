@@ -12,15 +12,15 @@ type loggedEvent struct {
 	Editor string `json:"editor" bson:"editor"`
 	EditorID primitive.ObjectID `json:"editor_id" bson:"editor_id"`
 	Persisted bool `json:"persisted" bson:"persisted"`
-	Changes map[field]change `json:"changes" bson:"changes"`
+	Changes map[field]types.Change `json:"changes" bson:"changes"`
 }
-func (self *loggedEvent) Normalize() *types.NormalizedLoggedEvent {
+func (self *loggedEvent) normalize() *types.NormalizedLoggedEvent {
 	return &types.NormalizedLoggedEvent {
 		ID: self.ID.Hex(),
 		EventType: self.EventType,
 		Timestamp: self.Timestamp,
 		Editor: self.Editor,
 		EditorID: self.EditorID.Hex(),
-		changes: self.Changes,
+		Changes: self.Changes,
 	}
 }

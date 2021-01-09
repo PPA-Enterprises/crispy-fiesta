@@ -1,25 +1,17 @@
 package types
 
 import (
-	"context"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
-type LoggableEvent interface {
-	Log(ctx context.Context, collection string) *Deliverable
-}
-
-type Deliverable interface {
-	normalize() *NormalizedLoggedEvent
-}
-
-type change struct {
-	Old string
-	New string
+type Change struct {
+	Old interface{}
+	New interface{}
 }
 
 type Editor struct {
 	Oid primitive.ObjectID
 	Name string
+	Collection string
 }
 
 type NormalizedLoggedEvent struct {
@@ -29,5 +21,5 @@ type NormalizedLoggedEvent struct {
 	Editor string `json:"editor" bson:"editor"`
 	EditorID string `json:"editor_id" bson:"editor_id"`
 	Persisted bool `json:"persisted" bson:"persisted"`
-	Changes map[string]change `json:"changes" bson:"changes"`
+	Changes map[string]Change `json:"changes" bson:"changes"`
 }

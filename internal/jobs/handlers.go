@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 	"net/http"
+	eventLogTypes "internal/event_log/types"
 	"github.com/gin-gonic/gin"
 )
 
@@ -15,16 +16,19 @@ func submitJob(c *gin.Context) {
 	if c.BindJSON(&data) != nil {
 		c.JSON(http.StatusNotAcceptable,
 		gin.H{"success": false, "message": "Provide relevant fields"})
-		c.Abort()
-		return
+		c.Abort(); return
 	}
 
 	newJob := fromSubmitJobCmd(&data)
-	oid, err := newJob.create(ctx); if err != nil {
+	editor := eventLogTypes.Editor {
+		Oid: newJob.ID,
+		Name: "Bob",
+		Collection: "Bob123",
+	}
+	oid, err := newJob.create(ctx, &editor); if err != nil {
 		c.JSON(err.Code,
 			gin.H{"success": false, "message": err.Error()})
-		c.Abort()
-		return
+		c.Abort(); return
 	}
 	c.JSON(http.StatusCreated,
 		gin.H{"success": true, "payload": oid.String(), "message": "Job Created"})
@@ -72,15 +76,13 @@ func getJobByID(c *gin.Context) {
 	if len(id) <= 0 {
 		c.JSON(http.StatusBadRequest,
 		gin.H{"success": false, "message": "Provide an id"})
-		c.Abort()
-		return
+		c.Abort(); return
 	}
 
 	job, err := jobByID(ctx, id); if err != nil {
 		c.JSON(err.Code,
 			gin.H{"success": false, "message": err.Error()})
-		c.Abort()
-		return
+		c.Abort(); return
 	}
 
 	c.JSON(http.StatusOK,

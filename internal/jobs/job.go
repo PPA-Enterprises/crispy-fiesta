@@ -23,7 +23,7 @@ type jobModel struct {
 	CarInfo         string             `json:"car_info"bson:"car_info"`
 	AppointmentInfo string             `json:"appointment_info"bson:"appointment_info"`
 	Notes           string             `json:"notes"bson:"notes"`
-	Log				[]types.NormalizedLoggedEvent `json:"log"bson:"log"`
+	Log				[]eventLogTypes.NormalizedLoggedEvent `json:"log"bson:"log"`
 }
 
 func fromSubmitJobCmd(data *submitJobCmd) *jobModel {
@@ -83,7 +83,7 @@ func (self *jobModel) create(ctx context.Context) (UID.ID, *errors.ResponseError
 	return nil, errors.UidTypeAssertionError()
 }*/
 
-func (self *jobModel) create(ctx context.Context, editor *types.Editor) (UID.ID, *errors.ResponseError) {
+func (self *jobModel) create(ctx context.Context, editor *eventLogTypes.Editor) (UID.ID, *errors.ResponseError) {
 	//if client exists, get it
 	var client clientTypes.Client
 	client = clients.ClientByPhone(ctx, self.ClientPhone)
@@ -142,13 +142,13 @@ func (self *jobModel) logable() *types.LogableJob {
 	}
 }
 
-func (self *jobModel) appendLog(ctx context.Context, event types.NormalizedLoggedEvent) *errors.ResponseError {
+func (self *jobModel) appendLog(ctx context.Context, event *eventLogTypes.NormalizedLoggedEvent) *errors.ResponseError {
 	//append log to job history
 	coll := db.Connection().Use(db.DefaultDatabase, "jobs")
 	opts := options.FindOneAndUpdate().SetUpsert(false)
 
 	filter := bson.D{{"_id", self.ID}}
-	updateLog := bson.D{{"$set", bson.M{"log": self.log}}}
+	updateLog := bson.D{{"$set", bson.M{"log": self.Log}}}
 	var updatedDocument jobModel
 
 	err := coll.FindOneAndUpdate(ctx, filter, updateLog, opts).Decode(&updatedDocument)
