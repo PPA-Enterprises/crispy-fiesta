@@ -144,11 +144,12 @@ func (self *jobModel) logable() *types.LogableJob {
 
 func (self *jobModel) appendLog(ctx context.Context, event *eventLogTypes.NormalizedLoggedEvent) *errors.ResponseError {
 	//append log to job history
+	self.Log = append(self.Log, *event)
 	coll := db.Connection().Use(db.DefaultDatabase, "jobs")
 	opts := options.FindOneAndUpdate().SetUpsert(false)
 
 	filter := bson.D{{"_id", self.ID}}
-	updateLog := bson.D{{"$set", bson.M{"log": self.Log}}}
+	updateLog := bson.D{{"$set", bson.D{{"log", self.Log}}}}
 	var updatedDocument jobModel
 
 	err := coll.FindOneAndUpdate(ctx, filter, updateLog, opts).Decode(&updatedDocument)
