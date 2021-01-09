@@ -106,7 +106,7 @@ func (self *jobModel) create(ctx context.Context, editor *eventLogTypes.Editor) 
 	}
 
 	//TODO: update logs on client
-	loggedJob := event_log.LogCreatedJob(ctx, self.logable(), editor)
+	loggedJob := event_log.LogCreated(ctx, self.logable(), editor)
 	_ = self.appendLog(ctx, loggedJob)
 	return UID.FromOid(self.ID), nil
 }
