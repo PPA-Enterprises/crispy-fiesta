@@ -7,7 +7,9 @@ import (
 	"internal/common/errors"
 	"internal/db"
 	jobTypes "internal/jobs/types"
-	"internal/uid"
+	eventLogTypes "internal/event_log/types"
+	//"internal/uid"
+	"internal/event_log"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -16,10 +18,11 @@ import (
 )
 
 type clientModel struct {
-	ID    primitive.ObjectID   `json:"_id,omitempty" bson:"_id,omitempty"`
-	Name  string               `json:"name" bson:"name"`
-	Phone string               `json:"phone" bson:"phone"`
-	Jobs  []primitive.ObjectID `json:"jobs" bson:"jobs"`
+	ID		primitive.ObjectID   `json:"_id,omitempty" bson:"_id,omitempty"`
+	Name	string               `json:"name" bson:"name"`
+	Phone	string               `json:"phone" bson:"phone"`
+	Jobs	[]primitive.ObjectID `json:"jobs" bson:"jobs"`
+	Log		[]eventLogTypes.NormalizedLoggedEvent `json:"log" bson:"log"`
 }
 
 func ClientByPhone(ctx context.Context, phone string) types.Client {
@@ -33,7 +36,7 @@ func ClientByPhone(ctx context.Context, phone string) types.Client {
 	return &foundClient
 }
 
-func (self *clientModel) AttatchJobID(ctx context.Context, oid primitive.ObjectID) *errors.ResponseError {
+func (self *clientModel) AttatchJobID(ctx context.Context, oid primitive.ObjectID, editor *eventLogTypes.Editor) *errors.ResponseError {
 	//search for id, insert if not already in the array
 	// linear search for now
 	const matched int = 0
@@ -45,19 +48,21 @@ func (self *clientModel) AttatchJobID(ctx context.Context, oid primitive.ObjectI
 		}
 	}
 	self.Jobs = append(self.Jobs, oid)
-	return self.put(ctx, true)
+	return self.put(ctx, true, editor)
 }
-
-func (self *clientModel) create(ctx context.Context) (UID.ID, *errors.ResponseError) {
+/*
+func (self *clientModel) create(ctx context.Context, editor *eventLogTypes.Editor) (UID.ID, *errors.ResponseError) {
 	coll := db.Connection().Use(db.DefaultDatabase, "clients")
 	res, err := coll.InsertOne(ctx, self)
 	if err != nil {
 		return nil, errors.DatabaseError(err)
 	}
+	loggedClient := event_log.LogCreated(ctx, self.logable(), editor)
+	_ = appendLog(ctx, self, loggedClient)
 	return UID.TryFromInterface(res.InsertedID)
-}
+}*/
 
-func (self *clientModel) put(ctx context.Context, upsert bool) *errors.ResponseError {
+func (self *clientModel) put(ctx context.Context, upsert bool, editor *eventLogTypes.Editor) *errors.ResponseError {
 	coll := db.Connection().Use(db.DefaultDatabase, "clients")
 	opts := options.FindOneAndReplace()
 	opts = opts.SetUpsert(true)
@@ -66,6 +71,8 @@ func (self *clientModel) put(ctx context.Context, upsert bool) *errors.ResponseE
 	if err == mongo.ErrNoDocuments {
 		if upsert {
 			//client was created
+			loggedClient := event_log.LogCreated(ctx, self.logable(), editor)
+			_ = appendLog(ctx, self, loggedClient)
 			return nil
 		} else {
 			return errors.PutFailed(err)
@@ -98,6 +105,14 @@ func (self *clientModel) Populate(ctx context.Context) (*types.PopulatedClientMo
 		Phone: self.Phone,
 		Jobs:  jobs,
 	}, nil
+}
+
+func (self *clientModel) logable() *types.LogableClient {
+	return &types.LogableClient {
+		ID: self.ID.Hex(),
+		Name: self.Name,
+		Phone: self.Phone,
+	}
 }
 
 /*

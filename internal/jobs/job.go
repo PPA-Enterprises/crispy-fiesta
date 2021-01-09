@@ -94,14 +94,9 @@ func (self *jobModel) create(ctx context.Context, editor *eventLogTypes.Editor) 
 	}
 
 	//update client array with job
-	err := client.AttatchJobID(ctx, self.ID); if err != nil {
+	err := client.AttatchJobID(ctx, self.ID, editor); if err != nil {
 		return nil, err
 	}
-
-	//save job and client. Need Put for both to remain idempotent
-	//err := client.Put(ctx, true); if err != nil {
-	//	return nil, err
-	//}
 
 	err = self.put(ctx, true); if err != nil {
 		return nil, err
