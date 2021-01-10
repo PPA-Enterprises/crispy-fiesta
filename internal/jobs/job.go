@@ -153,6 +153,15 @@ func jobByID(ctx context.Context, id string) (*jobModel, *errors.ResponseError) 
 	return &foundJob, nil
 }
 
+func deleteJobFromClient(ctx context.Context, jobID, clientID string) *errors.ResponseError {
+	//TODO: delete job from client
+
+	if err := DeleteByID(ctx, jobID); err != nil {
+		return err
+	}
+	return nil
+}
+
 func DeleteByID(ctx context.Context, id string) *errors.ResponseError {
 	coll := db.Connection().Use(db.DefaultDatabase, "deleted_jobs")
 	job, err := jobByID(ctx, id); if err != nil {
