@@ -2,9 +2,11 @@ package event_log
 
 import (
 	"context"
+	"fmt"
 	"internal/db"
 	"internal/event_log/types"
 	jobTypes "internal/jobs/types"
+	clientTypes "internal/clients/types"
 	"internal/uid"
 	"reflect"
 	"time"
@@ -66,16 +68,23 @@ func (self *logEvent) failed() *loggedEvent {
 func LogCreated(ctx context.Context, data interface{}, editor *types.Editor) *types.NormalizedLoggedEvent {
 	var changesMap map[string]interface{}
 	var err error
-
-	v, ok := data.(*jobTypes.LogableJob); if ok {
-		changesMap, err = structToMap(v, "m"); if err != nil {
-			return nil
-		}
-	}
-
 	changes := make(map[field]types.Change)
-	for key, value := range changesMap {
-		changes[key] = types.Change{Old:nil, New:value}
+
+	switch v := data.(type) {
+		case *jobTypes.LogableJob:
+			changesMap, err = structToMap(v, "m"); if err != nil { return nil }
+			for key, value := range changesMap {
+				changes[key] = types.Change{Old:nil, New:value}
+			}
+
+		case *clientTypes.LogableClient:
+			changesMap, err = structToMap(v, "m"); if err != nil { return nil }
+			for key, value := range changesMap {
+				changes[key] = types.Change{Old:nil, New:value}
+			}
+
+		default:
+			fmt.Println("type unknown")        // here v has type interface{}
 	}
 
 	event := &logEvent {

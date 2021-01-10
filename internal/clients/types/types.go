@@ -37,5 +37,5 @@ type DeliverableClient struct {
 type LogableClient struct {
 	ID string `m:"Identifier"`
 	Name string `m:"Name"`
-	Phone string `"Phone Number"`
+	Phone string `m:"Phone Number"`
 }
