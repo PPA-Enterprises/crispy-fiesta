@@ -93,7 +93,7 @@ func getJobByID(c *gin.Context) {
 	c.JSON(http.StatusOK,
 		gin.H{"success": true, "payload": job})
 }
-
+/*
 func deleteJobByID(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(c, 5*time.Second)
 	defer cancel()
@@ -113,4 +113,4 @@ func deleteJobByID(c *gin.Context) {
 
 	c.JSON(http.StatusOK,
 		gin.H{"success": true})
-}
+}*/
