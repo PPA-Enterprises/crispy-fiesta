@@ -73,18 +73,22 @@ func LogCreated(ctx context.Context, data interface{}, editor *types.Editor) *ty
 	switch v := data.(type) {
 		case *jobTypes.LogableJob:
 			changesMap, err = structToMap(v, "m"); if err != nil { return nil }
-			for key, value := range changesMap {
+			/*for key, value := range changesMap {
 				changes[key] = types.Change{Old:nil, New:value}
-			}
+			}*/
 
 		case *clientTypes.LogableClient:
 			changesMap, err = structToMap(v, "m"); if err != nil { return nil }
-			for key, value := range changesMap {
+			/*for key, value := range changesMap {
 				changes[key] = types.Change{Old:nil, New:value}
-			}
+			}*/
 
 		default:
 			fmt.Println("type unknown")        // here v has type interface{}
+	}
+
+	for key, value := range changesMap {
+		changes[key] = types.Change{Old:nil, New:value}
 	}
 
 	event := &logEvent {
@@ -110,15 +114,15 @@ func LogUpdated(ctx context.Context, prev interface{}, next interface{}, editor 
 	switch vPrev := prev.(type) {
 		case *jobTypes.LogableJob:
 			prevChangesMap, err = structToMap(vPrev, "m"); if err != nil { return nil }
-			for key, value := range prevChangesMap {
+			/*for key, value := range prevChangesMap {
 				changes[key] = types.Change{Old:nil, New:value}
-			}
+			}*/
 
 		case *clientTypes.LogableClient:
 			prevChangesMap, err = structToMap(vPrev, "m"); if err != nil { return nil }
-			for key, value := range prevChangesMap {
+			/*for key, value := range prevChangesMap {
 				changes[key] = types.Change{Old:nil, New:value}
-			}
+			}*/
 
 		default:
 			fmt.Println("type unknown")
@@ -127,15 +131,15 @@ func LogUpdated(ctx context.Context, prev interface{}, next interface{}, editor 
 	switch vNext := next.(type) {
 		case *jobTypes.LogableJob:
 			nextChangesMap, err = structToMap(vNext, "m"); if err != nil { return nil }
-			for key, value := range nextChangesMap{
+			/*for key, value := range nextChangesMap{
 				changes[key] = types.Change{Old:nil, New:value}
-			}
+			}*/
 
 		case *clientTypes.LogableClient:
 			nextChangesMap, err = structToMap(vNext, "m"); if err != nil { return nil }
-			for key, value := range nextChangesMap {
+			/*for key, value := range nextChangesMap {
 				changes[key] = types.Change{Old:nil, New:value}
-			}
+			}*/
 
 		default:
 			fmt.Println("type unknown")
