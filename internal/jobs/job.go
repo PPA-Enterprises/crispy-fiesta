@@ -155,6 +155,9 @@ func jobByID(ctx context.Context, id string) (*jobModel, *errors.ResponseError) 
 
 func deleteJobFromClient(ctx context.Context, jobID, clientID string) *errors.ResponseError {
 	//TODO: delete job from client
+	if err := clients.RemoveJob(ctx, clientID, jobID); err != nil {
+		return err
+	}
 
 	if err := DeleteByID(ctx, jobID); err != nil {
 		return err

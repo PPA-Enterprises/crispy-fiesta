@@ -6,9 +6,9 @@ import (
 	"internal/clients/types"
 	"internal/common/errors"
 	"internal/db"
-	jobTypes "internal/jobs/types"
-	eventLogTypes "internal/event_log/types"
 	"internal/event_log"
+	eventLogTypes "internal/event_log/types"
+	jobTypes "internal/jobs/types"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -49,17 +49,6 @@ func (self *clientModel) AttatchJobID(ctx context.Context, oid primitive.ObjectI
 	self.Jobs = append(self.Jobs, oid)
 	return self.put(ctx, true, editor)
 }
-/*
-func (self *clientModel) create(ctx context.Context, editor *eventLogTypes.Editor) (UID.ID, *errors.ResponseError) {
-	coll := db.Connection().Use(db.DefaultDatabase, "clients")
-	res, err := coll.InsertOne(ctx, self)
-	if err != nil {
-		return nil, errors.DatabaseError(err)
-	}
-	loggedClient := event_log.LogCreated(ctx, self.logable(), editor)
-	_ = appendLog(ctx, self, loggedClient)
-	return UID.TryFromInterface(res.InsertedID)
-}*/
 
 func (self *clientModel) put(ctx context.Context, upsert bool, editor *eventLogTypes.Editor) *errors.ResponseError {
 	coll := db.Connection().Use(db.DefaultDatabase, "clients")
@@ -218,5 +207,32 @@ func fetch(ctx context.Context, fetchOpts *BulkFetch) ([]types.UnpopulatedClient
 		return nil, errors.DatabaseError(err)
 	}
 	return clients, nil
+}
+
+func RemoveJob(ctx context.Context, clientID, jobID string) *errors.ResponseError {
+	const matched int = 0
+
+	client, err := clientByID(ctx, clientID); if err != nil {
+		return err
+	}
+
+	for i, oid := range client.Jobs {
+		result := bytes.Compare([]byte(jobID), []byte(oid.Hex()))
+		if result == matched {
+			// preserve the order. Idiomatic way
+			client.Jobs = append(client.Jobs[:i], client.Jobs[i+1:]...)
+		}
+	}
+
+	coll := db.Connection().Use(db.DefaultDatabase, "clients")
+	filter := bson.D{{"_id", client.ID}}
+	update := bson.D{{"$set", bson.D{{"jobs", client.Jobs}}}}
+
+	var updatedDoc clientModel
+	updateErr := coll.FindOneAndUpdate(ctx, filter, update).Decode(&updatedDoc)
+	if updateErr != nil {
+		return errors.DatabaseError(updateErr)
+	}
+	return nil
 }
 
