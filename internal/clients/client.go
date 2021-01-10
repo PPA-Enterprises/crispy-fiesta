@@ -8,7 +8,6 @@ import (
 	"internal/db"
 	jobTypes "internal/jobs/types"
 	eventLogTypes "internal/event_log/types"
-	//"internal/uid"
 	"internal/event_log"
 
 	"go.mongodb.org/mongo-driver/bson"
