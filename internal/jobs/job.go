@@ -102,7 +102,6 @@ func (self *jobModel) create(ctx context.Context, editor *eventLogTypes.Editor) 
 		return nil, err
 	}
 
-	//TODO: update logs on client
 	loggedJob := event_log.LogCreated(ctx, self.logable(), editor)
 	_ = appendLog(ctx, self, loggedJob)
 	return UID.FromOid(self.ID), nil
@@ -152,4 +151,21 @@ func jobByID(ctx context.Context, id string) (*jobModel, *errors.ResponseError) 
 		return nil, errors.DoesNotExist()
 	}
 	return &foundJob, nil
+}
+
+func DeleteByID(ctx context.Context, id string) *errors.ResponseError {
+	coll := db.Connection().Use(db.DefaultDatabase, "deleted_jobs")
+	job, err := jobByID(ctx, id); if err != nil {
+		return err
+	}
+	_, insertErr := coll.InsertOne(ctx, job); if err != nil {
+		return errors.DatabaseError(insertErr)
+	}
+
+	coll = db.Connection().Use(db.DefaultDatabase, "jobs")
+	_, delErr := coll.DeleteOne(ctx, bson.D{{"_id", job.ID}})
+	if delErr != nil {
+		return errors.DatabaseError(delErr)
+	}
+	return nil
 }

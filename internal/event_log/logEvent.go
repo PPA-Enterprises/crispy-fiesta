@@ -72,10 +72,12 @@ func LogCreated(ctx context.Context, data interface{}, editor *types.Editor) *ty
 
 	switch v := data.(type) {
 		case *jobTypes.LogableJob:
-			changesMap, err = structToMap(v, "m"); if err != nil { return nil }
+			changesMap, err = structToMap(v, "m")
+			if err != nil { return nil }
 
 		case *clientTypes.LogableClient:
-			changesMap, err = structToMap(v, "m"); if err != nil { return nil }
+			changesMap, err = structToMap(v, "m")
+			if err != nil { return nil }
 
 		default:
 			fmt.Println("type unknown")
@@ -107,10 +109,12 @@ func LogUpdated(ctx context.Context, prev interface{}, next interface{}, editor 
 	// Not sure any better way to do this
 	switch vPrev := prev.(type) {
 		case *jobTypes.LogableJob:
-			prevChangesMap, err = structToMap(vPrev, "m"); if err != nil { return nil }
+			prevChangesMap, err = structToMap(vPrev, "m")
+			if err != nil { return nil }
 
 		case *clientTypes.LogableClient:
-			prevChangesMap, err = structToMap(vPrev, "m"); if err != nil { return nil }
+			prevChangesMap, err = structToMap(vPrev, "m")
+			if err != nil { return nil }
 
 		default:
 			fmt.Println("type unknown")
@@ -118,10 +122,12 @@ func LogUpdated(ctx context.Context, prev interface{}, next interface{}, editor 
 
 	switch vNext := next.(type) {
 		case *jobTypes.LogableJob:
-			nextChangesMap, err = structToMap(vNext, "m"); if err != nil { return nil }
+			nextChangesMap, err = structToMap(vNext, "m")
+			if err != nil { return nil }
 
 		case *clientTypes.LogableClient:
-			nextChangesMap, err = structToMap(vNext, "m"); if err != nil { return nil }
+			nextChangesMap, err = structToMap(vNext, "m")
+			if err != nil { return nil }
 
 		default:
 			fmt.Println("type unknown")
