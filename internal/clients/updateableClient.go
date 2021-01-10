@@ -5,6 +5,8 @@ import (
 	"internal/clients/types"
 	"internal/common/errors"
 	"internal/db"
+	"internal/event_log"
+	eventLogTypes "internal/event_log/types"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -28,22 +30,26 @@ func tryFromUpdateClientCmd(data *updateClientCmd, id string) (*updateableClient
 	}, nil
 }
 
-func (self *updateableClient) patch(ctx context.Context, upsert bool) (*types.PopulatedClientModel, *errors.ResponseError) {
+func (self *updateableClient) patch(ctx context.Context, editor *eventLogTypes.Editor ,upsert bool) (*types.PopulatedClientModel, *errors.ResponseError) {
 	coll := db.Connection().Use(db.DefaultDatabase, "clients")
 	opts := options.FindOneAndUpdate().SetUpsert(upsert)
 
 	filter := bson.D{{"_id", self.ID}}
 	update := bson.D{{"$set", self}}
-	var updatedDocument clientModel
-	err := coll.FindOneAndUpdate(ctx, filter, update, opts).Decode(&updatedDocument)
+	var oldDoc clientModel
+	var updatedDoc clientModel
+	err := coll.FindOneAndUpdate(ctx, filter, update, opts).Decode(&oldDoc)
 
 	if err != nil {
 		return nil, errors.PutFailed(err)
 	}
 
-	err = coll.FindOne(ctx, filter).Decode(&updatedDocument)
+	err = coll.FindOne(ctx, filter).Decode(&updatedDoc)
 	if err != nil {
 		return nil, errors.DatabaseError(err)
 	}
-	return updatedDocument.Populate(ctx)
+
+	loggedClient := event_log.LogUpdated(ctx, oldDoc.logable(), updatedDoc.logable(), editor)
+	_ = appendLog(ctx, &updatedDoc, loggedClient)
+	return updatedDoc.Populate(ctx)
 }

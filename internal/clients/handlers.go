@@ -129,7 +129,13 @@ func update(c *gin.Context) {
 		c.Abort(); return
 	}
 
-	updated, err := update.patch(ctx, false)
+	editor := eventLogTypes.Editor {
+		Oid: primitive.NewObjectID() ,
+		Name: "Bob",
+		Collection: "Bob123",
+	}
+
+	updated, err := update.patch(ctx, &editor, false)
 	if err != nil {
 		c.JSON(err.Code,
 			gin.H{"success": false, "message": err.Error()})
