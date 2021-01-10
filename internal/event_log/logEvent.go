@@ -73,18 +73,12 @@ func LogCreated(ctx context.Context, data interface{}, editor *types.Editor) *ty
 	switch v := data.(type) {
 		case *jobTypes.LogableJob:
 			changesMap, err = structToMap(v, "m"); if err != nil { return nil }
-			/*for key, value := range changesMap {
-				changes[key] = types.Change{Old:nil, New:value}
-			}*/
 
 		case *clientTypes.LogableClient:
 			changesMap, err = structToMap(v, "m"); if err != nil { return nil }
-			/*for key, value := range changesMap {
-				changes[key] = types.Change{Old:nil, New:value}
-			}*/
 
 		default:
-			fmt.Println("type unknown")        // here v has type interface{}
+			fmt.Println("type unknown")
 	}
 
 	for key, value := range changesMap {
@@ -114,15 +108,9 @@ func LogUpdated(ctx context.Context, prev interface{}, next interface{}, editor 
 	switch vPrev := prev.(type) {
 		case *jobTypes.LogableJob:
 			prevChangesMap, err = structToMap(vPrev, "m"); if err != nil { return nil }
-			/*for key, value := range prevChangesMap {
-				changes[key] = types.Change{Old:nil, New:value}
-			}*/
 
 		case *clientTypes.LogableClient:
 			prevChangesMap, err = structToMap(vPrev, "m"); if err != nil { return nil }
-			/*for key, value := range prevChangesMap {
-				changes[key] = types.Change{Old:nil, New:value}
-			}*/
 
 		default:
 			fmt.Println("type unknown")
@@ -131,32 +119,14 @@ func LogUpdated(ctx context.Context, prev interface{}, next interface{}, editor 
 	switch vNext := next.(type) {
 		case *jobTypes.LogableJob:
 			nextChangesMap, err = structToMap(vNext, "m"); if err != nil { return nil }
-			/*for key, value := range nextChangesMap{
-				changes[key] = types.Change{Old:nil, New:value}
-			}*/
 
 		case *clientTypes.LogableClient:
 			nextChangesMap, err = structToMap(vNext, "m"); if err != nil { return nil }
-			/*for key, value := range nextChangesMap {
-				changes[key] = types.Change{Old:nil, New:value}
-			}*/
 
 		default:
 			fmt.Println("type unknown")
 	}
-	/*
-	vPrev, ok := prev.(*jobTypes.LogableJob); if ok {
-		prevChangesMap, err = structToMap(vPrev, "m"); if err != nil {
-			return nil
-		}
-	}
-	vNext, ok := next.(*jobTypes.LogableJob); if ok {
-		nextChangesMap, err = structToMap(vNext, "m"); if err != nil {
-			return nil
-		}
-	}*/
 
-	//changes := make(map[field]types.Change)
 	for key, value := range nextChangesMap {
 		if !reflect.DeepEqual(nextChangesMap[key], prevChangesMap[key]) {
 			changes[key] = types.Change{Old:prevChangesMap[key], New:value}
