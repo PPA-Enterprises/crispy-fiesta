@@ -165,7 +165,7 @@ func deleteJobFromClient(ctx context.Context, jobID, clientID string) *errors.Re
 	return nil
 }
 
-func DeleteByID(ctx context.Context, id string) *errors.ResponseError {
+func (*types.Deletor) DeleteByID(ctx context.Context, id string) *errors.ResponseError {
 	coll := db.Connection().Use(db.DefaultDatabase, "deleted_jobs")
 	job, err := jobByID(ctx, id); if err != nil {
 		return err

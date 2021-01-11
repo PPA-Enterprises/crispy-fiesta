@@ -1,6 +1,8 @@
 package types
 
 import(
+	"context"
+	"internal/common/errors"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -22,3 +24,4 @@ type LogableJob struct {
 	AppointmentInfo string `m:"Appointment Info"`
 	Notes			string `m:"Notes"`
 }
+

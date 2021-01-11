@@ -236,3 +236,26 @@ func RemoveJob(ctx context.Context, clientID, jobID string) *errors.ResponseErro
 	return nil
 }
 
+func deleteByID(ctx context.Context, clientID string) *errors.ResponseError {
+	coll := db.Connection().Use(db.DefaultDatabase, "deleted_clients")
+	client, err := clientByID(ctx, clientID); if err != nil {
+		return err
+	}
+
+	_, insertErr := coll.InsertOne(ctx, client); if insertErr != nil {
+		return errors.DatabaseError(insertErr)
+	}
+
+	jobDestroyer := jobTypes.DeletorFactory()
+
+	for _, oid := range client.Jobs {
+		_ := jobDestroyer.DeleteByID(ctx, oid)
+	}
+
+	coll = db.Connection().Use(db.DefaultDatabase, "clients")
+	_, delErr := coll.DeleteOne(ctx, bson.D{{"_id", client.ID}})
+	if delErr != nil {
+		return errors.DatabaseError(delErr)
+	}
+	return nil
+}
