@@ -1,4 +1,4 @@
-module github.com/PPA-Enterprises/crispy-fiesta
+module PPA
 
 go 1.15
 
