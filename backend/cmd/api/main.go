@@ -4,8 +4,6 @@ import (
 	"flag"
 	"pkg/common/config"
 	"pkg/api"
-	//"github.com/ribice/gorsk/pkg/api"
-	//"github.com/ribice/gorsk/pkg/utl/config"
 )
 
 func main() {

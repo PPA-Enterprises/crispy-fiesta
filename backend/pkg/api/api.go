@@ -17,6 +17,7 @@ import (
 
 	//"github.com/ribice/gorsk/pkg/utl/config"
 	"pkg/common/config"
+	"pkg/common/mongo"
 //	"github.com/ribice/gorsk/pkg/utl/jwt"
 //	authMw "github.com/ribice/gorsk/pkg/utl/middleware/auth"
 //	"github.com/ribice/gorsk/pkg/utl/postgres"
@@ -27,11 +28,8 @@ import (
 
 // Start starts the API service
 func Start(cfg *config.Configuration) error {
-	/*db, err := postgres.New(os.Getenv("DATABASE_URL"), cfg.DB.Timeout, cfg.DB.LogQueries)
-	if err != nil {
-		return err
-	}
-
+	_ = mongo.Init("mongodb://localhost:27017")
+/*
 	sec := secure.New(cfg.App.MinPasswordStr, sha1.New())
 	rbac := rbac.Service{}
 	jwt, err := jwt.New(cfg.JWT.SigningAlgorithm, os.Getenv("JWT_SECRET"), cfg.JWT.DurationMinutes, cfg.JWT.MinSecretLength)
