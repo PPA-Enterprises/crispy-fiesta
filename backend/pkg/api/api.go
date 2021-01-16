@@ -15,7 +15,8 @@ import (
 //	ul "github.com/ribice/gorsk/pkg/api/user/logging"
 //	ut "github.com/ribice/gorsk/pkg/api/user/transport"
 
-	"github.com/ribice/gorsk/pkg/utl/config"
+	//"github.com/ribice/gorsk/pkg/utl/config"
+	"pkg/common/config"
 //	"github.com/ribice/gorsk/pkg/utl/jwt"
 //	authMw "github.com/ribice/gorsk/pkg/utl/middleware/auth"
 //	"github.com/ribice/gorsk/pkg/utl/postgres"

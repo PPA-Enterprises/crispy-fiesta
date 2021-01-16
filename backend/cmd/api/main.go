@@ -2,12 +2,13 @@ package main
 
 import (
 	"flag"
+	"pkg/common/config"
+	"pkg/api"
 	//"github.com/ribice/gorsk/pkg/api"
 	//"github.com/ribice/gorsk/pkg/utl/config"
 )
 
 func main() {
-
 	cfgPath := flag.String("p", "./cmd/api/conf.local.yaml", "Path to config file")
 	flag.Parse()
 
