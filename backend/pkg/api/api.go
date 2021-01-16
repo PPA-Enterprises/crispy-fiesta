@@ -20,7 +20,6 @@ import (
 	"pkg/common/mongo"
 //	"github.com/ribice/gorsk/pkg/utl/jwt"
 //	authMw "github.com/ribice/gorsk/pkg/utl/middleware/auth"
-//	"github.com/ribice/gorsk/pkg/utl/postgres"
 //	"github.com/ribice/gorsk/pkg/utl/rbac"
 //	"github.com/ribice/gorsk/pkg/utl/secure"
 //	"github.com/ribice/gorsk/pkg/utl/server"
