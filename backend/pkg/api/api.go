@@ -12,7 +12,7 @@ import (
 )
 
 func Start(cfg *config.Configuration) error {
-	db := mongo.Init("mongodb://localhost:27017")
+	db := mongo.Init("mongodb://localhost:27017", "PPA")
 	server := gin.Default()
 	server.Use(cors.Default())
 	server.NoRoute(func(c *gin.Context) {
@@ -22,7 +22,7 @@ func Start(cfg *config.Configuration) error {
 	v1 := server.Group("/api/v1")
 	rbac := rbac.Service{}
 	security := secure.New()
-	userTransport.NewHTTP(userService.Init(db, rbac, security), v1)
+	userTransport.NewHTTP(userService.Init(db, "users", rbac, security), v1)
 	server.Run()
 	return nil
 }

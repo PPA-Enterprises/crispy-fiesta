@@ -12,20 +12,15 @@ import (
 
 type DBConnection struct {
 	client *mongo.Client
+	databaseName string
 }
 
-var dbConnect *DBConnection
-
-func Init(host string) *DBConnection {
-	dbConnect = NewConnection(host)
+func Init(host, db string) *DBConnection {
+	dbConnect := NewConnection(host, db)
 	return dbConnect
 }
 
-func Connection() *DBConnection {
-	return dbConnect
-}
-
-func NewConnection(host string) (conn *DBConnection) {
+func NewConnection(host, db string) (conn *DBConnection) {
 	//TODO: Auth
 	//client, err := mongo.NewClient(options.Client().SetReplicaSet(repl).ApplyURI(host))
 	client, err := mongo.NewClient(options.Client().ApplyURI(host))
@@ -44,13 +39,12 @@ func NewConnection(host string) (conn *DBConnection) {
 	err = client.Ping(pingCtx, nil)
 	if err != nil { panic(err)}
 
-	conn = &DBConnection{client}
+	conn = &DBConnection{client: client, databaseName: db}
 	return conn
-
 }
 
-func (conn *DBConnection) Use(dbName, tableName string) *mongo.Collection {
-	return conn.client.Database(dbName).Collection(tableName)
+func (conn *DBConnection) Use(tableName string) *mongo.Collection {
+	return conn.client.Database(conn.databaseName).Collection(tableName)
 }
 
 func (conn *DBConnection) Disconnect() {
