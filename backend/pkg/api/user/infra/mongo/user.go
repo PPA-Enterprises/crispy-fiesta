@@ -4,13 +4,13 @@ import (
 	"errors"
 	"context"
 	"pkg/common/mongo"
-	"go.go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/bson"
 )
 
 type User struct{}
 
-func (u User) Create(db *mongo.DBConnection, ctx context.Context, user *PPA.User) (PPA.User, error) {
-	coll := db.Connection().Use(db.DefaultDatabase, "users")
+func (u User) Create(db *mongo.DBConnection, ctx context.Context, user *PPA.User) (*PPA.User, error) {
+	coll := db.Use("PPA", "users")
 
 	if(emailExists(db, ctx, user.Email)) {
 		return nil, errors.New("")
@@ -23,11 +23,11 @@ func (u User) Create(db *mongo.DBConnection, ctx context.Context, user *PPA.User
 	return user, nil
 
 }
-func(u User) View()
-func(u User) List()
-func(u User) Delete()
+func(u User) View(){}
+func(u User) List(){}
+func(u User) Delete(){}
 func fetchByEmail(db *mongo.DBConnection, ctx context.Context, email string) (PPA.User, error) {
-	coll := db.Connection().Use(db.DefaultDatabase, "users")
+	coll := db.Use("PPA", "users")
 
 	var user PPA.User
 	err := coll.FindOne(ctx, bson.D{{"email", email}}).Decode(&user)

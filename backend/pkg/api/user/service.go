@@ -21,13 +21,13 @@ func New(db *mongo.DBConnection, udb Repository, rbac RBAC, securer Securer) *Us
 }
 
 func Init(db *mongo.DBConnection, rbac RBAC, securer Securer) *User {
-	return New(db, dbQuery.User, rbac, securer)
+	return New(db, dbQuery.User{}, rbac, securer)
 }
 
 type User struct {
 	db *mongo.DBConnection
 	udb Repository
-	//rbac RBAC
+	rbac RBAC
 	securer Securer
 }
 
@@ -36,7 +36,7 @@ type Securer interface {
 }
 
 type Repository interface {
-	Create(*mongo.DBConnection, context.Context, *PPA.User) (PPA.User, error)
+	Create(*mongo.DBConnection, context.Context, *PPA.User) (*PPA.User, error)
 	//View(*mongo.DBConnection, PPA.User) (PPA.User, error)
 	//Update(*mongo.DBConnection, PPA.User) (PPA.User, error)
 	//List(*mongo.DBConnection) ([]PPA.User, error)
