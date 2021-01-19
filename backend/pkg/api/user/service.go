@@ -9,7 +9,7 @@ import(
 )
 
 type Service interface {
-	Create(context.Context, PPA.User) (*PPA.User, error)
+	Create(*gin.Context, PPA.User) (*PPA.User, error)
 	//List(context.Context) ([]PPA.User, error)
 	//View(context.Context) (PPA.User, error)
 	//Delete(context.Context) error
@@ -44,6 +44,6 @@ type Repository interface {
 }
 
 type RBAC interface {
-	User(*gin.Context) PPA.AuthUser
-	AccountCreate(*gin.Context) error
+	//User(*gin.Context) PPA.AuthUser
+	//AccountCreate(*gin.Context) error
 }

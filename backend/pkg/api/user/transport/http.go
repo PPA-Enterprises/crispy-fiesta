@@ -1,10 +1,8 @@
 package transport
 
 import(
-	"context"
-	"time"
+	"PPA"
 	"net/http"
-	"strconv"
 	"pkg/api/user"
 	"github.com/gin-gonic/gin"
 )
@@ -23,26 +21,26 @@ func NewHTTP(service user.Service, router *gin.RouterGroup) {
 	//routes.DELETE("/:id", delete)
 }
 
-func (h HTTP) create(c *gin.Context) error {
-	ctx, cancel := context.WithTimeout(c, 5*time.Second)
-	defer cancel()
+func (h HTTP) create(c *gin.Context) {
+	//check that user is allowed to make this request
 
 	var data signupRequest
 	if c.BindJSON(&data) != nil {
-		return c.AbortWithStatusJSON(http.StatusNotAcceptable, bindFailure())
+		c.AbortWithStatusJSON(http.StatusNotAcceptable, bindFailure()); return
 	}
 
-	newUser := h.fromSignupRequest(ctx, data)
-	if user, err := h.service.Create(ctx, h.db, &newUser); err != nil {
+	newUser := h.fromSignupRequest(&data)
+	created, err := h.service.Create(c, newUser); if err != nil {
 		//return error
+		c.AbortWithStatusJSON(http.StatusNotAcceptable, bindFailure()); return
 	}
-	return c.JSON(http.StatusCreated, userCreated(user))
+	c.JSON(http.StatusCreated, userCreated(created)); return
 }
 
 func bindFailure() gin.H {
 	return gin.H{"success": false, "message": "Provide relevant fields"}
 }
 
-func userCreated(user *PPA.User) gin.H {
-	return gin.H{"success": true, "message": "User Created", "payload": user}
+func userCreated(u *PPA.User) gin.H {
+	return gin.H{"success": true, "message": "User Created", "payload": u}
 }
