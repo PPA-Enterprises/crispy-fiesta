@@ -2,17 +2,18 @@ package user
 
 import(
 	"PPA"
+	"context"
 	"pkg/common/mongo"
 	dbQuery "pkg/api/user/infra/mongo"
 	"github.com/gin-gonic/gin"
 )
 
 type Service interface {
-	Create(*gin.Context, PPA.User) (PPA.User, error)
-	List(*gin.Context) ([]PPA.User, error)
-	View(*gin.Context) (PPA.User, error)
-	Delete(*gin.Context) error
-	Update(*gin.Context) (PPA.User, error)
+	Create(context.Context, PPA.User) (*PPA.User, error)
+	//List(context.Context) ([]PPA.User, error)
+	//View(context.Context) (PPA.User, error)
+	//Delete(context.Context) error
+	//Update(context.Context) (PPA.User, error)
 }
 
 func New(db *mongo.DBConnection, udb Repository, rbac RBAC, securer Securer) *User {
@@ -26,7 +27,7 @@ func Init(db *mongo.DBConnection, rbac RBAC, securer Securer) *User {
 type User struct {
 	db *mongo.DBConnection
 	udb Repository
-	rbac RBAC
+	//rbac RBAC
 	securer Securer
 }
 
@@ -35,11 +36,11 @@ type Securer interface {
 }
 
 type Repository interface {
-	Create(*mongo.DBConnection, PPA.User) (PPA.User, error)
-	View(*mongo.DBConnection, PPA.User) (PPA.User, error)
-	Update(*mongo.DBConnection, PPA.User) (PPA.User, error)
-	List(*mongo.DBConnection) ([]PPA.User, error)
-	Delete(*mongo.DBConnection) error
+	Create(*mongo.DBConnection, context.Context, *PPA.User) (PPA.User, error)
+	//View(*mongo.DBConnection, PPA.User) (PPA.User, error)
+	//Update(*mongo.DBConnection, PPA.User) (PPA.User, error)
+	//List(*mongo.DBConnection) ([]PPA.User, error)
+	//Delete(*mongo.DBConnection) error
 }
 
 type RBAC interface {
