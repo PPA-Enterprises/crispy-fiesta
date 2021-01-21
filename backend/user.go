@@ -9,7 +9,7 @@ type User struct {
 	Name string `json:"name" bson:"name"`
 	Email string `json:"email" bson:"email"`
 	Password string `json:"-" bson:"password"`
-	IsDeleted bool `json:"is_deleted" bson:"is_deleted"`
+	IsDeleted bool `json:"-" bson:"is_deleted"`
 }
 
 type AuthUser struct {

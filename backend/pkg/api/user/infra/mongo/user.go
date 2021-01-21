@@ -33,7 +33,21 @@ func(u User) ViewById(db *mongo.DBConnection, ctx context.Context, oid primitive
 	return &user, err
 }
 
-func(u User) List(){}
+func(u User) List(db *mongo.DBConnection, ctx context.Context) (*[]PPA.User, error) {
+	coll := db.Use("users")
+
+	filter := bson.D {{"is_deleted", false}}
+	//check error?
+	cursor, err := coll.Find(ctx, filter)
+	defer cursor.Close(ctx)
+
+	var users []PPA.User
+	if err = cursor.All(ctx, &users); err != nil {
+		return nil, errors.New("")
+	}
+	return &users, nil
+}
+
 func(u User) Delete(){}
 func fetchByEmail(db *mongo.DBConnection, ctx context.Context, email string) (PPA.User, error) {
 	coll := db.Use("users")

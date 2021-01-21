@@ -41,7 +41,16 @@ func (u User) ViewById(c *gin.Context, id string) (*PPA.User, error) {
 	return u.udb.ViewById(u.db, ctx, oid)
 }
 
-func (u User) List() {}
+func (u User) List(c *gin.Context) (*[]PPA.User, error) {
+	//additional security stuff?
+	duration := time.Now().Add(5*time.Second)
+	ctx, cancel := context.WithDeadline(c.Request.Context(), duration)
+	defer cancel()
+
+	//Populate anything?
+	return u.udb.List(u.db, ctx)
+}
+
 func (u User) Delete() {}
 
 func (u User) oidExists(ctx context.Context, oid primitive.ObjectID) bool {

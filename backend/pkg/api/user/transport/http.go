@@ -12,12 +12,12 @@ type HTTP struct {
 }
 
 func NewHTTP(service user.Service, router *gin.RouterGroup) {
-	httpService := HTTP{service}
+	httpTransport := HTTP{service}
 	routes := router.Group("/users")
-	routes.POST("/", httpService.create)
+	routes.POST("/", httpTransport.create)
 	//routes.POST("/login", login)
-	//routes.GET("/", getUsers)
-	routes.GET("/:id", httpService.viewById)
+	routes.GET("/", httpTransport.list)
+	routes.GET("/:id", httpTransport.viewById)
 	//routes.PATCH("/:id", update)
 	//routes.DELETE("/:id", delete)
 }
@@ -51,6 +51,13 @@ func (h HTTP) viewById(c *gin.Context) {
 	c.JSON(http.StatusOK, fetched(fetchedUser)); return
 }
 
+func (h HTTP) list (c *gin.Context) {
+	users, err := h.service.List(c); if err != nil {
+		c.AbortWithStatusJSON(http.StatusNotAcceptable, fetchFailure()); return
+	}
+	c.JSON(http.StatusOK, fetchedAll(users)); return
+}
+
 func bindFailure() gin.H {
 	return gin.H{"success": false, "message": "Provide relevant fields"}
 }
@@ -60,6 +67,10 @@ func fetchFailure() gin.H {
 }
 
 func fetched(u *PPA.User) gin.H {
+	return gin.H{"success": true, "message": "Fetched User", "payload": u}
+}
+
+func fetchedAll(u *[]PPA.User) gin.H {
 	return gin.H{"success": true, "message": "Fetched User", "payload": u}
 }
 

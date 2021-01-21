@@ -11,7 +11,7 @@ import(
 
 type Service interface {
 	Create(*gin.Context, PPA.User) (*PPA.User, error)
-	//List(context.Context) ([]PPA.User, error)
+	List(*gin.Context) (*[]PPA.User, error)
 	ViewById(*gin.Context, string) (*PPA.User, error)
 	//Delete(context.Context) error
 	//Update(context.Context) (PPA.User, error)
@@ -41,7 +41,7 @@ type Repository interface {
 	Create(*mongo.DBConnection, context.Context, *PPA.User) (*PPA.User, error)
 	ViewById(*mongo.DBConnection, context.Context, primitive.ObjectID) (*PPA.User, error)
 	//Update(*mongo.DBConnection, PPA.User) (PPA.User, error)
-	//List(*mongo.DBConnection) ([]PPA.User, error)
+	List(*mongo.DBConnection, context.Context) (*[]PPA.User, error)
 	//Delete(*mongo.DBConnection) error
 }
 
