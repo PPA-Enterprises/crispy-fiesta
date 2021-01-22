@@ -73,6 +73,31 @@ func (u User) Delete(c *gin.Context, id string) error {
 	return u.udb.Delete(u.db, ctx, oid)
 }
 
+type Update struct {
+	Name string
+	Email string
+}
+
+func (u User) Update(c *gin.Context, req Update, id string) (*PPA.User, error) {
+	duration := time.Now().Add(5*time.Second)
+	ctx, cancel := context.WithDeadline(c.Request.Context(), duration)
+	defer cancel()
+
+	oid, err := primitive.ObjectIDFromHex(id); if err != nil {
+		return nil, errors.New("")
+	}
+
+	if err := u.udb.Update(u.db, ctx, oid, &PPA.User {
+		ID: primitive.NilObjectID,
+		Name: req.Name,
+		Email: req.Email,
+		Password: "",
+	}); err != nil {
+		return nil, errors.New("") //failed to update
+	}
+	return u.udb.ViewById(u.db, ctx, oid)
+}
+
 func (u User) oidExists(ctx context.Context, oid primitive.ObjectID) bool {
 	coll := u.db.Use(u.collection)
 

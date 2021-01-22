@@ -74,6 +74,19 @@ func(u User) Delete(db *mongo.DBConnection, ctx context.Context, oid primitive.O
 	return nil
 }
 
+func (u User) Update(db *mongo.DBConnection, ctx context.Context, oid primitive.ObjectID, update *PPA.User) error {
+	coll := db.Use("users")
+
+	filter := bson.D{{"_id", oid}}
+	updateDoc := bson.D{{"$set", update}}
+
+	var oldDoc PPA.User
+	if err := coll.FindOneAndUpdate(ctx, filter, updateDoc).Decode(&oldDoc); err != nil {
+		return errors.New("") //failed to update
+	}
+	return nil
+}
+
 func fetchByEmail(db *mongo.DBConnection, ctx context.Context, email string) (PPA.User, error) {
 	coll := db.Use("users")
 

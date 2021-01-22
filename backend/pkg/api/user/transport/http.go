@@ -19,7 +19,7 @@ func NewHTTP(service user.Service, router *gin.RouterGroup) {
 	routes.GET("/", httpTransport.list)
 	routes.GET("/email", httpTransport.viewByEmail)
 	routes.GET("id/:id", httpTransport.viewById)
-	//routes.PATCH("/:id", update)
+	routes.PATCH("/:id", httpTransport.update)
 	routes.DELETE("/:id",httpTransport.delete)
 }
 
@@ -85,6 +85,23 @@ func (h HTTP) delete(c *gin.Context) {
 	c.JSON(http.StatusOK, deleted()); return
 }
 
+func (h HTTP) update(c *gin.Context) {
+	id := c.Param("id")
+	if len(id) <= 0 {
+		c.AbortWithStatusJSON(http.StatusNotAcceptable, bindFailure()); return
+	}
+
+	var data updateRequest
+	if c.BindJSON(&data) != nil {
+		c.AbortWithStatusJSON(http.StatusNotAcceptable, bindFailure()); return
+	}
+
+	updated, err := h.service.Update(c, h.fromUpdateRequest(&data), id); if err != nil {
+		c.AbortWithStatusJSON(http.StatusNotAcceptable, bindFailure()); return
+	}
+	c.JSON(http.StatusOK, userUpdated(updated)); return
+}
+
 func bindFailure() gin.H {
 	return gin.H{"success": false, "message": "Provide relevant fields"}
 }
@@ -107,4 +124,8 @@ func fetchedAll(u *[]PPA.User) gin.H {
 
 func userCreated(u *PPA.User) gin.H {
 	return gin.H{"success": true, "message": "User Created", "payload": u}
+}
+
+func userUpdated(u *PPA.User) gin.H {
+	return gin.H{"success": true, "message": "User Updated", "payload": u}
 }

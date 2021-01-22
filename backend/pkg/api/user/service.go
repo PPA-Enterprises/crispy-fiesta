@@ -15,7 +15,7 @@ type Service interface {
 	ViewById(*gin.Context, string) (*PPA.User, error)
 	ViewByEmail(*gin.Context, string) (*PPA.User, error)
 	Delete(*gin.Context, string) error
-	//Update(context.Context) (PPA.User, error)
+	Update(*gin.Context, Update, string) (*PPA.User, error)
 }
 
 func New(db *mongo.DBConnection, coll string, udb Repository, rbac RBAC, securer Securer) *User {
@@ -42,7 +42,7 @@ type Repository interface {
 	Create(*mongo.DBConnection, context.Context, *PPA.User) (*PPA.User, error)
 	ViewById(*mongo.DBConnection, context.Context, primitive.ObjectID) (*PPA.User, error)
 	ViewByEmail(*mongo.DBConnection, context.Context, string) (*PPA.User, error)
-	//Update(*mongo.DBConnection, PPA.User) (PPA.User, error)
+	Update(*mongo.DBConnection, context.Context, primitive.ObjectID, *PPA.User) error
 	List(*mongo.DBConnection, context.Context) (*[]PPA.User, error)
 	Delete(*mongo.DBConnection, context.Context, primitive.ObjectID) error
 }
