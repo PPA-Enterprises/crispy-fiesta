@@ -60,7 +60,18 @@ func (u User) ViewByEmail(c *gin.Context, email string) (*PPA.User, error) {
 	return u.udb.ViewByEmail(u.db, ctx, email)
 }
 
-func (u User) Delete() {}
+func (u User) Delete(c *gin.Context, id string) error {
+	//additional security stuff?
+	duration := time.Now().Add(5*time.Second)
+	ctx, cancel := context.WithDeadline(c.Request.Context(), duration)
+	defer cancel()
+
+	oid, err := primitive.ObjectIDFromHex(id); if err != nil {
+		return errors.New("")
+	}
+
+	return u.udb.Delete(u.db, ctx, oid)
+}
 
 func (u User) oidExists(ctx context.Context, oid primitive.ObjectID) bool {
 	coll := u.db.Use(u.collection)

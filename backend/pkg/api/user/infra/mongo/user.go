@@ -44,9 +44,8 @@ func(u User) ViewByEmail(db *mongo.DBConnection, ctx context.Context, email stri
 func(u User) List(db *mongo.DBConnection, ctx context.Context) (*[]PPA.User, error) {
 	coll := db.Use("users")
 
-	filter := bson.D {{"is_deleted", false}}
 	//check error?
-	cursor, err := coll.Find(ctx, filter)
+	cursor, err := coll.Find(ctx, bson.D{{}})
 	defer cursor.Close(ctx)
 
 	var users []PPA.User
@@ -56,7 +55,25 @@ func(u User) List(db *mongo.DBConnection, ctx context.Context) (*[]PPA.User, err
 	return &users, nil
 }
 
-func(u User) Delete(){}
+func(u User) Delete(db *mongo.DBConnection, ctx context.Context, oid primitive.ObjectID) error {
+	coll := db.Use("deleted_users")
+
+	fetched, err := u.ViewById(db, ctx, oid); if err != nil {
+		return errors.New("")//user doesnt exist
+	}
+
+	if _, insertErr := coll.InsertOne(ctx, fetched); insertErr != nil {
+		return errors.New("") //insert err, db err
+	}
+
+	coll = db.Use("users")
+	if _, delErr := coll.DeleteOne(ctx, bson.D{{"_id", oid}}); delErr != nil {
+		return errors.New("") //db error
+	}
+
+	return nil
+}
+
 func fetchByEmail(db *mongo.DBConnection, ctx context.Context, email string) (PPA.User, error) {
 	coll := db.Use("users")
 

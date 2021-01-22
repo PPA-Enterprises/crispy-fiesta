@@ -14,7 +14,7 @@ type Service interface {
 	List(*gin.Context) (*[]PPA.User, error)
 	ViewById(*gin.Context, string) (*PPA.User, error)
 	ViewByEmail(*gin.Context, string) (*PPA.User, error)
-	//Delete(context.Context) error
+	Delete(*gin.Context, string) error
 	//Update(context.Context) (PPA.User, error)
 }
 
@@ -44,7 +44,7 @@ type Repository interface {
 	ViewByEmail(*mongo.DBConnection, context.Context, string) (*PPA.User, error)
 	//Update(*mongo.DBConnection, PPA.User) (PPA.User, error)
 	List(*mongo.DBConnection, context.Context) (*[]PPA.User, error)
-	//Delete(*mongo.DBConnection) error
+	Delete(*mongo.DBConnection, context.Context, primitive.ObjectID) error
 }
 
 type RBAC interface {

@@ -20,7 +20,7 @@ func NewHTTP(service user.Service, router *gin.RouterGroup) {
 	routes.GET("/email", httpTransport.viewByEmail)
 	routes.GET("id/:id", httpTransport.viewById)
 	//routes.PATCH("/:id", update)
-	//routes.DELETE("/:id", delete)
+	routes.DELETE("/:id",httpTransport.delete)
 }
 
 func (h HTTP) create(c *gin.Context) {
@@ -70,12 +70,27 @@ func (h HTTP) viewByEmail(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, fetched(fetchedUser)); return
-
 }
 
+func (h HTTP) delete(c *gin.Context) {
+	id := c.Param("id")
+	if len(id) <= 0 {
+		c.AbortWithStatusJSON(http.StatusNotAcceptable, bindFailure()); return
+	}
+
+	if err := h.service.Delete(c, id); err != nil {
+		//TODO: give proper error
+		c.AbortWithStatusJSON(http.StatusNotAcceptable, bindFailure()); return
+	}
+	c.JSON(http.StatusOK, deleted()); return
+}
 
 func bindFailure() gin.H {
 	return gin.H{"success": false, "message": "Provide relevant fields"}
+}
+
+func deleted() gin.H {
+	return gin.H{"success": true, "message": "User Deleted"}
 }
 
 func fetchFailure() gin.H {
