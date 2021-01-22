@@ -19,7 +19,6 @@ func NewHTTP(service user.Service, router *gin.RouterGroup) {
 	httpTransport := HTTP{service}
 	routes := router.Group("/users")
 	routes.POST("/", httpTransport.create)
-	//routes.POST("/login", login)
 	routes.GET("/", httpTransport.list)
 	routes.GET("/email", httpTransport.viewByEmail)
 	routes.GET("id/:id", httpTransport.viewById)
