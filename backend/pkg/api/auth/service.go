@@ -28,17 +28,20 @@ func New(db *mongo.DBConnection, udb UDB, tkgen TokenGenerator, sec Securer, rba
 }
 
 func Init(db *mongo.DBConnection, tkgen TokenGenerator, sec Securer, rbac RBAC) Auth {
-	return New(db, mongo.User{}, tkgen, sec, rbac)
+	return New(db, dbQuery.User{}, tkgen, sec, rbac)
 }
 
 type Service interface {
 	Authenticate(*gin.Context, string, string) (PPA.AuthToken, error)
-	//Refresh(*gin.Context, string) (string, error)
+	Refresh(*gin.Context, string) (string, error)
 }
 
 type UDB interface {
 	ViewById(*mongo.DBConnection, context.Context, primitive.ObjectID) (PPA.user, error)
 	ViewByEmail(*mongo.DBConnection, context.Context, string) (*PPA.User, error)
+	ViewByToken(*mongo.DBConnection, context.Context, string) (*PPA.User, error)
+	Update(*mongo.DBConnection, context.Context, *PPA.User) error
+
 }
 
 type TokenGenerator interface {
