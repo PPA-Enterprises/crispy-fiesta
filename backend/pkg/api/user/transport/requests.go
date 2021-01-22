@@ -27,6 +27,5 @@ func (h HTTP) fromSignupRequest(data *signupRequest) PPA.User {
 		Name: data.Name,
 		Email: data.Email,
 		Password: data.Password,
-		IsDeleted: false,
 	}
 }
