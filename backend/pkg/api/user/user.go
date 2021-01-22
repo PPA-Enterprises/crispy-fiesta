@@ -51,6 +51,15 @@ func (u User) List(c *gin.Context) (*[]PPA.User, error) {
 	return u.udb.List(u.db, ctx)
 }
 
+func (u User) ViewByEmail(c *gin.Context, email string) (*PPA.User, error) {
+	//additional security stuff?
+	duration := time.Now().Add(5*time.Second)
+	ctx, cancel := context.WithDeadline(c.Request.Context(), duration)
+	defer cancel()
+
+	return u.udb.ViewByEmail(u.db, ctx, email)
+}
+
 func (u User) Delete() {}
 
 func (u User) oidExists(ctx context.Context, oid primitive.ObjectID) bool {

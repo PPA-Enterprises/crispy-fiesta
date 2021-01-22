@@ -33,6 +33,14 @@ func(u User) ViewById(db *mongo.DBConnection, ctx context.Context, oid primitive
 	return &user, err
 }
 
+func(u User) ViewByEmail(db *mongo.DBConnection, ctx context.Context, email string) (*PPA.User, error) {
+	coll := db.Use("users")
+
+	var user PPA.User
+	err := coll.FindOne(ctx, bson.D{{"email", email}}).Decode(&user)
+	return &user, err
+}
+
 func(u User) List(db *mongo.DBConnection, ctx context.Context) (*[]PPA.User, error) {
 	coll := db.Use("users")
 

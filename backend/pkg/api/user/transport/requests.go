@@ -7,8 +7,16 @@ import (
 
 type signupRequest struct {
 	Name string `json:"name" binding:"required,alphanum"`
-	Email string `json:"email" binding:"required,email"`
+	Email string `json:"email" binding:"required" email`
 	Password string `json:"password" binding:"required,alphanum"`
+}
+
+type emailRequest struct {
+	Email string `json:"email" binding:"required" email`
+}
+
+func (h HTTP) fromEmailRequest(data *emailRequest) string {
+	return data.Email
 }
 
 func (h HTTP) fromSignupRequest(data *signupRequest) PPA.User {

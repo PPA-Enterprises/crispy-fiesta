@@ -17,7 +17,8 @@ func NewHTTP(service user.Service, router *gin.RouterGroup) {
 	routes.POST("/", httpTransport.create)
 	//routes.POST("/login", login)
 	routes.GET("/", httpTransport.list)
-	routes.GET("/:id", httpTransport.viewById)
+	routes.GET("/email", httpTransport.viewByEmail)
+	routes.GET("id/:id", httpTransport.viewById)
 	//routes.PATCH("/:id", update)
 	//routes.DELETE("/:id", delete)
 }
@@ -57,6 +58,21 @@ func (h HTTP) list (c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, fetchedAll(users)); return
 }
+
+func (h HTTP) viewByEmail(c *gin.Context) {
+	var data emailRequest
+	if c.BindJSON(&data) != nil {
+		c.AbortWithStatusJSON(http.StatusNotAcceptable, bindFailure()); return
+	}
+
+	fetchedUser, err := h.service.ViewByEmail(c, h.fromEmailRequest(&data)); if err != nil {
+		c.AbortWithStatusJSON(http.StatusNotAcceptable, fetchFailure()); return
+	}
+
+	c.JSON(http.StatusOK, fetched(fetchedUser)); return
+
+}
+
 
 func bindFailure() gin.H {
 	return gin.H{"success": false, "message": "Provide relevant fields"}
