@@ -6,13 +6,11 @@ import (
 	"time"
 
 	"github.com/ribice/gorsk"
-
 	"github.com/dgrijalva/jwt-go"
 )
 
 var minSecretLen = 128
 
-// New generates new JWT service necessary for auth middleware
 func New(algo, secret string, ttlMinutes, minSecretLength int) (Service, error) {
 	if minSecretLength > 0 {
 		minSecretLen = minSecretLength
@@ -32,19 +30,12 @@ func New(algo, secret string, ttlMinutes, minSecretLength int) (Service, error) 
 	}, nil
 }
 
-// Service provides a Json-Web-Token authentication implementation
 type Service struct {
-	// Secret key used for signing.
 	key []byte
-
-	// Duration for which the jwt token is valid.
 	ttl time.Duration
-
-	// JWT signing algorithm
 	algo jwt.SigningMethod
 }
 
-// ParseToken parses token from Authorization header
 func (s Service) ParseToken(authHeader string) (*jwt.Token, error) {
 	parts := strings.SplitN(authHeader, " ", 2)
 	if !(len(parts) == 2 && parts[0] == "Bearer") {
@@ -60,16 +51,12 @@ func (s Service) ParseToken(authHeader string) (*jwt.Token, error) {
 
 }
 
-/*// GenerateToken generates new JWT token and populates it with user data
 func (s Service) GenerateToken(u gorsk.User) (string, error) {
 	return jwt.NewWithClaims(s.algo, jwt.MapClaims{
-		"id":  u.Base.ID,
-		"u":   u.Username,
+		"_id":  u.ID.hex(),
 		"e":   u.Email,
 		"r":   u.Role.AccessLevel,
-		"c":   u.CompanyID,
-		"l":   u.LocationID,
 		"exp": time.Now().Add(s.ttl).Unix(),
 	}).SignedString(s.key)
 
-}*/
+}
