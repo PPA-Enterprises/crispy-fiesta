@@ -11,6 +11,10 @@ type HTTP struct {
 	service user.Service
 }
 
+const (
+	BadRequest = http.StatusBadRequest
+)
+
 func NewHTTP(service user.Service, router *gin.RouterGroup) {
 	httpTransport := HTTP{service}
 	routes := router.Group("/users")
@@ -27,8 +31,8 @@ func (h HTTP) create(c *gin.Context) {
 	//check that user is allowed to make this request
 
 	var data signupRequest
-	if c.BindJSON(&data) != nil {
-		PPA.Response(c, PPA.BadRequest); return
+	if err := c.ShouldBindJSON(&data); err != nil {
+		PPA.Response(c, err); return
 	}
 
 	newUser := h.fromSignupRequest(&data)
@@ -41,7 +45,7 @@ func (h HTTP) create(c *gin.Context) {
 func (h HTTP) viewById(c *gin.Context) {
 	id := c.Param("id")
 	if len(id) <= 0 {
-		PPA.Response(c, PPA.BadRequest); return
+		PPA.Response(c, PPA.NewAppError(BadRequest, "ID Required")); return
 	}
 
 	fetchedUser, err := h.service.ViewById(c, id); if err != nil {
@@ -60,8 +64,8 @@ func (h HTTP) list (c *gin.Context) {
 
 func (h HTTP) viewByEmail(c *gin.Context) {
 	var data emailRequest
-	if c.BindJSON(&data) != nil {
-		PPA.Response(c, PPA.BadRequest); return
+	if err := c.ShouldBindJSON(&data); err != nil {
+		PPA.Response(c, err); return
 	}
 
 	fetchedUser, err := h.service.ViewByEmail(c, h.fromEmailRequest(&data)); if err != nil {
@@ -74,7 +78,7 @@ func (h HTTP) viewByEmail(c *gin.Context) {
 func (h HTTP) delete(c *gin.Context) {
 	id := c.Param("id")
 	if len(id) <= 0 {
-		PPA.Response(c, PPA.BadRequest); return
+		PPA.Response(c, PPA.NewAppError(BadRequest, "ID Required")); return
 	}
 
 	if err := h.service.Delete(c, id); err != nil {
@@ -86,12 +90,12 @@ func (h HTTP) delete(c *gin.Context) {
 func (h HTTP) update(c *gin.Context) {
 	id := c.Param("id")
 	if len(id) <= 0 {
-		PPA.Response(c, PPA.BadRequest); return
+		PPA.Response(c, PPA.NewAppError(BadRequest, "ID Required")); return
 	}
 
 	var data updateRequest
-	if c.BindJSON(&data) != nil {
-		PPA.Response(c, PPA.BadRequest); return
+	if err := c.ShouldBindJSON(&data); err != nil {
+		PPA.Response(c, err); return
 	}
 
 	updated, err := h.service.Update(c, h.fromUpdateRequest(&data), id); if err != nil {
