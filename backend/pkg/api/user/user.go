@@ -2,7 +2,6 @@ package user
 
 import (
 	"context"
-	"errors"
 	"time"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -35,7 +34,7 @@ func (u User) ViewById(c *gin.Context, id string) (*PPA.User, error) {
 	defer cancel()
 
 	oid, err := primitive.ObjectIDFromHex(id); if err != nil {
-		return nil, errors.New("")
+		return nil, PPA.InternalError
 	}
 
 	return u.udb.ViewById(u.db, ctx, oid)
@@ -67,7 +66,7 @@ func (u User) Delete(c *gin.Context, id string) error {
 	defer cancel()
 
 	oid, err := primitive.ObjectIDFromHex(id); if err != nil {
-		return errors.New("")
+		return PPA.InternalError
 	}
 
 	return u.udb.Delete(u.db, ctx, oid)
@@ -84,7 +83,7 @@ func (u User) Update(c *gin.Context, req Update, id string) (*PPA.User, error) {
 	defer cancel()
 
 	oid, err := primitive.ObjectIDFromHex(id); if err != nil {
-		return nil, errors.New("")
+		return nil, PPA.InternalError
 	}
 
 	if err := u.udb.Update(u.db, ctx, oid, &PPA.User {
@@ -93,7 +92,7 @@ func (u User) Update(c *gin.Context, req Update, id string) (*PPA.User, error) {
 		Email: req.Email,
 		Password: "",
 	}); err != nil {
-		return nil, errors.New("") //failed to update
+		return nil, err
 	}
 	return u.udb.ViewById(u.db, ctx, oid)
 }

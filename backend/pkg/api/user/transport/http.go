@@ -28,13 +28,12 @@ func (h HTTP) create(c *gin.Context) {
 
 	var data signupRequest
 	if c.BindJSON(&data) != nil {
-		c.AbortWithStatusJSON(http.StatusNotAcceptable, bindFailure()); return
+		PPA.Response(c, PPA.BadRequest); return
 	}
 
 	newUser := h.fromSignupRequest(&data)
 	created, err := h.service.Create(c, newUser); if err != nil {
-		//TODO: give proper error
-		c.AbortWithStatusJSON(http.StatusNotAcceptable, bindFailure()); return
+		PPA.Response(c, err); return
 	}
 	c.JSON(http.StatusCreated, userCreated(created)); return
 }
@@ -42,11 +41,11 @@ func (h HTTP) create(c *gin.Context) {
 func (h HTTP) viewById(c *gin.Context) {
 	id := c.Param("id")
 	if len(id) <= 0 {
-		c.AbortWithStatusJSON(http.StatusNotAcceptable, bindFailure()); return
+		PPA.Response(c, PPA.BadRequest); return
 	}
 
 	fetchedUser, err := h.service.ViewById(c, id); if err != nil {
-		c.AbortWithStatusJSON(http.StatusNotAcceptable, fetchFailure()); return
+		PPA.Response(c, err); return
 	}
 
 	c.JSON(http.StatusOK, fetched(fetchedUser)); return
@@ -54,7 +53,7 @@ func (h HTTP) viewById(c *gin.Context) {
 
 func (h HTTP) list (c *gin.Context) {
 	users, err := h.service.List(c); if err != nil {
-		c.AbortWithStatusJSON(http.StatusNotAcceptable, fetchFailure()); return
+		PPA.Response(c, err); return
 	}
 	c.JSON(http.StatusOK, fetchedAll(users)); return
 }
@@ -62,11 +61,11 @@ func (h HTTP) list (c *gin.Context) {
 func (h HTTP) viewByEmail(c *gin.Context) {
 	var data emailRequest
 	if c.BindJSON(&data) != nil {
-		c.AbortWithStatusJSON(http.StatusNotAcceptable, bindFailure()); return
+		PPA.Response(c, PPA.BadRequest); return
 	}
 
 	fetchedUser, err := h.service.ViewByEmail(c, h.fromEmailRequest(&data)); if err != nil {
-		c.AbortWithStatusJSON(http.StatusNotAcceptable, fetchFailure()); return
+		PPA.Response(c, err); return
 	}
 
 	c.JSON(http.StatusOK, fetched(fetchedUser)); return
@@ -75,12 +74,11 @@ func (h HTTP) viewByEmail(c *gin.Context) {
 func (h HTTP) delete(c *gin.Context) {
 	id := c.Param("id")
 	if len(id) <= 0 {
-		c.AbortWithStatusJSON(http.StatusNotAcceptable, bindFailure()); return
+		PPA.Response(c, PPA.BadRequest); return
 	}
 
 	if err := h.service.Delete(c, id); err != nil {
-		//TODO: give proper error
-		c.AbortWithStatusJSON(http.StatusNotAcceptable, bindFailure()); return
+		PPA.Response(c, err); return
 	}
 	c.JSON(http.StatusOK, deleted()); return
 }
@@ -88,30 +86,23 @@ func (h HTTP) delete(c *gin.Context) {
 func (h HTTP) update(c *gin.Context) {
 	id := c.Param("id")
 	if len(id) <= 0 {
-		c.AbortWithStatusJSON(http.StatusNotAcceptable, bindFailure()); return
+		PPA.Response(c, PPA.BadRequest); return
 	}
 
 	var data updateRequest
 	if c.BindJSON(&data) != nil {
-		c.AbortWithStatusJSON(http.StatusNotAcceptable, bindFailure()); return
+		PPA.Response(c, PPA.BadRequest); return
 	}
 
 	updated, err := h.service.Update(c, h.fromUpdateRequest(&data), id); if err != nil {
-		c.AbortWithStatusJSON(http.StatusNotAcceptable, bindFailure()); return
+		PPA.Response(c, err); return
 	}
 	c.JSON(http.StatusOK, userUpdated(updated)); return
 }
 
-func bindFailure() gin.H {
-	return gin.H{"success": false, "message": "Provide relevant fields"}
-}
 
 func deleted() gin.H {
 	return gin.H{"success": true, "message": "User Deleted"}
-}
-
-func fetchFailure() gin.H {
-	return gin.H{"success": false, "message": "Failed to Fetch User"}
 }
 
 func fetched(u *PPA.User) gin.H {

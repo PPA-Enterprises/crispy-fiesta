@@ -1,11 +1,17 @@
 package mongo
 import (
 	"PPA"
-	"errors"
+	"net/http"
 	"context"
 	"pkg/common/mongo"
 	"go.mongodb.org/mongo-driver/bson"
+	mongodb "go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+)
+
+const (
+	AlreadyExists = http.StatusConflict
+	NotFound = http.StatusNotFound
 )
 
 type User struct{}
@@ -14,11 +20,11 @@ func (u User) Create(db *mongo.DBConnection, ctx context.Context, user *PPA.User
 	coll := db.Use("users")
 
 	if(emailExists(db, ctx, user.Email)) {
-		return nil, errors.New("")
+		return nil, PPA.NewAppError(AlreadyExists, "Email Taken")
 	}
 
 	if _, err := coll.InsertOne(ctx, user); err != nil {
-		return nil, errors.New("")
+		return nil, PPA.InternalError
 	}
 
 	return user, nil
@@ -29,8 +35,16 @@ func(u User) ViewById(db *mongo.DBConnection, ctx context.Context, oid primitive
 	coll := db.Use("users")
 
 	var user PPA.User
-	err := coll.FindOne(ctx, bson.D{{"_id", oid}}).Decode(&user)
-	return &user, err
+	if err := coll.FindOne(ctx, bson.D{{"_id", oid}}).Decode(&user); err != nil {
+		if err == mongodb.ErrNoDocuments {
+			return nil, PPA.NewAppError(NotFound, "User Not Found")
+		}
+		if err != nil {
+			return nil, PPA.InternalError
+		}
+	}
+
+	return &user, nil
 }
 
 func(u User) ViewByEmail(db *mongo.DBConnection, ctx context.Context, email string) (*PPA.User, error) {
@@ -38,7 +52,13 @@ func(u User) ViewByEmail(db *mongo.DBConnection, ctx context.Context, email stri
 
 	var user PPA.User
 	err := coll.FindOne(ctx, bson.D{{"email", email}}).Decode(&user)
-	return &user, err
+		if err == mongodb.ErrNoDocuments {
+			return nil, PPA.NewAppError(NotFound, "User Not Found")
+		}
+		if err != nil {
+			return nil, PPA.InternalError
+		}
+	return &user, nil
 }
 
 func(u User) List(db *mongo.DBConnection, ctx context.Context) (*[]PPA.User, error) {
@@ -50,7 +70,7 @@ func(u User) List(db *mongo.DBConnection, ctx context.Context) (*[]PPA.User, err
 
 	var users []PPA.User
 	if err = cursor.All(ctx, &users); err != nil {
-		return nil, errors.New("")
+		return nil, PPA.InternalError
 	}
 	return &users, nil
 }
@@ -59,16 +79,16 @@ func(u User) Delete(db *mongo.DBConnection, ctx context.Context, oid primitive.O
 	coll := db.Use("deleted_users")
 
 	fetched, err := u.ViewById(db, ctx, oid); if err != nil {
-		return errors.New("")//user doesnt exist
+		return PPA.NewAppError(NotFound, "User Not Found")
 	}
 
 	if _, insertErr := coll.InsertOne(ctx, fetched); insertErr != nil {
-		return errors.New("") //insert err, db err
+		return PPA.InternalError //insert err, db err
 	}
 
 	coll = db.Use("users")
 	if _, delErr := coll.DeleteOne(ctx, bson.D{{"_id", oid}}); delErr != nil {
-		return errors.New("") //db error
+		return PPA.InternalError //db error
 	}
 
 	return nil
@@ -81,8 +101,14 @@ func (u User) Update(db *mongo.DBConnection, ctx context.Context, oid primitive.
 	updateDoc := bson.D{{"$set", update}}
 
 	var oldDoc PPA.User
-	if err := coll.FindOneAndUpdate(ctx, filter, updateDoc).Decode(&oldDoc); err != nil {
-		return errors.New("") //failed to update
+	err := coll.FindOneAndUpdate(ctx, filter, updateDoc).Decode(&oldDoc)
+
+	if err == mongodb.ErrNoDocuments {
+		return PPA.NewAppError(NotFound, "User Not Found")
+	}
+
+	if err != nil {
+		return PPA.InternalError
 	}
 	return nil
 }

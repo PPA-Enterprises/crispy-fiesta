@@ -1,23 +1,25 @@
-package app_error
+package PPA
 import (
-	"http"
+	"net/http"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	validator "gopkg.in/go-playground/validator.v10"
+	validator "github.com/go-playground/validator/v10"
 )
 
 type AppError struct {
 	Status int `json:"-"`
+	Success bool `json:"success"`
 	Message string `json:"message,omitempty"`
 }
 
 var (
-	Internal = NewStatus(http.StatusInternalServerError)
-	DB = NewStatus(http.StatusInternalServerError)
-	Forbidden = NewStatus(http.StatusForbidden)
-	BadRequest = NewStatus(http.StatusBadRequest)
-	NotFound = NewStatus(http.StatusNotFound)
-	Unauthorized = NewStatus(http.StatusUnauthorized)
+	InternalError = ErrWithStatus(http.StatusInternalServerError)
+	DbError = ErrWithStatus(http.StatusInternalServerError)
+	AlreadyExists = ErrWithStatus(http.StatusConflict)
+	Forbidden = ErrWithStatus(http.StatusForbidden)
+	BadRequest = ErrWithStatus(http.StatusBadRequest)
+	NotFound = ErrWithStatus(http.StatusNotFound)
+	Unauthorized = ErrWithStatus(http.StatusUnauthorized)
 )
 
 var validationErrors = map[string]string {
@@ -25,12 +27,12 @@ var validationErrors = map[string]string {
 	"email": " is not a valid email",
 }
 
-func NewStatus(status int) *AppError {
-	return &AppError{Status: status}
+func ErrWithStatus(status int) *AppError {
+	return &AppError{Status: status, Success: false}
 }
 
-func New(status int, msg string) *AppError {
-	return &AppError{Status: status, Message: msg}
+func NewAppError(status int, msg string) *AppError {
+	return &AppError{Status: status, Success: false, Message: msg}
 }
 
 // Needed to implement Go error interface
@@ -61,7 +63,7 @@ func Response(c *gin.Context, err error) {
 		e := err.(validator.ValidationErrors)
 
 		for _, v := range e {
-			msg = append(msg, fmt.Sprintf("%s%s", v.Name, validationErrorMessage(v.ActualTag)))
+			msg = append(msg, fmt.Sprintf("%s%s", v.StructField(), validationErrorMessage(v.ActualTag())))
 		}
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"success": false, "message": msg})
 
