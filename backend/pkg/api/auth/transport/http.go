@@ -13,6 +13,7 @@ type HTTP struct {
 
 const (
 	BadRequest = http.StatusBadRequest
+	Unauthorized = http.StatusUnauthorized
 )
 
 func NewHTTP(service auth.Service, router *gin.RouterGroup) {
@@ -42,6 +43,10 @@ func (h HTTP) refresh(c *gin.Context) {
 
 	token, err := h.service.Refresh(c, token); if err != nil {
 		PPA.Response(c, err); return
+	}
+
+	if len(token) <= 0 {
+		PPA.Response(c, PPA.NewAppError(Unauthorized, "Session Timed Out")); return
 	}
 	c.JSON(http.StatusOK, refreshed(token)); return
 }
