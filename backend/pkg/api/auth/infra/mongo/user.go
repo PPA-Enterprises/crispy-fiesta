@@ -1,13 +1,22 @@
 package mongo
 
 import(
-	"github.com/gin-gonic/gin"
+	"PPA"
+	"net/http"
+	"context"
+	"pkg/common/mongo"
+	"go.mongodb.org/mongo-driver/bson"
+	mongodb "go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type User struct{}
 
+const (
+	NotFound = http.StatusNotFound
+)
 
-func(u User) ViewById(db *mongo.DBConnection, ctx context.Context, oid primitive.ObjectID) (*PPA.User, error) {
+func(u User) FindById(db *mongo.DBConnection, ctx context.Context, oid primitive.ObjectID) (*PPA.User, error) {
 	coll := db.Use("users")
 
 	var user PPA.User
@@ -23,7 +32,7 @@ func(u User) ViewById(db *mongo.DBConnection, ctx context.Context, oid primitive
 	return &user, nil
 }
 
-func(u User) ViewByEmail(db *mongo.DBConnection, ctx context.Context, email string) (*PPA.User, error) {
+func(u User) FindByEmail(db *mongo.DBConnection, ctx context.Context, email string) (*PPA.User, error) {
 	coll := db.Use("users")
 
 	var user PPA.User
@@ -37,10 +46,10 @@ func(u User) ViewByEmail(db *mongo.DBConnection, ctx context.Context, email stri
 	return &user, nil
 }
 
-func (u User) Update(db *mongo.DBConnection, ctx context.Context, oid primitive.ObjectID, update *PPA.User) error {
+func (u User) Update(db *mongo.DBConnection, ctx context.Context, update *PPA.User) error {
 	coll := db.Use("users")
 
-	filter := bson.D{{"_id", oid}}
+	filter := bson.D{{"_id", update.ID}}
 	updateDoc := bson.D{{"$set", update}}
 
 	var oldDoc PPA.User
@@ -55,4 +64,17 @@ func (u User) Update(db *mongo.DBConnection, ctx context.Context, oid primitive.
 	}
 	return nil
 }
-//FindByToken?
+
+func (u User) FindByToken(db *mongo.DBConnection, ctx context.Context, token string) (*PPA.User, error) {
+	coll := db.Use("users")
+
+	var user PPA.User
+	err := coll.FindOne(ctx, bson.D{{"token", token}}).Decode(&user)
+		if err == mongodb.ErrNoDocuments {
+			return nil, PPA.NewAppError(NotFound, "User Not Found")
+		}
+		if err != nil {
+			return nil, PPA.InternalError
+		}
+	return &user, nil
+}

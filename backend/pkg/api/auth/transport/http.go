@@ -1,6 +1,7 @@
 package transport
 
 import (
+	"PPA"
 	"net/http"
 	"pkg/api/auth"
 	"github.com/gin-gonic/gin"
@@ -10,11 +11,15 @@ type HTTP struct {
 	service auth.Service
 }
 
+const (
+	BadRequest = http.StatusBadRequest
+)
+
 func NewHTTP(service auth.Service, router *gin.RouterGroup) {
 	httpTransport := HTTP{service}
 	routes := router.Group("/auth")
 	routes.POST("/", httpTransport.login)
-	routes.Get("/refresh/:token", httpTransport.refresh)
+	routes.GET("/refresh/:token", httpTransport.refresh)
 }
 
 func (h HTTP) login(c *gin.Context) {
@@ -29,7 +34,7 @@ func (h HTTP) login(c *gin.Context) {
 	c.JSON(http.StatusOK, authenticated(authToken)); return
 }
 
-func (h HTTP) refresh(c *gin.Context) error {
+func (h HTTP) refresh(c *gin.Context) {
 	token := c.Param("token")
 	if len(token) <= 0 {
 		PPA.Response(c, PPA.NewAppError(BadRequest, "Token Required")); return

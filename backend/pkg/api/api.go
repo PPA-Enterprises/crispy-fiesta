@@ -1,12 +1,16 @@
 package api
 
 import (
+	"crypto/sha1"
 	"pkg/common/config"
 	"pkg/common/mongo"
 	"pkg/common/rbac"
 	"pkg/common/secure"
+	"pkg/common/jwt"
 	userTransport "pkg/api/user/transport"
 	userService "pkg/api/user"
+	authTransport "pkg/api/auth/transport"
+	authService "pkg/api/auth"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
@@ -21,8 +25,15 @@ func Start(cfg *config.Configuration) error {
 
 	v1 := server.Group("/api/v1")
 	rbac := rbac.Service{}
-	security := secure.New()
+	security := secure.New(sha1.New())
+	jwt, err := jwt.New(cfg.JWT.SigningAlgorithm, "my asdfasfasdfsafsadfasfasfasfsafasfsadfsadsecret from os get env", cfg.JWT.DurationMinutes, cfg.JWT.MinSecretLength)
+
+	if err != nil {
+		return err
+	}
+
 	userTransport.NewHTTP(userService.Init(db, "users", rbac, security), v1)
+	authTransport.NewHTTP(authService.Init(db, jwt, security, rbac), v1)
 	server.Run()
 	return nil
 }

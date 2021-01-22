@@ -1,30 +1,36 @@
 package secure
 
 import (
+	"fmt"
+	"hash"
+	"time"
+	"strconv"
 	"github.com/matthewhartstonge/argon2"
 
 )
 
-// New initializes security service
-func New() *Service {
+func New(h hash.Hash) *Service {
 	cfg := argon2.DefaultConfig()
-	return &Service{cfg: cfg}
+	return &Service{cfg: cfg, hasher: h}
 }
 
-// Service holds security related methods
 type Service struct {
 	cfg		argon2.Config
+	hasher hash.Hash
 }
 
-
-// Hash hashes the password using bcrypt
 func (self *Service) Hash(password string) string {
 	raw, _ := self.cfg.Hash([]byte(password), nil)
 	return string(raw.Encode())
 }
 
-// HashMatchesPassword matches hash with password. Returns true if hash and password match.
 func (*Service) HashMatchesPassword(hash, password string) bool {
 	res, _ := argon2.VerifyEncoded([]byte(password), []byte(hash))
 	return res
+}
+
+func (s *Service) Token(str string) string {
+	s.hasher.Reset()
+	fmt.Fprintf(s.hasher, "%s%s", str, strconv.Itoa(time.Now().Nanosecond()))
+	return fmt.Sprintf("%x", s.hasher.Sum(nil))
 }

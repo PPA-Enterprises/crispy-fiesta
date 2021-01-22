@@ -17,7 +17,7 @@ func (a Auth) Authenticate(c *gin.Context, email, pass string) (*PPA.AuthToken, 
 	ctx, cancel := context.WithDeadline(c.Request.Context(), duration)
 	defer cancel()
 
-	user, err := a.udb.ViewByEmail(a.db, ctx, email); if err != nil {
+	user, err := a.udb.FindByEmail(a.db, ctx, email); if err != nil {
 		return nil, err
 	}
 
@@ -25,11 +25,11 @@ func (a Auth) Authenticate(c *gin.Context, email, pass string) (*PPA.AuthToken, 
 		return nil, InvalidCredentials
 	}
 
-	if !user.Active {
+	/*if !user.Active {
 		return nil, NotAuthorized
-	}
+	}*/
 
-	token, err := a.tokenGen.GenerateToken(user); if err != nil {
+	token, err := a.tokenGen.GenerateToken(*user); if err != nil {
 		return nil, NotAuthorized
 	}
 
@@ -37,7 +37,7 @@ func (a Auth) Authenticate(c *gin.Context, email, pass string) (*PPA.AuthToken, 
 	if err := a.udb.Update(a.db, ctx, user); err != nil {
 		return nil, err
 	}
-	return PPA.AuthToken{Token: token, RefreshToken: user.token}, nil
+	return &PPA.AuthToken{Token: token, RefreshToken: user.Token}, nil
 }
 
 func (a Auth) Refresh(c *gin.Context, refreshToken string) (string, error) {
@@ -48,5 +48,5 @@ func (a Auth) Refresh(c *gin.Context, refreshToken string) (string, error) {
 	user, err := a.udb.FindByToken(a.db, ctx, refreshToken); if err != nil {
 		return "", nil
 	}
-	return a.tokenGen.GenerateToken(user)
+	return a.tokenGen.GenerateToken(*user)
 }

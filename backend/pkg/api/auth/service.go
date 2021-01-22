@@ -32,16 +32,15 @@ func Init(db *mongo.DBConnection, tkgen TokenGenerator, sec Securer, rbac RBAC) 
 }
 
 type Service interface {
-	Authenticate(*gin.Context, string, string) (PPA.AuthToken, error)
+	Authenticate(*gin.Context, string, string) (*PPA.AuthToken, error)
 	Refresh(*gin.Context, string) (string, error)
 }
 
 type UDB interface {
-	ViewById(*mongo.DBConnection, context.Context, primitive.ObjectID) (PPA.user, error)
-	ViewByEmail(*mongo.DBConnection, context.Context, string) (*PPA.User, error)
-	ViewByToken(*mongo.DBConnection, context.Context, string) (*PPA.User, error)
+	FindById(*mongo.DBConnection, context.Context, primitive.ObjectID) (*PPA.User, error)
+	FindByEmail(*mongo.DBConnection, context.Context, string) (*PPA.User, error)
+	FindByToken(*mongo.DBConnection, context.Context, string) (*PPA.User, error)
 	Update(*mongo.DBConnection, context.Context, *PPA.User) error
-
 }
 
 type TokenGenerator interface {
