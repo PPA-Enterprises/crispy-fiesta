@@ -15,11 +15,11 @@ const (
 	BadRequest = http.StatusBadRequest
 )
 
-func NewHTTP(service user.Service, router *gin.RouterGroup) {
+func NewHTTP(service user.Service, router *gin.RouterGroup, mw gin.HandlerFunc) {
 	httpTransport := HTTP{service}
 	routes := router.Group("/users")
 	routes.POST("/", httpTransport.create)
-	routes.GET("/", httpTransport.list)
+	routes.GET("/", mw, httpTransport.list)
 	routes.GET("/email", httpTransport.viewByEmail)
 	routes.GET("id/:id", httpTransport.viewById)
 	routes.PATCH("/:id", httpTransport.update)
