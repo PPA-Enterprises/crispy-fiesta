@@ -11,6 +11,10 @@ type HTTP struct {
 	service client.Service
 }
 
+const (
+	BadRequest = http.StatusBadRequest
+)
+
 func NewHTTP(service client.Service, router *gin.RouterGroup, authMw gin.HandlerFunc) {
 	httpTransport := HTTP{service}
 	routes := router.Group("/clients")
@@ -63,7 +67,7 @@ func (h HTTP) viewByPhone(c *gin.Context) {
 		PPA.Response(c, PPA.NewAppError(BadRequest, "Phone Number Required")); return
 	}
 
-	fetchedClient, err := h.service.ViewByPhone(c, phone)if err != nil {
+	fetchedClient, err := h.service.ViewByPhone(c, phone); if err != nil {
 		PPA.Response(c, err); return
 	}
 
