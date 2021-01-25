@@ -17,17 +17,13 @@ func (a Auth) Authenticate(c *gin.Context, email, pass string) (*PPA.AuthToken, 
 	ctx, cancel := context.WithDeadline(c.Request.Context(), duration)
 	defer cancel()
 
-	user, err := a.udb.FindByEmail(a.db, ctx, email); if err != nil {
+	user, err := a.userRepo.ViewByEmail(a.db, ctx, email); if err != nil {
 		return nil, err
 	}
 
 	if !a.securer.HashMatchesPassword(user.Password, pass) {
 		return nil, InvalidCredentials
 	}
-
-	/*if !user.Active {
-		return nil, NotAuthorized
-	}*/
 
 	token, err := a.tokenGen.GenerateToken(*user); if err != nil {
 		return nil, NotAuthorized
