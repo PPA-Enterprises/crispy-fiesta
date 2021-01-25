@@ -100,21 +100,21 @@ func (h HTTP) delete(c *gin.Context) {
 }
 
 func deleted() gin.H {
-	return gin.H{"success": true, "message": "User Deleted"}
+	return gin.H{"success": true, "message": "Client And Associated Jobs Deleted"}
 }
 
-func fetched(u *PPA.User) gin.H {
-	return gin.H{"success": true, "message": "Fetched User", "payload": u}
+func fetched(c *PPA.Client) gin.H {
+	return gin.H{"success": true, "message": "Fetched Client", "payload": c}
 }
 
-func fetchedAll(u *[]PPA.User) gin.H {
-	return gin.H{"success": true, "message": "Fetched User", "payload": u}
+func fetchedAll(u *[]PPA.Client) gin.H {
+	return gin.H{"success": true, "message": "Fetched Clients", "payload": c}
 }
 
-func userCreated(u *PPA.User) gin.H {
-	return gin.H{"success": true, "message": "User Created", "payload": u}
+func userCreated(u *PPA.Client) gin.H {
+	return gin.H{"success": true, "message": "Client Created", "payload": c}
 }
 
-func userUpdated(u *PPA.User) gin.H {
-	return gin.H{"success": true, "message": "User Updated", "payload": u}
+func userUpdated(u *PPA.Client) gin.H {
+	return gin.H{"success": true, "message": "Client Updated", "payload": c}
 }

@@ -66,6 +66,7 @@ func (cl Client) Delete(c *gin.Context, id string) error {
 	oid, err := primitive.ObjectIDFromHex(id); if err != nil {
 		return PPA.InternalError
 	}
+	// TODO: Delete all jobs assigned to client
 
 	return cl.cdb.Delete(cl.db, ctx, oid)
 
