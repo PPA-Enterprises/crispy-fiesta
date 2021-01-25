@@ -11,7 +11,6 @@ type User struct {
 	Email string `json:"email" bson:"email,omitempty"`
 	Password string `json:"-" bson:"password,omitempty"`
 
-	Active bool `json:"active"`
 	LastLogin time.Time `json:"last_login,omitempty"`
 	Token string `json:"-"`
 	Role *Role `json:"role,omitempty"`
