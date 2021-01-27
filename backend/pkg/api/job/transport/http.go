@@ -28,13 +28,13 @@ func NewHTTP(service job.Service, router *gin.RouterGroup, authMw gin.HandlerFun
 func (h HTTP) create(c *gin.Context) {
 	//check that user is allowed to make this request
 
-	var data signupRequest
+	var data submitJobRequest
 	if err := c.ShouldBindJSON(&data); err != nil {
 		PPA.Response(c, err); return
 	}
 
-	newUser := h.fromSignupRequest(&data)
-	created, err := h.service.Create(c, newUser); if err != nil {
+	newJob := h.fromSubmitJobRequest(&data)
+	created, err := h.service.Create(c, newJob); if err != nil {
 		PPA.Response(c, err); return
 	}
 	c.JSON(http.StatusCreated, jobCreated(created)); return
