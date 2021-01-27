@@ -2,7 +2,7 @@ package transport
 
 import (
 	"PPA"
-//	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"pkg/api/client"
 )
 
@@ -25,7 +25,9 @@ func (h HTTP) fromUpdateRequest(data *updateRequest) client.Update {
 
 func (h HTTP) fromCreateClientRequest(data *createClientRequest) PPA.Client {
 	return PPA.Client {
+		ID: primitive.NewObjectID(),
 		Name: data.Name,
 		Phone: data.Phone,
+		Jobs: []primitive.ObjectID{},
 	}
 }
