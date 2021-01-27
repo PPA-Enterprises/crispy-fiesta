@@ -6,7 +6,7 @@ import (
 
 type Client struct {
 	ID primitive.ObjectID `json:"_id,omitempty" bson:"_id,omitempty"`
-	Name string `json:"name" bson:"name"`
-	Phone string `json:"phone" bson:"phone"`
-	Jobs []primitive.ObjectID `json:"-" bson:"jobs"`
+	Name string `json:"name" bson:"name,omitempty"`
+	Phone string `json:"phone" bson:"phone,omitempty"`
+	Jobs []primitive.ObjectID `json:"jobs" bson:"jobs,omitempty"`
 }
