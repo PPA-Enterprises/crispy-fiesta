@@ -64,6 +64,8 @@ func (cl Client) Delete(c *gin.Context, id string) error {
 	defer cancel()
 
 	oid, err := primitive.ObjectIDFromHex(id); if err != nil {
+		//TODO: return an error about the object ID.
+		//do this for anytime that I try to convert hex to OID
 		return PPA.InternalError
 	}
 	// TODO: Delete all jobs assigned to client
