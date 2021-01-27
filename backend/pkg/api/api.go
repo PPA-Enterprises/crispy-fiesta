@@ -13,6 +13,8 @@ import (
 	userRepo "pkg/api/user/infra/mongo"
 	authTransport "pkg/api/auth/transport"
 	authService "pkg/api/auth"
+	clientTransport "pkg/api/client/transport"
+	clientService "pkg/api/client"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
@@ -36,8 +38,9 @@ func Start(cfg *config.Configuration) error {
 
 	authMiddleware := authMw.Middleware(jwt)
 
-	userTransport.NewHTTP(userService.Init(db, "users", rbac, security), v1, authMiddleware)
 	authTransport.NewHTTP(authService.Init(db, jwt, security, rbac, userRepo.User{}), v1)
+	userTransport.NewHTTP(userService.Init(db, "users", rbac, security), v1, authMiddleware)
+	clientTransport.NewHTTP(clientService.Init(db, rbac), v1, authMiddleware)
 	server.Run()
 	return nil
 }

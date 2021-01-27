@@ -38,7 +38,7 @@ type Repository interface {
 	ViewByPhone(*mongo.DBConnection, context.Context, string) (*PPA.Client, error)
 	List(*mongo.DBConnection, context.Context) (*[]PPA.Client, error)
 	Delete(*mongo.DBConnection, context.Context, primitive.ObjectID) error
-	Update(*mongo.DBConnection, context.Context, primitive.ObjectID, *PPA.Client) (*PPA.Client, error)
+	Update(*mongo.DBConnection, context.Context, primitive.ObjectID, *PPA.Client) error
 }
 
 type RBAC interface {

@@ -54,7 +54,7 @@ func (cl Client) ViewByPhone(c *gin.Context, phone string) (*PPA.Client, error) 
 	ctx, cancel := context.WithDeadline(c.Request.Context(), duration)
 	defer cancel()
 
-	return cl.cdb.ViewByEmail(cl.db, ctx, phone)
+	return cl.cdb.ViewByPhone(cl.db, ctx, phone)
 }
 
 func (cl Client) Delete(c *gin.Context, id string) error {
@@ -84,8 +84,7 @@ func (cl Client) Update(c *gin.Context, req Update, id string) (*PPA.Client, err
 	if err := cl.cdb.Update(cl.db, ctx, oid, &PPA.Client {
 		ID: primitive.NilObjectID,
 		Name: req.Name,
-		Email: req.Email,
-		Password: "",
+		Phone: req.Phone,
 	}); err != nil {
 		return nil, err
 	}

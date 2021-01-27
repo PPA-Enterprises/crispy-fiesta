@@ -109,7 +109,7 @@ func (c Client) Update(db *mongo.DBConnection, ctx context.Context, oid primitiv
 }
 
 func (c Client) phoneExists(db *mongo.DBConnection, ctx context.Context, phone string) bool {
-	if _, err := c.ViewByphone(db, ctx, phone); err != nil {
+	if _, err := c.ViewByPhone(db, ctx, phone); err != nil {
 		return false
 	}
 	return true

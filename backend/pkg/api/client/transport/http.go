@@ -111,14 +111,14 @@ func fetched(c *PPA.Client) gin.H {
 	return gin.H{"success": true, "message": "Fetched Client", "payload": c}
 }
 
-func fetchedAll(u *[]PPA.Client) gin.H {
+func fetchedAll(c *[]PPA.Client) gin.H {
 	return gin.H{"success": true, "message": "Fetched Clients", "payload": c}
 }
 
-func userCreated(u *PPA.Client) gin.H {
+func clientCreated(c *PPA.Client) gin.H {
 	return gin.H{"success": true, "message": "Client Created", "payload": c}
 }
 
-func userUpdated(u *PPA.Client) gin.H {
+func clientUpdated(c *PPA.Client) gin.H {
 	return gin.H{"success": true, "message": "Client Updated", "payload": c}
 }

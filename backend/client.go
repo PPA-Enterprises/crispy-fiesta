@@ -1,7 +1,7 @@
 package PPA
 
 import (
-	"go.mongodb.org/mongo-driver/primitive"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type Client struct {
