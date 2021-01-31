@@ -82,6 +82,7 @@ func (cl Client) Update(c *gin.Context, req Update, id string) (*PPA.Client, err
 	oid, err := primitive.ObjectIDFromHex(id); if err != nil {
 		return nil, PPA.InternalError
 	}
+	//TODO: Ensure updated phone number is unique
 
 	if err := cl.cdb.Update(cl.db, ctx, oid, &PPA.Client {
 		ID: primitive.NilObjectID,

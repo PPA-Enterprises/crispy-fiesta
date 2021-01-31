@@ -11,6 +11,7 @@ import(
 type Job struct {
 	db *mongo.DBConnection
 	jdb Repository
+	cdb ClientRepository
 	rbac RBAC
 }
 
@@ -22,12 +23,12 @@ type Service interface {
 	Update(*gin.Context, Update, string) (*PPA.Job, error)
 }
 
-func New(db *mongo.DBConnection, jdb Repository, rbac RBAC) *Job {
-	return &Job{db: db, jdb: jdb, rbac: rbac}
+func New(db *mongo.DBConnection, jdb Repository, cdb ClientRepository, rbac RBAC) *Job {
+	return &Job{db: db, jdb: jdb, cdb: cdb, rbac: rbac}
 }
 
-func Init(db *mongo.DBConnection, rbac RBAC) *Job {
-	return New(db, dbQuery.Job{}, rbac)
+func Init(db *mongo.DBConnection, rbac RBAC, cdb ClientRepository) *Job {
+	return New(db, dbQuery.Job{}, cdb, rbac)
 }
 
 type Repository interface {
@@ -36,6 +37,12 @@ type Repository interface {
 	ViewById(*mongo.DBConnection, context.Context, primitive.ObjectID) (*PPA.Job, error)
 	Delete(*mongo.DBConnection, context.Context, primitive.ObjectID) error
 	Update(*mongo.DBConnection, context.Context, primitive.ObjectID, *PPA.Job) error
+}
+
+type ClientRepository interface {
+	Create(*mongo.DBConnection, context.Context, *PPA.Client) (*PPA.Client, error)
+	ViewByPhone(*mongo.DBConnection, context.Context, string) (*PPA.Client, error)
+	Update(*mongo.DBConnection, context.Context, primitive.ObjectID, *PPA.Client) error
 }
 
 type RBAC interface{}

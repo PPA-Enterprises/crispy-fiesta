@@ -10,3 +10,7 @@ type Client struct {
 	Phone string `json:"phone" bson:"phone,omitempty"`
 	Jobs []primitive.ObjectID `json:"jobs" bson:"jobs,omitempty"`
 }
+
+func (c *Client) AttatchJob(jobOid primitive.ObjectID) {
+	c.Jobs = append(c.Jobs, jobOid)
+}
