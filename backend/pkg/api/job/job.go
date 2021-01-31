@@ -24,6 +24,8 @@ func (j Job) Create(c *gin.Context, req PPA.Job) (*PPA.Job, error) {
 	for j.oidExists(ctx, req.ID) {
 		req.ID = primitive.NewObjectID()
 	}
+	// TODO: check client by phone, if client exists, add job oid
+	// otherwise create client and add job oid
 	return j.jdb.Create(j.db, ctx, &req)
 }
 
@@ -63,7 +65,7 @@ func (j Job) Update(c *gin.Context, req Update, id string) (*PPA.Job, error) {
 	defer cancel()
 
 	oid, err := primitive.ObjectIDFromHex(id); if err != nil {
-		return PPA.InternalError
+		return nil, PPA.InternalError
 	}
 
 	if err := j.jdb.Update(j.db, ctx, oid, &PPA.Job {
@@ -83,6 +85,6 @@ func (j Job) oidExists(ctx context.Context, oid primitive.ObjectID) bool {
 	coll := j.db.Use("job")
 
 	var inserted PPA.Job
-	err := Coll.FindOne(ctx, bson.D{{"_id", oid}}).Decode(&inserted)
+	err := coll.FindOne(ctx, bson.D{{"_id", oid}}).Decode(&inserted)
 	return err == nil
 }

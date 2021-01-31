@@ -2,6 +2,7 @@ package mongo
 
 import (
 	"PPA"
+	"fmt"
 	"net/http"
 	"context"
 	"pkg/common/mongo"
@@ -19,7 +20,8 @@ type Job struct{}
 func (j Job) Create(db *mongo.DBConnection, ctx context.Context, job *PPA.Job) (*PPA.Job, error) {
 	coll := db.Use("jobs")
 
-	if _, err := coll.InsertOne(ctx, user); err != nil {
+	if _, err := coll.InsertOne(ctx, job); err != nil {
+		fmt.Println(err)
 		return nil, PPA.InternalError
 	}
 	return job, nil

@@ -19,7 +19,7 @@ type Service interface {
 	List(*gin.Context) (*[]PPA.Job, error)
 	ViewById(*gin.Context, string) (*PPA.Job, error)
 	Delete(*gin.Context, string) error
-	Update(*gin.Context, Update, string) (*PPA.Client, error)
+	Update(*gin.Context, Update, string) (*PPA.Job, error)
 }
 
 func New(db *mongo.DBConnection, jdb Repository, rbac RBAC) *Job {
@@ -34,7 +34,7 @@ type Repository interface {
 	Create(*mongo.DBConnection, context.Context, *PPA.Job) (*PPA.Job, error)
 	List(*mongo.DBConnection, context.Context) (*[]PPA.Job, error)
 	ViewById(*mongo.DBConnection, context.Context, primitive.ObjectID) (*PPA.Job, error)
-	Delete(*mongo.DBConnection, context.Context, primitive.ObjectID) (*PPA.Job, error)
+	Delete(*mongo.DBConnection, context.Context, primitive.ObjectID) error
 	Update(*mongo.DBConnection, context.Context, primitive.ObjectID, *PPA.Job) error
 }
 
