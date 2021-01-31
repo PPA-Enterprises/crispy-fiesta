@@ -65,12 +65,12 @@ func (j Job) ViewById( c *gin.Context, id string) (*PPA.Job, error) {
 	return j.jdb.ViewById(j.db, ctx, oid)
 }
 
-func (j Job) List(c *gin.Context) (*[]PPA.Job, error) {
+func (j Job) List(c *gin.Context, opts PPA.BulkFetchOptions) (*[]PPA.Job, error) {
 	duration := time.Now().Add(5*time.Second)
 	ctx, cancel := context.WithDeadline(c.Request.Context(), duration)
 	defer cancel()
 
-	return j.jdb.List(j.db, ctx)
+	return j.jdb.List(j.db, ctx, opts)
 }
 
 func (j Job) Delete(c *gin.Context, id string) error {
