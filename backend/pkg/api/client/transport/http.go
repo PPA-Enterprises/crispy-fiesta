@@ -2,6 +2,7 @@ package transport
 
 import(
 	"PPA"
+	"fmt"
 	"net/http"
 	"pkg/api/client"
 	"github.com/gin-gonic/gin"
@@ -49,6 +50,7 @@ func (h HTTP) list(c *gin.Context) {
 }
 
 func (h HTTP) viewById(c *gin.Context) {
+	fmt.Println(h)
 	id := c.Param("id")
 	if len(id) <= 0 {
 		PPA.Response(c, PPA.NewAppError(BadRequest, "ID Required")); return
@@ -58,7 +60,10 @@ func (h HTTP) viewById(c *gin.Context) {
 		PPA.Response(c, err); return
 	}
 
-	c.JSON(http.StatusOK, fetched(fetchedClient)); return
+	populated, err := h.service.PopulateJob(c, fetchedClient); if err != nil {
+		PPA.Response(c, err); return
+	}
+	c.JSON(http.StatusOK, fetched(populated)); return
 }
 
 func (h HTTP) viewByPhone(c *gin.Context) {
@@ -71,7 +76,10 @@ func (h HTTP) viewByPhone(c *gin.Context) {
 		PPA.Response(c, err); return
 	}
 
-	c.JSON(http.StatusOK, fetched(fetchedClient)); return
+	populated, err := h.service.PopulateJob(c, fetchedClient); if err != nil {
+		PPA.Response(c, err); return
+	}
+	c.JSON(http.StatusOK, fetched(populated)); return
 }
 
 func (h HTTP) update(c *gin.Context) {
@@ -88,7 +96,11 @@ func (h HTTP) update(c *gin.Context) {
 	updated, err := h.service.Update(c, h.fromUpdateRequest(&data), id); if err != nil {
 		PPA.Response(c, err); return
 	}
-	c.JSON(http.StatusOK, clientUpdated(updated)); return
+
+	populated, err := h.service.PopulateJob(c, updated); if err != nil {
+		PPA.Response(c, err); return
+	}
+	c.JSON(http.StatusOK, fetched(populated)); return
 }
 
 func (h HTTP) delete(c *gin.Context) {
@@ -107,7 +119,7 @@ func deleted() gin.H {
 	return gin.H{"success": true, "message": "Client And Associated Jobs Deleted"}
 }
 
-func fetched(c *PPA.Client) gin.H {
+func fetched(c *client.PopulatedClient) gin.H {
 	return gin.H{"success": true, "message": "Fetched Client", "payload": c}
 }
 
@@ -119,6 +131,6 @@ func clientCreated(c *PPA.Client) gin.H {
 	return gin.H{"success": true, "message": "Client Created", "payload": c}
 }
 
-func clientUpdated(c *PPA.Client) gin.H {
+func clientUpdated(c *client.PopulatedClient) gin.H {
 	return gin.H{"success": true, "message": "Client Updated", "payload": c}
 }

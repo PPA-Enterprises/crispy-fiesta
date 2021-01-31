@@ -63,6 +63,6 @@ func (conn *DBConnection) Session(opts ...*options.SessionOptions) (mongo.Sessio
 	return session, err
 }
 
-func Populate(ctx context.Context, coll *mongo.Collection, ids []primitive.ObjectID) (*mongo.Cursor, error) {
+func (conn *DBConnection) Populate(ctx context.Context, coll *mongo.Collection, ids []primitive.ObjectID) (*mongo.Cursor, error) {
 	return coll.Find(ctx, bson.M{"_id": bson.M{"$in": ids}})
 }

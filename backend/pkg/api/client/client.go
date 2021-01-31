@@ -94,6 +94,22 @@ func (cl Client) Update(c *gin.Context, req Update, id string) (*PPA.Client, err
 	return cl.cdb.ViewById(cl.db, ctx, oid)
 }
 
+func (cl Client) PopulateJob(c *gin.Context, unpopClient *PPA.Client) (*PopulatedClient, error) {
+	duration := time.Now().Add(5*time.Second)
+	ctx, cancel := context.WithDeadline(c.Request.Context(), duration)
+	defer cancel()
+
+	jobs, err := cl.cdb.Populate(cl.db, ctx, unpopClient.Jobs); if err != nil {
+		return nil, err
+	}
+	return &PopulatedClient {
+		ID: unpopClient.ID,
+		Name: unpopClient.Name,
+		Phone: unpopClient.Phone,
+		Jobs: jobs,
+	}, nil
+}
+
 func (cl Client) oidExists(ctx context.Context, oid primitive.ObjectID) bool {
 	coll := cl.db.Use("clients")
 

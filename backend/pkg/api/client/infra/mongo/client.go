@@ -108,6 +108,20 @@ func (c Client) Update(db *mongo.DBConnection, ctx context.Context, oid primitiv
 	return nil
 }
 
+func (c Client) Populate(db *mongo.DBConnection, ctx context.Context, oids []primitive.ObjectID) ([]PPA.Job, error) {
+	coll := db.Use("jobs")
+	cursor, err := db.Populate(ctx, coll, oids); if err != nil {
+		return []PPA.Job{}, PPA.InternalError
+	}
+	defer cursor.Close(ctx)
+
+	var jobs []PPA.Job
+	if err = cursor.All(ctx, &jobs); err != nil {
+		return []PPA.Job{}, PPA.InternalError
+	}
+	return jobs, nil
+}
+
 func (c Client) phoneExists(db *mongo.DBConnection, ctx context.Context, phone string) bool {
 	if _, err := c.ViewByPhone(db, ctx, phone); err != nil {
 		return false

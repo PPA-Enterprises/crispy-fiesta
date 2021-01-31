@@ -22,6 +22,8 @@ type Service interface {
 	ViewByPhone(*gin.Context, string) (*PPA.Client, error)
 	Delete(*gin.Context, string) error
 	Update(*gin.Context, Update, string) (*PPA.Client, error)
+	PopulateJob(*gin.Context, *PPA.Client) (*PopulatedClient, error)
+//	PopulateJobs(*gin.Context, *[]PPA.Client) (*[]PopulatedClient, error)
 }
 
 func New(db *mongo.DBConnection, cdb Repository, rbac RBAC) *Client {
@@ -39,6 +41,14 @@ type Repository interface {
 	List(*mongo.DBConnection, context.Context) (*[]PPA.Client, error)
 	Delete(*mongo.DBConnection, context.Context, primitive.ObjectID) error
 	Update(*mongo.DBConnection, context.Context, primitive.ObjectID, *PPA.Client) error
+	Populate(*mongo.DBConnection, context.Context, []primitive.ObjectID) ([]PPA.Job, error)
+}
+
+type PopulatedClient struct {
+	ID primitive.ObjectID `json:"_id"`
+	Name string `json:"name"`
+	Phone string `json:"phone"`
+	Jobs []PPA.Job `json:"jobs"`
 }
 
 type RBAC interface {
