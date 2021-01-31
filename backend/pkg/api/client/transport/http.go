@@ -3,6 +3,7 @@ package transport
 import(
 	"PPA"
 	"fmt"
+	"strconv"
 	"net/http"
 	"pkg/api/client"
 	"github.com/gin-gonic/gin"
@@ -43,7 +44,29 @@ func (h HTTP) create(c *gin.Context) {
 }
 
 func (h HTTP) list(c *gin.Context) {
-	clients, err := h.service.List(c); if err != nil {
+	options := PPA.NewBulkFetchOptions()
+
+	all, err := strconv.ParseBool(c.DefaultQuery("all", "false")); if err != nil {
+		PPA.Response(c, PPA.NewAppError(BadRequest, "Invalid (all) Param")); return
+	}
+	options.All = all
+
+	sort, err := strconv.ParseBool(c.DefaultQuery("sort", "false")); if err != nil {
+		PPA.Response(c, PPA.NewAppError(BadRequest, "Invalid (sort) Param")); return
+	}
+	options.Sort = sort
+
+	source, err := strconv.ParseUint(c.DefaultQuery("source", "0"), 10, 64); if err != nil {
+		PPA.Response(c, PPA.NewAppError(BadRequest, "Invalid (source) Param")); return
+	}
+	options.Source = source
+
+	next, err := strconv.ParseUint(c.DefaultQuery("next", "10"), 10, 64); if err != nil {
+		PPA.Response(c, PPA.NewAppError(BadRequest, "Invalid (next) Param")); return
+	}
+	options.Next = next
+
+	clients, err := h.service.List(c, options); if err != nil {
 		PPA.Response(c, err); return
 	}
 	populated, err := h.service.PopulateJobs(c, clients); if err != nil {

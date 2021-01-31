@@ -38,14 +38,13 @@ func (cl Client) ViewById(c *gin.Context, id string) (*PPA.Client, error) {
 	return cl.cdb.ViewById(cl.db, ctx, oid)
 }
 
-func (cl Client) List(c *gin.Context) (*[]PPA.Client, error) {
+func (cl Client) List(c *gin.Context, opts PPA.BulkFetchOptions) (*[]PPA.Client, error) {
 	//additional security stuff?
 	duration := time.Now().Add(5*time.Second)
 	ctx, cancel := context.WithDeadline(c.Request.Context(), duration)
 	defer cancel()
 
-	//Populate anything?
-	return cl.cdb.List(cl.db, ctx)
+	return cl.cdb.List(cl.db, ctx, opts)
 }
 
 func (cl Client) ViewByPhone(c *gin.Context, phone string) (*PPA.Client, error) {

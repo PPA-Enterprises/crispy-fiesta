@@ -17,7 +17,7 @@ type Client struct {
 
 type Service interface {
 	Create(*gin.Context, PPA.Client) (*PPA.Client, error)
-	List(*gin.Context) (*[]PPA.Client, error)
+	List(*gin.Context, PPA.BulkFetchOptions) (*[]PPA.Client, error)
 	ViewById(*gin.Context, string) (*PPA.Client, error)
 	ViewByPhone(*gin.Context, string) (*PPA.Client, error)
 	Delete(*gin.Context, string) error
@@ -38,7 +38,7 @@ type Repository interface {
 	Create(*mongo.DBConnection, context.Context, *PPA.Client) (*PPA.Client, error)
 	ViewById(*mongo.DBConnection, context.Context, primitive.ObjectID) (*PPA.Client, error)
 	ViewByPhone(*mongo.DBConnection, context.Context, string) (*PPA.Client, error)
-	List(*mongo.DBConnection, context.Context) (*[]PPA.Client, error)
+	List(*mongo.DBConnection, context.Context, PPA.BulkFetchOptions) (*[]PPA.Client, error)
 	Delete(*mongo.DBConnection, context.Context, primitive.ObjectID) error
 	Update(*mongo.DBConnection, context.Context, primitive.ObjectID, *PPA.Client) error
 	Populate(*mongo.DBConnection, context.Context, []primitive.ObjectID) ([]PPA.Job, error)
