@@ -3,11 +3,18 @@ package client
 import(
 	"PPA"
 	"context"
+	"net/http"
 	"time"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/bson"
 )
+
+const (
+	NotFound = http.StatusNotFound
+)
+
+var OidNotFound = PPA.NewAppError(NotFound, "Does not exist")
 
 type Update struct {
 	Name string
@@ -32,7 +39,7 @@ func (cl Client) ViewById(c *gin.Context, id string) (*PPA.Client, error) {
 	defer cancel()
 
 	oid, err := primitive.ObjectIDFromHex(id); if err != nil {
-		return nil, PPA.InternalError
+		return nil, OidNotFound
 	}
 
 	return cl.cdb.ViewById(cl.db, ctx, oid)
@@ -63,11 +70,14 @@ func (cl Client) Delete(c *gin.Context, id string) error {
 	defer cancel()
 
 	oid, err := primitive.ObjectIDFromHex(id); if err != nil {
-		//TODO: return an error about the object ID.
-		//do this for anytime that I try to convert hex to OID
-		return PPA.InternalError
+		return OidNotFound
 	}
-	// TODO: Delete all jobs assigned to client
+
+	client, err := cl.cdb.ViewById(cl.db, ctx, oid); if err != nil {
+		return OidNotFound
+	}
+	// delete jobs
+	cl.deletejobs(ctx, client.Jobs)
 
 	return cl.cdb.Delete(cl.db, ctx, oid)
 
@@ -79,7 +89,7 @@ func (cl Client) Update(c *gin.Context, req Update, id string) (*PPA.Client, err
 	defer cancel()
 
 	oid, err := primitive.ObjectIDFromHex(id); if err != nil {
-		return nil, PPA.InternalError
+		return nil, OidNotFound
 	}
 	//TODO: Ensure updated phone number is unique
 
@@ -137,4 +147,12 @@ func (cl Client) oidExists(ctx context.Context, oid primitive.ObjectID) bool {
 	var inserted PPA.Client
 	err := coll.FindOne(ctx, bson.D{{"_id", oid}}).Decode(&inserted)
 	return err == nil
+}
+
+func (cl Client) deletejobs(ctx context.Context, oids []primitive.ObjectID) {
+	for _, oid := range oids {
+		err := cl.jdb.Delete(cl.db, ctx, oid); if err != nil {
+			// do nothing
+		}
+	}
 }

@@ -12,6 +12,7 @@ import (
 type Client struct {
 	db *mongo.DBConnection
 	cdb Repository
+	jdb JobRepository
 	rbac RBAC
 }
 
@@ -26,12 +27,16 @@ type Service interface {
 	PopulateJobs(*gin.Context, *[]PPA.Client) (*[]PopulatedClient, error)
 }
 
-func New(db *mongo.DBConnection, cdb Repository, rbac RBAC) *Client {
-	return &Client{db: db, cdb: cdb, rbac: rbac}
+func New(db *mongo.DBConnection, cdb Repository, jdb JobRepository, rbac RBAC) *Client {
+	return &Client{db: db, cdb: cdb, jdb: jdb, rbac: rbac}
 }
 
-func Init(db *mongo.DBConnection, rbac RBAC) *Client {
-	return New(db, dbQuery.Client{}, rbac)
+func Init(db *mongo.DBConnection, rbac RBAC, jdb JobRepository) *Client {
+	return New(db, dbQuery.Client{}, jdb, rbac)
+}
+
+type JobRepository interface {
+	Delete(*mongo.DBConnection, context.Context, primitive.ObjectID) error
 }
 
 type Repository interface {
