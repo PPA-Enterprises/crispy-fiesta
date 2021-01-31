@@ -2,6 +2,7 @@ package client
 
 import(
 	"PPA"
+	"fmt"
 	"context"
 	"net/http"
 	"time"
@@ -18,6 +19,11 @@ const (
 var OidNotFound = PPA.NewAppError(NotFound, "Does not exist")
 
 type Update struct {
+	Name string
+	Phone string
+}
+
+type JobUpdate struct {
 	Name string
 	Phone string
 }
@@ -89,16 +95,20 @@ func (cl Client) Update(c *gin.Context, req Update, id string) (*PPA.Client, err
 	ctx, cancel := context.WithDeadline(c.Request.Context(), duration)
 	defer cancel()
 
-	fetched, err := cl.cdb.ViewByPhone(cl.db, ctx, req.Phone)
-	if err != nil && fetched.Phone != req.Phone {
-		return nil, PPA.NewAppError(Conflict, "Phone number already in use")
+	// Note that len(nil) is 0
+	if len(req.Phone) > 0 {
+		fetched, _ := cl.cdb.ViewByPhone(cl.db, ctx, req.Phone)
+		fmt.Println(fetched)
+		if fetched != nil {
+			if fetched.ID.Hex() != id {
+				return nil, PPA.NewAppError(Conflict, "Phone number already already in use")
+			}
+		}
 	}
 
 	oid, err := primitive.ObjectIDFromHex(id); if err != nil {
 		return nil, OidNotFound
 	}
-
-	// TODO update name and number on jobs
 
 	if err := cl.cdb.Update(cl.db, ctx, oid, &PPA.Client {
 		ID: primitive.NilObjectID,
@@ -107,7 +117,14 @@ func (cl Client) Update(c *gin.Context, req Update, id string) (*PPA.Client, err
 	}); err != nil {
 		return nil, err
 	}
-	return cl.cdb.ViewById(cl.db, ctx, oid)
+
+	updated, err := cl.cdb.ViewById(cl.db, ctx, oid); if err != nil {
+		return nil, err
+	}
+
+	// update client info on all corresponding jobs
+	cl.updateJobs(ctx, updated.Jobs, JobUpdate { Name: updated.Name, Phone: updated.Phone })
+	return updated, nil
 }
 
 func (cl Client) PopulateJob(c *gin.Context, unpopClient *PPA.Client) (*PopulatedClient, error) {
@@ -160,6 +177,20 @@ func (cl Client) deletejobs(ctx context.Context, oids []primitive.ObjectID) {
 	for _, oid := range oids {
 		err := cl.jdb.Delete(cl.db, ctx, oid); if err != nil {
 			// do nothing
+		}
+	}
+}
+
+// How strong of a consistency garuntee do we want????
+func (cl Client) updateJobs(ctx context.Context, oids []primitive.ObjectID, update JobUpdate) {
+	if len(oids) <= 0 { return } // Note that len(nil) is 0
+
+	for _, oid := range oids {
+		if err := cl.jdb.Update(cl.db, ctx, oid, &PPA.Job {
+			ClientName: update.Name,
+			ClientPhone: update.Phone,
+		}); err != nil {
+			// do nothing or fail, depends
 		}
 	}
 }

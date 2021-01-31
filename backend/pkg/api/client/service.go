@@ -37,6 +37,7 @@ func Init(db *mongo.DBConnection, rbac RBAC, jdb JobRepository) *Client {
 
 type JobRepository interface {
 	Delete(*mongo.DBConnection, context.Context, primitive.ObjectID) error
+	Update(*mongo.DBConnection, context.Context, primitive.ObjectID, *PPA.Job) error
 }
 
 type Repository interface {
