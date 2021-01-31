@@ -9,7 +9,6 @@ import (
 )
 
 type Update struct {
-	ID primitive.ObjectID
 	ClientName string
 	ClientPhone string
 	CarInfo string
