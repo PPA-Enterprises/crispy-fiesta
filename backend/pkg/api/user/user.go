@@ -3,11 +3,18 @@ package user
 import (
 	"context"
 	"time"
+	"net/http"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/bson"
 	"PPA"
 )
+
+const (
+	NotFound = http.StatusNotFound
+)
+
+var OidNotFound = PPA.NewAppError(NotFound, "Does not exist")
 
 func (u User) Create(c *gin.Context, req PPA.User) (*PPA.User, error) {
 	//additional security stuff like if user is allowed to do this
@@ -34,7 +41,7 @@ func (u User) ViewById(c *gin.Context, id string) (*PPA.User, error) {
 	defer cancel()
 
 	oid, err := primitive.ObjectIDFromHex(id); if err != nil {
-		return nil, PPA.InternalError
+		return nil, OidNotFound
 	}
 
 	return u.udb.ViewById(u.db, ctx, oid)
@@ -66,7 +73,7 @@ func (u User) Delete(c *gin.Context, id string) error {
 	defer cancel()
 
 	oid, err := primitive.ObjectIDFromHex(id); if err != nil {
-		return PPA.InternalError
+		return OidNotFound
 	}
 
 	return u.udb.Delete(u.db, ctx, oid)
@@ -83,7 +90,7 @@ func (u User) Update(c *gin.Context, req Update, id string) (*PPA.User, error) {
 	defer cancel()
 
 	oid, err := primitive.ObjectIDFromHex(id); if err != nil {
-		return nil, PPA.InternalError
+		return nil, OidNotFound
 	}
 
 	if err := u.udb.Update(u.db, ctx, oid, &PPA.User {

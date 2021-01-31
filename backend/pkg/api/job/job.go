@@ -2,11 +2,18 @@ package job
 import (
 	"PPA"
 	"context"
+	"net/http"
 	"time"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
+
+const (
+	NotFound = http.StatusNotFound
+)
+
+var OidNotFound = PPA.NewAppError(NotFound, "Does not exist")
 
 type Update struct {
 	ClientName string
@@ -60,7 +67,7 @@ func (j Job) ViewById( c *gin.Context, id string) (*PPA.Job, error) {
 	defer cancel()
 
 	oid, err := primitive.ObjectIDFromHex(id); if err != nil {
-		return nil, PPA.InternalError
+		return nil, OidNotFound
 	}
 	return j.jdb.ViewById(j.db, ctx, oid)
 }
@@ -79,7 +86,7 @@ func (j Job) Delete(c *gin.Context, id string) error {
 	defer cancel()
 
 	oid, err := primitive.ObjectIDFromHex(id); if err != nil {
-		return PPA.InternalError
+		return OidNotFound
 	}
 	return j.jdb.Delete(j.db, ctx, oid)
 }
@@ -90,7 +97,7 @@ func (j Job) Update(c *gin.Context, req Update, id string) (*PPA.Job, error) {
 	defer cancel()
 
 	oid, err := primitive.ObjectIDFromHex(id); if err != nil {
-		return nil, PPA.InternalError
+		return nil, OidNotFound
 	}
 	// TODO: update name and number on client side too
 
