@@ -28,7 +28,6 @@ func (u User) Create(db *mongo.DBConnection, ctx context.Context, user *PPA.User
 	}
 
 	return user, nil
-
 }
 
 func(u User) ViewById(db *mongo.DBConnection, ctx context.Context, oid primitive.ObjectID) (*PPA.User, error) {
