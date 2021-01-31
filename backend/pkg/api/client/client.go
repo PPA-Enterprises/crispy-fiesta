@@ -11,6 +11,7 @@ import(
 )
 
 const (
+	Conflict = http.StatusConflict
 	NotFound = http.StatusNotFound
 )
 
@@ -88,10 +89,16 @@ func (cl Client) Update(c *gin.Context, req Update, id string) (*PPA.Client, err
 	ctx, cancel := context.WithDeadline(c.Request.Context(), duration)
 	defer cancel()
 
+	fetched, err := cl.cdb.ViewByPhone(cl.db, ctx, req.Phone)
+	if err != nil && fetched.Phone != req.Phone {
+		return nil, PPA.NewAppError(Conflict, "Phone number already in use")
+	}
+
 	oid, err := primitive.ObjectIDFromHex(id); if err != nil {
 		return nil, OidNotFound
 	}
-	//TODO: Ensure updated phone number is unique
+
+	// TODO update name and number on jobs
 
 	if err := cl.cdb.Update(cl.db, ctx, oid, &PPA.Client {
 		ID: primitive.NilObjectID,
