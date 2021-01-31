@@ -104,6 +104,13 @@ func (j Job) Update(c *gin.Context, req Update, id string) (*PPA.Job, error) {
 	}); err != nil {
 		return nil, err
 	}
+
+	/* TODO: Needs discussion...update client name/phone?
+	clientUpdate := ClientUpdate { Name: req.ClientName, Phone: re.ClientPhone }
+	if err := updateClient(ctx, clientUpdate); err != nil {
+		return nil, err
+	}*/
+
 	return j.jdb.ViewById(j.db, ctx, oid)
 }
 
@@ -145,3 +152,4 @@ func (j Job) attatchJobToClient(ctx context.Context, phone string, jobOid primit
 	updateErr := j.cdb.Update(j.db, ctx, client.ID, client)
 	return updateErr
 }
+
