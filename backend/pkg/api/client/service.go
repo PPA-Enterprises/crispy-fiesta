@@ -23,7 +23,7 @@ type Service interface {
 	Delete(*gin.Context, string) error
 	Update(*gin.Context, Update, string) (*PPA.Client, error)
 	PopulateJob(*gin.Context, *PPA.Client) (*PopulatedClient, error)
-//	PopulateJobs(*gin.Context, *[]PPA.Client) (*[]PopulatedClient, error)
+	PopulateJobs(*gin.Context, *[]PPA.Client) (*[]PopulatedClient, error)
 }
 
 func New(db *mongo.DBConnection, cdb Repository, rbac RBAC) *Client {

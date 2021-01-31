@@ -46,7 +46,10 @@ func (h HTTP) list(c *gin.Context) {
 	clients, err := h.service.List(c); if err != nil {
 		PPA.Response(c, err); return
 	}
-	c.JSON(http.StatusOK, fetchedAll(clients)); return
+	populated, err := h.service.PopulateJobs(c, clients); if err != nil {
+		PPA.Response(c, err); return
+	}
+	c.JSON(http.StatusOK, fetchedAll(populated)); return
 }
 
 func (h HTTP) viewById(c *gin.Context) {
@@ -123,7 +126,7 @@ func fetched(c *client.PopulatedClient) gin.H {
 	return gin.H{"success": true, "message": "Fetched Client", "payload": c}
 }
 
-func fetchedAll(c *[]PPA.Client) gin.H {
+func fetchedAll(c *[]client.PopulatedClient) gin.H {
 	return gin.H{"success": true, "message": "Fetched Clients", "payload": c}
 }
 

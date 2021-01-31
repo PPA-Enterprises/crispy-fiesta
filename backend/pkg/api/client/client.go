@@ -110,6 +110,28 @@ func (cl Client) PopulateJob(c *gin.Context, unpopClient *PPA.Client) (*Populate
 	}, nil
 }
 
+func (cl Client) PopulateJobs(c *gin.Context, unpopClients *[]PPA.Client) (*[]PopulatedClient, error) {
+	duration := time.Now().Add(5*time.Second)
+	ctx, cancel := context.WithDeadline(c.Request.Context(), duration)
+	defer cancel()
+
+	var popClients = make([]PopulatedClient, 0, len(*unpopClients))
+
+	for _, unpop := range *unpopClients {
+		jobs, err := cl.cdb.Populate(cl.db, ctx, unpop.Jobs); if err != nil {
+			//return nil, err
+			//just skip it???
+		}
+		popClients = append(popClients, PopulatedClient {
+			ID: unpop.ID,
+			Name: unpop.Name,
+			Phone: unpop.Phone,
+			Jobs: jobs,
+		})
+	}
+	return &popClients, nil
+}
+
 func (cl Client) oidExists(ctx context.Context, oid primitive.ObjectID) bool {
 	coll := cl.db.Use("clients")
 
