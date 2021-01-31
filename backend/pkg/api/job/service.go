@@ -43,6 +43,7 @@ type ClientRepository interface {
 	Create(*mongo.DBConnection, context.Context, *PPA.Client) (*PPA.Client, error)
 	ViewByPhone(*mongo.DBConnection, context.Context, string) (*PPA.Client, error)
 	Update(*mongo.DBConnection, context.Context, primitive.ObjectID, *PPA.Client) error
+	RemoveJob(*mongo.DBConnection, context.Context, string, primitive.ObjectID) error
 }
 
 type RBAC interface{}

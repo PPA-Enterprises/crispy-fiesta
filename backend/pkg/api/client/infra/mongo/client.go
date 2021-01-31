@@ -137,6 +137,30 @@ func (c Client) Populate(db *mongo.DBConnection, ctx context.Context, oids []pri
 	return jobs, nil
 }
 
+func (c Client) RemoveJob(db *mongo.DBConnection, ctx context.Context, clientPhone string, jobOid primitive.ObjectID) error {
+	fetched, err := c.ViewByPhone(db, ctx, clientPhone); if err != nil {
+		return err
+	}
+	fetched.FindAndRemoveJob(jobOid)
+
+	coll := db.Use("clients")
+
+	filter := bson.D{{"_id", fetched.ID}}
+	updateDoc := bson.D{{"$set", fetched}}
+
+	var oldDoc PPA.Client
+	err = coll.FindOneAndUpdate(ctx, filter, updateDoc).Decode(&oldDoc)
+
+	if err == mongodb.ErrNoDocuments {
+		return PPA.NewAppError(NotFound, "Client Not Found")
+	}
+
+	if err != nil {
+		return PPA.InternalError
+	}
+	return nil
+}
+
 func (c Client) phoneExists(db *mongo.DBConnection, ctx context.Context, phone string) bool {
 	if _, err := c.ViewByPhone(db, ctx, phone); err != nil {
 		return false

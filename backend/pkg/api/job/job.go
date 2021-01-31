@@ -14,6 +14,7 @@ const (
 )
 
 var OidNotFound = PPA.NewAppError(NotFound, "Does not exist")
+var JobNotFound = PPA.NewAppError(NotFound, "Does not exist")
 
 type Update struct {
 	ClientName string
@@ -87,6 +88,14 @@ func (j Job) Delete(c *gin.Context, id string) error {
 
 	oid, err := primitive.ObjectIDFromHex(id); if err != nil {
 		return OidNotFound
+	}
+
+	job, err := j.jdb.ViewById(j.db, ctx, oid); if err != nil {
+		return JobNotFound
+	}
+
+	if err := j.cdb.RemoveJob(j.db, ctx, job.ClientPhone, oid); err != nil {
+		return err
 	}
 	return j.jdb.Delete(j.db, ctx, oid)
 }
