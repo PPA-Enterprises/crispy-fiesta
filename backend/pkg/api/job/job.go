@@ -11,6 +11,7 @@ import (
 
 const (
 	NotFound = http.StatusNotFound
+	Conflict = http.StatusConflict
 )
 
 var OidNotFound = PPA.NewAppError(NotFound, "Does not exist")
@@ -26,7 +27,7 @@ type Update struct {
 
 type ClientUpdate struct {
 	Name string
-	phone string
+	Phone string
 }
 
 func (j Job) Create(c *gin.Context, req PPA.Job) (*PPA.Job, error) {
@@ -108,6 +109,24 @@ func (j Job) Update(c *gin.Context, req Update, id string) (*PPA.Job, error) {
 	oid, err := primitive.ObjectIDFromHex(id); if err != nil {
 		return nil, OidNotFound
 	}
+
+	oldJob, err := j.jdb.ViewById(j.db, ctx, oid); if err != nil {
+		return nil, err
+	}
+
+	client, err := j.cdb.ViewByPhone(j.db, ctx, oldJob.ClientPhone); if err != nil {
+		return nil, err
+	}
+
+	if len(req.ClientPhone) > 0 {
+		fetched, _ := j.cdb.ViewByPhone(j.db, ctx, req.ClientPhone)
+		if fetched != nil {
+			if fetched.ID.Hex() != client.ID.Hex() {
+				return nil, PPA.NewAppError(Conflict, "Phone number already already in use")
+			}
+		}
+	}
+
 	// TODO: update name and number on client side too
 
 	if err := j.jdb.Update(j.db, ctx, oid, &PPA.Job {
@@ -120,6 +139,15 @@ func (j Job) Update(c *gin.Context, req Update, id string) (*PPA.Job, error) {
 	}); err != nil {
 		return nil, err
 	}
+
+	if err = j.cdb.Update(j.db, ctx, client.ID, &PPA.Client {
+		Name: req.ClientName,
+		Phone: req.ClientPhone,
+	}); err != nil {
+		return nil, err
+	}
+
+	j.updateJobs(ctx, client.Jobs, ClientUpdate{ Name: req.ClientName, Phone: req.ClientPhone })
 
 	/* TODO: Needs discussion...update client name/phone?
 	clientUpdate := ClientUpdate { Name: req.ClientName, Phone: re.ClientPhone }
@@ -169,3 +197,15 @@ func (j Job) attatchJobToClient(ctx context.Context, phone string, jobOid primit
 	return updateErr
 }
 
+func (j Job) updateJobs(ctx context.Context, oids []primitive.ObjectID, update ClientUpdate) {
+	if len(oids) <= 0 { return } // Note that len(nil) is 0
+
+	for _, oid := range oids {
+		if err := j.jdb.Update(j.db, ctx, oid, &PPA.Job {
+			ClientName: update.Name,
+			ClientPhone: update.Phone,
+		}); err != nil {
+			// do nothing or fail, depends
+		}
+	}
+}
