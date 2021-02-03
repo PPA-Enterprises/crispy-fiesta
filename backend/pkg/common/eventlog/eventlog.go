@@ -75,6 +75,33 @@ func (s Service) LogCreated(ctx context.Context, data PPA.EventMap, editor PPA.E
 	return event
 }
 
+func (s Service) LogUpdated(ctx context.Context, prev PPA.EventMap, next PPA.EventMap, editor PPA.Editor) PPA.LogEvent {
+	changes := make(PPA.ChangesMap)
+	for k, v := range next {
+		if !reflect.DeepEqual(next[k], prev[k]) {
+			changes[k] = PPA.Change{Old: prev[k], New: v}
+		}
+	}
+
+	event := PPA.LogEvent {
+		ID: primitive.NewObjectID(),
+		EventType: PPA.Edited,
+		Timestamp: time.Now(),
+		Editor: editor.Name,
+		EditorID: editor.OID,
+		Changes: changes,
+	}
+
+	for s.oidExists(ctx, event.ID, editor.Collection) {
+		event.ID = primitive.NewObjectID()
+	}
+
+	if !s.log(ctx, editor.Collection, &event) {
+		return s.failed(&event)
+	}
+	return event
+}
+
 func (s Service) log(ctx context.Context, collection string, event *PPA.LogEvent) bool {
 	coll := s.db.Use(collection)
 	_, err := coll.InsertOne(ctx, event); if err != nil {

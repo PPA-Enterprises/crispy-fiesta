@@ -50,6 +50,8 @@ type Repository interface {
 
 type EventLogger interface {
 	LogCreated(context.Context, PPA.EventMap, PPA.Editor) PPA.LogEvent
+	LogUpdated(context.Context, PPA.EventMap, PPA.EventMap, PPA.Editor) PPA.LogEvent
+	LogDeleted(context.Context, PPA.Editor) PPA.LogEvent
 	GenerateEvent(interface{}, string) PPA.EventMap
 }
 

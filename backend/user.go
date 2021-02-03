@@ -15,7 +15,7 @@ type User struct {
 	Token string `json:"-"`
 	Role *Role `json:"role,omitempty" m:"Permission Level"`
 	RoleID AccessRole `json:"-" m:"Access Role"`
-	History []LogEvent `json:"history" bson:"history,omitempty"`
+	History []LogEvent `json:"-" bson:"history,omitempty"`
 }
 
 type AuthUser struct {

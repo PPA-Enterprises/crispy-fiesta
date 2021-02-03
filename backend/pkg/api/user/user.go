@@ -110,6 +110,10 @@ func (u User) Update(c *gin.Context, req Update, id string) (*PPA.User, error) {
 		return nil, OidNotFound
 	}
 
+	oldDoc, err := u.udb.ViewById(u.db, ctx, oid); if err != nil {
+		return nil, OidNotFound
+	}
+
 	if err := u.udb.Update(u.db, ctx, oid, &PPA.User {
 		ID: primitive.NilObjectID,
 		Name: req.Name,
@@ -118,7 +122,24 @@ func (u User) Update(c *gin.Context, req Update, id string) (*PPA.User, error) {
 	}); err != nil {
 		return nil, err
 	}
-	return u.udb.ViewById(u.db, ctx, oid)
+
+	updated, err := u.udb.ViewById(u.db, ctx, oid); if err != nil {
+		return nil, PPA.InternalError
+	}
+	editor := PPA.Editor {
+		OID: updated.ID,
+		Name: "Bob",
+		Collection: "Bob" + updated.ID.Hex() + "a",
+
+	}
+
+	updated.AppendLog(u.eventLogger.LogUpdated(ctx,
+		u.eventLogger.GenerateEvent(oldDoc, EventTag),
+		u.eventLogger.GenerateEvent(updated, EventTag),
+		editor))
+	u.udb.LogEvent(u.db, ctx, updated)
+
+	return updated, nil
 }
 
 func (u User) oidExists(ctx context.Context, oid primitive.ObjectID) bool {
