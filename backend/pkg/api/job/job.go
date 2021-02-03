@@ -56,13 +56,13 @@ func (j Job) Create(c *gin.Context, req PPA.Job, editor PPA.Editor) (*PPA.Job, e
 			Name: created.ClientName,
 			Phone: created.ClientPhone,
 			Jobs: []primitive.ObjectID{},
-		}); err != nil {
+		}, editor); err != nil {
 			return nil, err
 		}
 	}
 
 	// append id to client
-	if err := j.attatchJobToClient(ctx, created.ClientPhone, created.ID); err != nil {
+	if err := j.attatchJobToClient(ctx, created.ClientPhone, created, editor); err != nil {
 		return nil, err
 	}
 
@@ -183,12 +183,20 @@ func (j Job) clientExists(ctx context.Context, phone string) bool {
 	return err == nil
 }
 
-func (j Job) createClient(ctx context.Context, client *PPA.Client) (*PPA.Client, error) {
+func (j Job) createClient(ctx context.Context, client *PPA.Client, editor PPA.Editor) (*PPA.Client, error) {
 	client.ID = primitive.NewObjectID()
 	for j.clientOidExists(ctx, client.ID) {
 		client.ID = primitive.NewObjectID()
 	}
-	return j.cdb.Create(j.db, ctx, client)
+
+	created, err := j.cdb.Create(j.db, ctx, client); if err != nil {
+		return nil, err
+	}
+
+	created.AppendLog(j.eventLogger.LogCreated(ctx, j.eventLogger.GenerateEvent(created, EventTag), editor))
+	j.cdb.LogEvent(j.db, ctx, created)
+
+	return created, nil
 }
 
 func (j Job) clientOidExists(ctx context.Context, oid primitive.ObjectID) bool {
@@ -199,13 +207,16 @@ func (j Job) clientOidExists(ctx context.Context, oid primitive.ObjectID) bool {
 	return err == nil
 }
 
-func (j Job) attatchJobToClient(ctx context.Context, phone string, jobOid primitive.ObjectID) error {
+func (j Job) attatchJobToClient(ctx context.Context, phone string, job *PPA.Job, editor PPA.Editor) error {
 	client, err := j.cdb.ViewByPhone(j.db, ctx, phone); if err != nil {
 		return err
 	}
 
-	client.AttatchJob(jobOid)
+	client.AttatchJob(job.ID)
 	updateErr := j.cdb.Update(j.db, ctx, client.ID, client)
+
+	client.AppendLog(j.eventLogger.LogAssignedJob(ctx, j.eventLogger.GenerateEvent(job, EventTag), editor))
+	j.cdb.LogEvent(j.db, ctx, client)
 	return updateErr
 }
 

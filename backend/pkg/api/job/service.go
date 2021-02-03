@@ -46,12 +46,14 @@ type ClientRepository interface {
 	ViewByPhone(*mongo.DBConnection, context.Context, string) (*PPA.Client, error)
 	Update(*mongo.DBConnection, context.Context, primitive.ObjectID, *PPA.Client) error
 	RemoveJob(*mongo.DBConnection, context.Context, string, primitive.ObjectID) error
+	LogEvent(*mongo.DBConnection, context.Context, *PPA.Client)
 }
 
 type EventLogger interface {
 	LogCreated(context.Context, PPA.EventMap, PPA.Editor) PPA.LogEvent
 	LogUpdated(context.Context, PPA.EventMap, PPA.EventMap, PPA.Editor) PPA.LogEvent
 	LogDeleted(context.Context, PPA.Editor) PPA.LogEvent
+	LogAssignedJob(context.Context, PPA.EventMap, PPA.Editor) PPA.LogEvent
 	GenerateEvent(interface{}, string) PPA.EventMap
 }
 
