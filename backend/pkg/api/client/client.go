@@ -161,6 +161,7 @@ func (cl Client) PopulateJob(c *gin.Context, unpopClient *PPA.Client) (*Populate
 		Name: unpopClient.Name,
 		Phone: unpopClient.Phone,
 		Jobs: jobs,
+		History: unpopClient.History,
 	}, nil
 }
 
@@ -181,6 +182,7 @@ func (cl Client) PopulateJobs(c *gin.Context, unpopClients *[]PPA.Client) (*[]Po
 			Name: unpop.Name,
 			Phone: unpop.Phone,
 			Jobs: jobs,
+			History: unpop.History,
 		})
 	}
 	return &popClients, nil

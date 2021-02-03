@@ -66,6 +66,7 @@ type PopulatedClient struct {
 	Name string `json:"name"`
 	Phone string `json:"phone"`
 	Jobs []PPA.Job `json:"jobs"`
+	History []PPA.LogEvent `json:"history"`
 }
 
 type RBAC interface {

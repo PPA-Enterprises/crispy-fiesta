@@ -14,7 +14,6 @@ const(
 	Edited Event = "Edited"
 	Deleted Event = "Deleted"
 	JobAssigned Event = "Assigned Job"
-	JobCreatedAndAssigned = "Job Created and Assigned to Client"
 )
 type Change struct {
 	Old interface{} `json:"old,omitempty" bson:"old,omitempty"`
