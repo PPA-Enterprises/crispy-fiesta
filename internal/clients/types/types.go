@@ -5,6 +5,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"internal/common/errors"
 	jobTypes "internal/jobs/types"
+	eventLogTypes "internal/event_log/types"
 )
 
 type PopulatedClientModel struct {
@@ -22,8 +23,7 @@ type UnpopulatedClientModel struct {
 }
 
 type Client interface {
-	AttatchJobID(primitive.ObjectID)
-	Put(ctx context.Context, upsert bool) (*errors.ResponseError)
+	AttatchJobID(ctx context.Context, oid primitive.ObjectID, editor *eventLogTypes.Editor) *errors.ResponseError
 	Populate(ctx context.Context) (*PopulatedClientModel, *errors.ResponseError)
 }
 
@@ -32,4 +32,10 @@ type DeliverableClient struct {
 	Name string `json:"name" bson:"name"`
 	Phone string `json:"phone" bson:"phone"`
 	Jobs []jobTypes.Job `json:"jobs" bosn:"jobs"`
+}
+
+type LogableClient struct {
+	ID string `m:"Identifier"`
+	Name string `m:"Name"`
+	Phone string `m:"Phone Number"`
 }

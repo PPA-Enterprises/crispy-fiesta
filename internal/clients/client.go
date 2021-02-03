@@ -3,92 +3,25 @@ package clients
 import (
 	"bytes"
 	"context"
-	//"strings"
-	//"fmt"
 	"internal/clients/types"
 	"internal/common/errors"
 	"internal/db"
+	"internal/event_log"
+	eventLogTypes "internal/event_log/types"
 	jobTypes "internal/jobs/types"
-	"internal/uid"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	//combinations "github.com/mxschmitt/golang-combinations"
 )
 
 type clientModel struct {
-	ID    primitive.ObjectID   `json:"_id,omitempty" bson:"_id,omitempty"`
-	Name  string               `json:"name" bson:"name"`
-	Phone string               `json:"phone" bson:"phone"`
-	Jobs  []primitive.ObjectID `json:"jobs" bson:"jobs"`
-}
-
-type updateableClient struct {
-	ID    primitive.ObjectID   `json:"_id,omitempty" bson:"_id,omitempty"`
-	Name  string               `json:"name" bson:"name,omitempty"`
-	Phone string               `json:"phone" bson:"phone,omitempty"`
-}
-
-type newClient struct {
-	Name  string               `json:"name" bson:"name"`
-	Phone string               `json:"phone" bson:"phone"`
-	Jobs  []primitive.ObjectID `json:"jobs" bson:"jobs"`
-}
-
-//need this cuz of bug
-type joblessClient struct {
-	ID primitive.ObjectID	`json:"_id"`
-	Name string				`json:"name"`
-	Phone string			`json:"phone"`
-	Jobs []string			`json:"jobs"`
-}
-
-func fromCreateClientCmd(data *createClientCmd) *newClient {
-	return &newClient{
-		Name: data.Name,
-		Phone: data.Phone,
-		Jobs: make([]primitive.ObjectID, 0),
-	}
-}
-
-func emptyJobsClient(c *types.PopulatedClientModel) *joblessClient {
-	return &joblessClient {
-		ID: c.ID,
-		Name: c.Name,
-		Phone: c.Phone,
-		Jobs: make([]string, 0),
-	}
-}
-
-func tryFromUpdateClientCmd(data *updateClientCmd, id string) (*updateableClient, *errors.ResponseError) {
-	clientOID, err := primitive.ObjectIDFromHex(id); if err != nil {
-		return nil, errors.InvalidOID()
-	}
-	return &updateableClient{
-		ID:    clientOID,
-		Name:  data.Name,
-		Phone: data.Phone,
-	}, nil
-}
-
-
-func normalize(j []jobTypes.Job) []primitive.ObjectID {
-	oids := make([]primitive.ObjectID, 0)
-	for _, job := range j {
-		oids = append(oids, job.ID)
-	}
-	return oids
-}
-
-func NewClient(name, phone string) types.Client {
-	return &clientModel{
-		ID:    primitive.NewObjectID(),
-		Name:  name,
-		Phone: phone,
-		Jobs:  []primitive.ObjectID{},
-	}
+	ID		primitive.ObjectID   `json:"_id,omitempty" bson:"_id,omitempty"`
+	Name	string               `json:"name" bson:"name"`
+	Phone	string               `json:"phone" bson:"phone"`
+	Jobs	[]primitive.ObjectID `json:"jobs" bson:"jobs"`
+	Log		[]eventLogTypes.NormalizedLoggedEvent `json:"log" bson:"log"`
 }
 
 func ClientByPhone(ctx context.Context, phone string) types.Client {
@@ -102,7 +35,7 @@ func ClientByPhone(ctx context.Context, phone string) types.Client {
 	return &foundClient
 }
 
-func (self *clientModel) AttatchJobID(oid primitive.ObjectID) {
+func (self *clientModel) AttatchJobID(ctx context.Context, oid primitive.ObjectID, editor *eventLogTypes.Editor) *errors.ResponseError {
 	//search for id, insert if not already in the array
 	// linear search for now
 	const matched int = 0
@@ -110,36 +43,14 @@ func (self *clientModel) AttatchJobID(oid primitive.ObjectID) {
 	for _, id := range self.Jobs {
 		result := bytes.Compare([]byte(oid.String()), []byte(id.String()))
 		if result == matched {
-			return
+			return errors.JobAlreadyExistsError()
 		}
 	}
 	self.Jobs = append(self.Jobs, oid)
+	return self.put(ctx, true, editor)
 }
 
-func (self *clientModel) create(ctx context.Context) (UID.ID, *errors.ResponseError) {
-	coll := db.Connection().Use(db.DefaultDatabase, "clients")
-	res, err := coll.InsertOne(ctx, self)
-	if err != nil {
-		return nil, errors.DatabaseError(err)
-	}
-	return UID.TryFromInterface(res.InsertedID)
-}
-
-func (self *newClient) createUniq(ctx context.Context) (UID.ID, *errors.ResponseError) {
-	coll := db.Connection().Use(db.DefaultDatabase, "clients")
-	exists := ClientByPhone(ctx, self.Phone)
-	if exists != nil {
-		return nil, errors.DoesNotExist()
-	}
-
-	res, err := coll.InsertOne(ctx, self)
-	if err != nil {
-		return nil, errors.DatabaseError(err)
-	}
-	return UID.TryFromInterface(res.InsertedID)
-}
-
-func (self *clientModel) Put(ctx context.Context, upsert bool) *errors.ResponseError {
+func (self *clientModel) put(ctx context.Context, upsert bool, editor *eventLogTypes.Editor) *errors.ResponseError {
 	coll := db.Connection().Use(db.DefaultDatabase, "clients")
 	opts := options.FindOneAndReplace()
 	opts = opts.SetUpsert(true)
@@ -147,6 +58,9 @@ func (self *clientModel) Put(ctx context.Context, upsert bool) *errors.ResponseE
 	err := coll.FindOneAndReplace(ctx, bson.D{{"_id", self.ID}}, self, opts).Err()
 	if err == mongo.ErrNoDocuments {
 		if upsert {
+			//client was created
+			loggedClient := event_log.LogCreated(ctx, self.logable(), editor)
+			_ = appendLog(ctx, self, loggedClient)
 			return nil
 		} else {
 			return errors.PutFailed(err)
@@ -156,27 +70,8 @@ func (self *clientModel) Put(ctx context.Context, upsert bool) *errors.ResponseE
 	if err != nil {
 		return errors.PutFailed(err)
 	}
+	//client was updated with an appended job
 	return nil
-}
-
-func (self *updateableClient) patch(ctx context.Context, upsert bool) (*types.PopulatedClientModel, *errors.ResponseError) {
-	coll := db.Connection().Use(db.DefaultDatabase, "clients")
-	opts := options.FindOneAndUpdate().SetUpsert(upsert)
-
-	filter := bson.D{{"_id", self.ID}}
-	update := bson.D{{"$set", self}}
-	var updatedDocument clientModel
-	err := coll.FindOneAndUpdate(ctx, filter, update, opts).Decode(&updatedDocument)
-
-	if err != nil {
-		return nil, errors.PutFailed(err)
-	}
-
-	err = coll.FindOne(ctx, filter).Decode(&updatedDocument)
-	if err != nil {
-		return nil, errors.DatabaseError(err)
-	}
-	return updatedDocument.Populate(ctx)
 }
 
 func (self *clientModel) Populate(ctx context.Context) (*types.PopulatedClientModel, *errors.ResponseError) {
@@ -198,6 +93,14 @@ func (self *clientModel) Populate(ctx context.Context) (*types.PopulatedClientMo
 		Phone: self.Phone,
 		Jobs:  jobs,
 	}, nil
+}
+
+func (self *clientModel) logable() *types.LogableClient {
+	return &types.LogableClient {
+		ID: self.ID.Hex(),
+		Name: self.Name,
+		Phone: self.Phone,
+	}
 }
 
 /*
@@ -244,18 +147,6 @@ func powersetRegex(term string) string {
 	return regex
 }
 */
-func populateClients(ctx context.Context, clients []clientModel) []types.PopulatedClientModel {
-
-	populatedClients := make([]types.PopulatedClientModel, 0, len(clients))
-	for _, c := range clients {
-		client, err := c.Populate(ctx)
-		//just skip bad records
-		if err == nil {
-			populatedClients = append(populatedClients, *client)
-		}
-	}
-	return populatedClients
-}
 
 func clientByID(ctx context.Context, id string) (*clientModel, *errors.ResponseError) {
 	coll := db.Connection().Use(db.DefaultDatabase, "clients")
@@ -318,3 +209,53 @@ func fetch(ctx context.Context, fetchOpts *BulkFetch) ([]types.UnpopulatedClient
 	return clients, nil
 }
 
+func RemoveJob(ctx context.Context, clientID, jobID string) *errors.ResponseError {
+	const matched int = 0
+
+	client, err := clientByID(ctx, clientID); if err != nil {
+		return err
+	}
+
+	for i, oid := range client.Jobs {
+		result := bytes.Compare([]byte(jobID), []byte(oid.Hex()))
+		if result == matched {
+			// preserve the order. Idiomatic way
+			client.Jobs = append(client.Jobs[:i], client.Jobs[i+1:]...)
+		}
+	}
+
+	coll := db.Connection().Use(db.DefaultDatabase, "clients")
+	filter := bson.D{{"_id", client.ID}}
+	update := bson.D{{"$set", bson.D{{"jobs", client.Jobs}}}}
+
+	var updatedDoc clientModel
+	updateErr := coll.FindOneAndUpdate(ctx, filter, update).Decode(&updatedDoc)
+	if updateErr != nil {
+		return errors.DatabaseError(updateErr)
+	}
+	return nil
+}
+
+func deleteByID(ctx context.Context, clientID string) *errors.ResponseError {
+	coll := db.Connection().Use(db.DefaultDatabase, "deleted_clients")
+	client, err := clientByID(ctx, clientID); if err != nil {
+		return err
+	}
+
+	_, insertErr := coll.InsertOne(ctx, client); if insertErr != nil {
+		return errors.DatabaseError(insertErr)
+	}
+
+	jobDestroyer := jobTypes.DeletorFactory()
+
+	for _, oid := range client.Jobs {
+		_ := jobDestroyer.DeleteByID(ctx, oid)
+	}
+
+	coll = db.Connection().Use(db.DefaultDatabase, "clients")
+	_, delErr := coll.DeleteOne(ctx, bson.D{{"_id", client.ID}})
+	if delErr != nil {
+		return errors.DatabaseError(delErr)
+	}
+	return nil
+}

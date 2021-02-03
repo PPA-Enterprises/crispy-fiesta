@@ -5,7 +5,8 @@ import (
 	"net/http"
 	"strconv"
 	"time"
-
+	eventLogTypes "internal/event_log/types"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"github.com/gin-gonic/gin"
 )
 
@@ -20,7 +21,13 @@ func createClient(c *gin.Context) {
 		c.Abort(); return
 	}
 	newClient := fromCreateClientCmd(&data)
-	uid, err := newClient.createUniq(ctx); if err != nil {
+	editor := eventLogTypes.Editor {
+		Oid: primitive.NewObjectID() ,
+		Name: "Bob",
+		Collection: "Bob123",
+	}
+
+	uid, err := newClient.createUniq(ctx, &editor); if err != nil {
 		c.JSON(err.Code,
 			gin.H{"success": false, "message": err.Error()});
 		c.Abort(); return
@@ -122,7 +129,13 @@ func update(c *gin.Context) {
 		c.Abort(); return
 	}
 
-	updated, err := update.patch(ctx, false)
+	editor := eventLogTypes.Editor {
+		Oid: primitive.NewObjectID() ,
+		Name: "Bob",
+		Collection: "Bob123",
+	}
+
+	updated, err := update.patch(ctx, &editor, false)
 	if err != nil {
 		c.JSON(err.Code,
 			gin.H{"success": false, "message": err.Error()})

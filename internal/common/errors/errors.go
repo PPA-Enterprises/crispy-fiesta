@@ -20,6 +20,13 @@ func EmailAlreadyExistsError() *ResponseError {
 	}
 }
 
+func JobAlreadyExistsError() *ResponseError {
+	return &ResponseError{
+		Code: http.StatusConflict,
+		reason: "Job Already Exists",
+	}
+}
+
 func EmailDoesNotExistError() *ResponseError {
 	return &ResponseError{
 		Code: http.StatusNotFound,

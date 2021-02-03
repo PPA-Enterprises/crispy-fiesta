@@ -2,7 +2,6 @@ package jobs
 
 import (
 	"context"
-
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -11,7 +10,10 @@ import (
 	"internal/db"
 	"internal/uid"
 	clientTypes "internal/clients/types"
+	eventLogTypes "internal/event_log/types"
+	"internal/event_log"
 	"internal/clients"
+	"internal/jobs/types"
 )
 
 type jobModel struct {
@@ -21,16 +23,9 @@ type jobModel struct {
 	CarInfo         string             `json:"car_info"bson:"car_info"`
 	AppointmentInfo string             `json:"appointment_info"bson:"appointment_info"`
 	Notes           string             `json:"notes"bson:"notes"`
+	Log				[]eventLogTypes.NormalizedLoggedEvent `json:"log"bson:"log"`
 }
 
-type updateableJob struct {
-	ID              primitive.ObjectID `json:"_id,omitempty"bson:"_id,omitempty"`
-	ClientName      string             `json:"client_info"bson:"client_info,omitempty"`
-	ClientPhone		string             `json:"client_phone"bson:"client_phone,omitempty"`
-	CarInfo         string             `json:"car_info"bson:"car_info,omitempty"`
-	AppointmentInfo string             `json:"appointment_info"bson:"appointment_info,omitempty"`
-	Notes           string             `json:"notes"bson:"notes,omitempty"`
-}
 func fromSubmitJobCmd(data *submitJobCmd) *jobModel {
 	return &jobModel{
 		ID: primitive.NewObjectID(),
@@ -40,21 +35,6 @@ func fromSubmitJobCmd(data *submitJobCmd) *jobModel {
 		AppointmentInfo: data.AppointmentInfo,
 		Notes: data.Notes,
 	}
-}
-
-func tryFromUpdateJobCmd(data *updateJobCmd, id string) (*updateableJob, *errors.ResponseError) {
-	oid, err := primitive.ObjectIDFromHex(id); if err != nil {
-		return nil, errors.InvalidOID()
-	}
-
-	return &updateableJob{
-		ID: oid,
-		ClientName: data.ClientName,
-		ClientPhone: data.ClientPhone,
-		CarInfo: data.CarInfo,
-		AppointmentInfo: data.AppointmentInfo,
-		Notes: data.Notes,
-	}, nil
 }
 
 /*
@@ -103,7 +83,7 @@ func (self *jobModel) create(ctx context.Context) (UID.ID, *errors.ResponseError
 	return nil, errors.UidTypeAssertionError()
 }*/
 
-func (self *jobModel) create(ctx context.Context) (UID.ID, *errors.ResponseError) {
+func (self *jobModel) create(ctx context.Context, editor *eventLogTypes.Editor) (UID.ID, *errors.ResponseError) {
 	//if client exists, get it
 	var client clientTypes.Client
 	client = clients.ClientByPhone(ctx, self.ClientPhone)
@@ -114,10 +94,7 @@ func (self *jobModel) create(ctx context.Context) (UID.ID, *errors.ResponseError
 	}
 
 	//update client array with job
-	client.AttatchJobID(self.ID)
-
-	//save job and client. Need Put for both to remain idempotent
-	err := client.Put(ctx, true); if err != nil {
+	err := client.AttatchJobID(ctx, self.ID, editor); if err != nil {
 		return nil, err
 	}
 
@@ -125,6 +102,8 @@ func (self *jobModel) create(ctx context.Context) (UID.ID, *errors.ResponseError
 		return nil, err
 	}
 
+	loggedJob := event_log.LogCreated(ctx, self.logable(), editor)
+	_ = appendLog(ctx, self, loggedJob)
 	return UID.FromOid(self.ID), nil
 }
 
@@ -148,24 +127,15 @@ func (self *jobModel) put(ctx context.Context, upsert bool) *errors.ResponseErro
 	return nil
 }
 
-func (self *updateableJob) Patch(ctx context.Context, upsert bool) (*jobModel, *errors.ResponseError) {
-	coll := db.Connection().Use(db.DefaultDatabase, "jobs")
-	opts := options.FindOneAndUpdate().SetUpsert(upsert)
-
-	filter := bson.D{{"_id", self.ID}}
-	update := bson.D{{"$set", self}}
-	var updatedDocument jobModel
-
-	err := coll.FindOneAndUpdate(ctx, filter, update, opts).Decode(&updatedDocument)
-	if err != nil {
-		return nil, errors.PutFailed(err)
+func (self *jobModel) logable() *types.LogableJob {
+	return &types.LogableJob {
+		ID: self.ID.Hex(),
+		ClientName: self.ClientName,
+		ClientPhone: self.ClientPhone,
+		CarInfo: self.CarInfo,
+		AppointmentInfo: self.AppointmentInfo,
+		Notes: self.Notes,
 	}
-
-	err = coll.FindOne(ctx, filter).Decode(&updatedDocument)
-	if err != nil {
-		return nil, errors.DatabaseError(err)
-	}
-	return &updatedDocument, nil
 }
 
 func jobByID(ctx context.Context, id string) (*jobModel, *errors.ResponseError) {
@@ -181,4 +151,33 @@ func jobByID(ctx context.Context, id string) (*jobModel, *errors.ResponseError) 
 		return nil, errors.DoesNotExist()
 	}
 	return &foundJob, nil
+}
+
+func deleteJobFromClient(ctx context.Context, jobID, clientID string) *errors.ResponseError {
+	//TODO: delete job from client
+	if err := clients.RemoveJob(ctx, clientID, jobID); err != nil {
+		return err
+	}
+
+	if err := DeleteByID(ctx, jobID); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (*types.Deletor) DeleteByID(ctx context.Context, id string) *errors.ResponseError {
+	coll := db.Connection().Use(db.DefaultDatabase, "deleted_jobs")
+	job, err := jobByID(ctx, id); if err != nil {
+		return err
+	}
+	_, insertErr := coll.InsertOne(ctx, job); if err != nil {
+		return errors.DatabaseError(insertErr)
+	}
+
+	coll = db.Connection().Use(db.DefaultDatabase, "jobs")
+	_, delErr := coll.DeleteOne(ctx, bson.D{{"_id", job.ID}})
+	if delErr != nil {
+		return errors.DatabaseError(delErr)
+	}
+	return nil
 }
