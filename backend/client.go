@@ -10,6 +10,7 @@ type Client struct {
 	Name string `json:"name" bson:"name,omitempty"`
 	Phone string `json:"phone" bson:"phone,omitempty"`
 	Jobs []primitive.ObjectID `json:"jobs" bson:"jobs,omitempty"`
+	History []LogEvent `json:"history" bson:"history,omitempty"`
 }
 
 func (c *Client) AttatchJob(jobOid primitive.ObjectID) {
@@ -26,5 +27,8 @@ func (c *Client) FindAndRemoveJob(jobOid primitive.ObjectID) {
 			return
 		}
 	}
+}
 
+func (c *Client) AppendLog(event LogEvent) {
+	c.History = append(c.History, event)
 }

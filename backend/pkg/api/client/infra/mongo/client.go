@@ -2,6 +2,7 @@ package mongo
 import (
 	"PPA"
 	"net/http"
+	"fmt"
 	"context"
 	"pkg/common/mongo"
 	"go.mongodb.org/mongo-driver/bson"
@@ -13,11 +14,14 @@ import (
 const (
 	AlreadyExists = http.StatusConflict
 	NotFound = http.StatusNotFound
+	Collection = "clients"
+	DeletedClientCollection = "deleted_clients"
+	JobsCollection = "jobs"
 )
 
 type Client struct{}
 func (c Client) Create(db *mongo.DBConnection, ctx context.Context, client *PPA.Client) (*PPA.Client, error) {
-	coll := db.Use("clients")
+	coll := db.Use(Collection)
 
 	if(c.phoneExists(db, ctx, client.Phone)) {
 		return nil, PPA.NewAppError(AlreadyExists, "Phone Number Already In Use")
@@ -30,7 +34,7 @@ func (c Client) Create(db *mongo.DBConnection, ctx context.Context, client *PPA.
 }
 
 func(c Client) ViewById(db *mongo.DBConnection, ctx context.Context, oid primitive.ObjectID) (*PPA.Client, error) {
-	coll := db.Use("clients")
+	coll := db.Use(Collection)
 
 	var client PPA.Client
 	if err := coll.FindOne(ctx, bson.D{{"_id", oid}}).Decode(&client); err != nil {
@@ -45,7 +49,7 @@ func(c Client) ViewById(db *mongo.DBConnection, ctx context.Context, oid primiti
 }
 
 func(c Client) ViewByPhone(db *mongo.DBConnection, ctx context.Context, phone string) (*PPA.Client, error) {
-	coll := db.Use("clients")
+	coll := db.Use(Collection)
 
 	var client PPA.Client
 	err := coll.FindOne(ctx, bson.D{{"phone", phone}}).Decode(&client)
@@ -63,7 +67,7 @@ func(c Client) List(db *mongo.DBConnection, ctx context.Context, fetchOpts PPA.B
 		return fetchAll(db, ctx, fetchOpts.Sort)
 	}
 
-	coll := db.Use("clients")
+	coll := db.Use(Collection)
 	findOpts := options.
 	Find().
 	SetSkip(int64(fetchOpts.Source)).
@@ -87,7 +91,7 @@ func(c Client) List(db *mongo.DBConnection, ctx context.Context, fetchOpts PPA.B
 }
 
 func(c Client) Delete(db *mongo.DBConnection, ctx context.Context, oid primitive.ObjectID) error {
-	coll := db.Use("deleted_clients")
+	coll := db.Use(DeletedClientCollection)
 
 	fetched, err := c.ViewById(db, ctx, oid); if err != nil {
 		return PPA.NewAppError(NotFound, "Client Not Found")
@@ -97,7 +101,7 @@ func(c Client) Delete(db *mongo.DBConnection, ctx context.Context, oid primitive
 		return PPA.InternalError //insert err, db err
 	}
 
-	coll = db.Use("clients")
+	coll = db.Use(Collection)
 	if _, delErr := coll.DeleteOne(ctx, bson.D{{"_id", oid}}); delErr != nil {
 		return PPA.InternalError //db error
 	}
@@ -105,7 +109,7 @@ func(c Client) Delete(db *mongo.DBConnection, ctx context.Context, oid primitive
 }
 
 func (c Client) Update(db *mongo.DBConnection, ctx context.Context, oid primitive.ObjectID, update *PPA.Client) error {
-	coll := db.Use("clients")
+	coll := db.Use(Collection)
 
 	filter := bson.D{{"_id", oid}}
 	updateDoc := bson.D{{"$set", update}}
@@ -123,8 +127,14 @@ func (c Client) Update(db *mongo.DBConnection, ctx context.Context, oid primitiv
 	return nil
 }
 
+func (c Client) LogEvent(db *mongo.DBConnection, ctx context.Context, update *PPA.Client) {
+	if err := c.Update(db, ctx, update.ID, update); err != nil {
+		fmt.Println(err)
+	}
+}
+
 func (c Client) Populate(db *mongo.DBConnection, ctx context.Context, oids []primitive.ObjectID) ([]PPA.Job, error) {
-	coll := db.Use("jobs")
+	coll := db.Use(JobsCollection)
 	cursor, err := db.Populate(ctx, coll, oids); if err != nil {
 		return []PPA.Job{}, PPA.InternalError
 	}
@@ -143,7 +153,7 @@ func (c Client) RemoveJob(db *mongo.DBConnection, ctx context.Context, clientPho
 	}
 	fetched.FindAndRemoveJob(jobOid)
 
-	coll := db.Use("clients")
+	coll := db.Use(Collection)
 
 	filter := bson.D{{"_id", fetched.ID}}
 	updateDoc := bson.D{{"$set", fetched}}
@@ -169,7 +179,7 @@ func (c Client) phoneExists(db *mongo.DBConnection, ctx context.Context, phone s
 }
 
 func fetchAll(db *mongo.DBConnection, ctx context.Context, sort bool) (*[]PPA.Client, error) {
-	coll := db.Use("clients")
+	coll := db.Use(Collection)
 	opts := options.Find()
 
 	if sort {

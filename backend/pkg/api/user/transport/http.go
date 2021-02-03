@@ -36,12 +36,10 @@ func (h HTTP) create(c *gin.Context) {
 	}
 
 	oid := primitive.NewObjectID()
-
 	editor := PPA.Editor {
 		OID: oid,
 		Name: "Bob",
 		Collection: "Bob" + oid.Hex() + "a",
-
 	}
 
 	newUser := h.fromSignupRequest(&data)

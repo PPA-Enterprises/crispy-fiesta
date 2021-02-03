@@ -7,6 +7,7 @@ import(
 	"net/http"
 	"pkg/api/client"
 	"github.com/gin-gonic/gin"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type HTTP struct {
@@ -36,8 +37,15 @@ func (h HTTP) create(c *gin.Context) {
 		PPA.Response(c, err); return
 	}
 
+	oid := primitive.NewObjectID()
+	editor := PPA.Editor {
+		OID: oid,
+		Name: "Bob",
+		Collection: "Bob" + oid.Hex() + "a",
+	}
+
 	newClient := h.fromCreateClientRequest(&data)
-	created, err := h.service.Create(c, newClient); if err != nil {
+	created, err := h.service.Create(c, newClient, editor); if err != nil {
 		PPA.Response(c, err); return
 	}
 	c.JSON(http.StatusCreated, clientCreated(created)); return
@@ -119,7 +127,14 @@ func (h HTTP) update(c *gin.Context) {
 		PPA.Response(c, err); return
 	}
 
-	updated, err := h.service.Update(c, h.fromUpdateRequest(&data), id); if err != nil {
+	oid := primitive.NewObjectID()
+	editor := PPA.Editor {
+		OID: oid,
+		Name: "Bob",
+		Collection: "Bob" + oid.Hex() + "a",
+	}
+
+	updated, err := h.service.Update(c, h.fromUpdateRequest(&data), id, editor); if err != nil {
 		PPA.Response(c, err); return
 	}
 
@@ -135,7 +150,14 @@ func (h HTTP) delete(c *gin.Context) {
 		PPA.Response(c, PPA.NewAppError(BadRequest, "ID Required")); return
 	}
 
-	if err := h.service.Delete(c, id); err != nil {
+	oid := primitive.NewObjectID()
+	editor := PPA.Editor {
+		OID: oid,
+		Name: "Bob",
+		Collection: "Bob" + oid.Hex() + "a",
+	}
+
+	if err := h.service.Delete(c, id, editor); err != nil {
 		PPA.Response(c, err); return
 	}
 	c.JSON(http.StatusOK, deleted()); return

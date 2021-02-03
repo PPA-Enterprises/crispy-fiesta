@@ -18,6 +18,11 @@ const (
 
 var OidNotFound = PPA.NewAppError(NotFound, "Does not exist")
 
+const (
+	Collection = "clients"
+	EventTag = "m"
+)
+
 type Update struct {
 	Name string
 	Phone string
@@ -28,7 +33,7 @@ type JobUpdate struct {
 	Phone string
 }
 
-func (cl Client) Create(c *gin.Context, req PPA.Client) (*PPA.Client, error) {
+func (cl Client) Create(c *gin.Context, req PPA.Client, editor PPA.Editor) (*PPA.Client, error) {
 	duration := time.Now().Add(5*time.Second)
 	ctx, cancel := context.WithDeadline(c.Request.Context(), duration)
 	defer cancel()
@@ -37,6 +42,13 @@ func (cl Client) Create(c *gin.Context, req PPA.Client) (*PPA.Client, error) {
 	for cl.oidExists(ctx, req.ID) {
 		req.ID = primitive.NewObjectID()
 	}
+
+	created, err := cl.cdb.Create(cl.db, ctx, &req); if err != nil {
+		return nil, err
+	}
+
+	created.AppendLog(cl.eventLogger.LogCreated(ctx, cl.eventLogger.GenerateEvent(created, EventTag), editor))
+	cl.cdb.LogEvent(cl.db, ctx, created)
 	return cl.cdb.Create(cl.db, ctx, &req)
 }
 
@@ -70,7 +82,7 @@ func (cl Client) ViewByPhone(c *gin.Context, phone string) (*PPA.Client, error) 
 	return cl.cdb.ViewByPhone(cl.db, ctx, phone)
 }
 
-func (cl Client) Delete(c *gin.Context, id string) error {
+func (cl Client) Delete(c *gin.Context, id string, editor PPA.Editor) error {
 	//additional security stuff?
 	duration := time.Now().Add(5*time.Second)
 	ctx, cancel := context.WithDeadline(c.Request.Context(), duration)
@@ -86,11 +98,13 @@ func (cl Client) Delete(c *gin.Context, id string) error {
 	// delete jobs
 	cl.deletejobs(ctx, client.Jobs)
 
+	client.AppendLog(cl.eventLogger.LogDeleted(ctx, editor))
+	cl.cdb.LogEvent(cl.db, ctx, client)
 	return cl.cdb.Delete(cl.db, ctx, oid)
 
 }
 
-func (cl Client) Update(c *gin.Context, req Update, id string) (*PPA.Client, error) {
+func (cl Client) Update(c *gin.Context, req Update, id string, editor PPA.Editor) (*PPA.Client, error) {
 	duration := time.Now().Add(5*time.Second)
 	ctx, cancel := context.WithDeadline(c.Request.Context(), duration)
 	defer cancel()
@@ -110,6 +124,10 @@ func (cl Client) Update(c *gin.Context, req Update, id string) (*PPA.Client, err
 		return nil, OidNotFound
 	}
 
+	oldDoc, err := cl.cdb.ViewById(cl.db, ctx, oid); if err != nil {
+		return nil, err
+	}
+
 	if err := cl.cdb.Update(cl.db, ctx, oid, &PPA.Client {
 		ID: primitive.NilObjectID,
 		Name: req.Name,
@@ -121,6 +139,12 @@ func (cl Client) Update(c *gin.Context, req Update, id string) (*PPA.Client, err
 	updated, err := cl.cdb.ViewById(cl.db, ctx, oid); if err != nil {
 		return nil, err
 	}
+
+	updated.AppendLog(cl.eventLogger.LogUpdated(ctx,
+		cl.eventLogger.GenerateEvent(oldDoc, EventTag),
+		cl.eventLogger.GenerateEvent(updated, EventTag),
+		editor))
+	cl.cdb.LogEvent(cl.db, ctx, updated)
 
 	// update client info on all corresponding jobs
 	cl.updateJobs(ctx, updated.Jobs, JobUpdate { Name: updated.Name, Phone: updated.Phone })
