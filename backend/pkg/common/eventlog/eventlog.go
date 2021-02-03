@@ -102,6 +102,26 @@ func (s Service) LogUpdated(ctx context.Context, prev PPA.EventMap, next PPA.Eve
 	return event
 }
 
+func (s Service) LogDeleted(ctx context.Context, editor PPA.Editor) PPA.LogEvent {
+	event := PPA.LogEvent {
+		ID: primitive.NewObjectID(),
+		EventType: PPA.Deleted,
+		Timestamp: time.Now(),
+		Editor: editor.Name,
+		EditorID: editor.OID,
+		Changes: PPA.ChangesMap{},
+	}
+
+	for s.oidExists(ctx, event.ID, editor.Collection) {
+		event.ID = primitive.NewObjectID()
+	}
+
+	if !s.log(ctx, editor.Collection, &event) {
+		return s.failed(&event)
+	}
+	return event
+}
+
 func (s Service) log(ctx context.Context, collection string, event *PPA.LogEvent) bool {
 	coll := s.db.Use(collection)
 	_, err := coll.InsertOne(ctx, event); if err != nil {

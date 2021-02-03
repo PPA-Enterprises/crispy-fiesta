@@ -93,6 +93,20 @@ func (u User) Delete(c *gin.Context, id string) error {
 		return OidNotFound
 	}
 
+	oldDoc, err := u.udb.ViewById(u.db, ctx, oid); if err != nil {
+		return OidNotFound
+	}
+
+	editor := PPA.Editor {
+		OID: oldDoc.ID,
+		Name: "Bob",
+		Collection: "Bob" + oldDoc.ID.Hex() + "a",
+
+	}
+
+	oldDoc.AppendLog(u.eventLogger.LogDeleted(ctx, editor))
+	u.udb.LogEvent(u.db, ctx, oldDoc)
+
 	return u.udb.Delete(u.db, ctx, oid)
 }
 
