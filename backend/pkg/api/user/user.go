@@ -20,6 +20,11 @@ const (
 	EventTag = "m"
 )
 
+type Update struct {
+	Name string
+	Email string
+}
+
 func (u User) Create(c *gin.Context, req PPA.User, editor PPA.Editor) (*PPA.User, error) {
 	//additional security stuff like if user is allowed to do this
 	/*if err := self.rbac.AccountCreate(c); err != nil {
@@ -97,10 +102,6 @@ func (u User) Delete(c *gin.Context, id string, editor PPA.Editor) error {
 	return u.udb.Delete(u.db, ctx, oid)
 }
 
-type Update struct {
-	Name string
-	Email string
-}
 
 func (u User) Update(c *gin.Context, req Update, id string, editor PPA.Editor) (*PPA.User, error) {
 	duration := time.Now().Add(5*time.Second)

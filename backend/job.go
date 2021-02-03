@@ -10,4 +10,9 @@ type Job struct {
 	CarInfo string `json:"car_info" bson:"car_info,omitempty"`
 	AppointmentInfo string `json:"appointment_info" bson:"appointment_info,omitempty"`
 	Notes string `json:"notes" bson:"notes,omitempty"`
+	History []LogEvent `json:"history" bson:"history,omitempty"`
+}
+
+func (j *Job) AppendLog(event LogEvent) {
+	j.History = append(j.History, event)
 }

@@ -111,6 +111,12 @@ func (j Job) Update(db *mongo.DBConnection, ctx context.Context, oid primitive.O
 	return nil
 }
 
+func (j Job) LogEvent(db *mongo.DBConnection, ctx context.Context, update *PPA.Job) {
+	if err := j.Update(db, ctx, update.ID, update); err != nil {
+		fmt.Println(err)
+	}
+}
+
 func fetchAll(db *mongo.DBConnection, ctx context.Context, sort bool) (*[]PPA.Job, error) {
 	coll := db.Use("jobs")
 	opts := options.Find()

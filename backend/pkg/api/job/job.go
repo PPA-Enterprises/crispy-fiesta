@@ -12,6 +12,8 @@ import (
 const (
 	NotFound = http.StatusNotFound
 	Conflict = http.StatusConflict
+	Collection = "users"
+	EventTag = "m"
 )
 
 var OidNotFound = PPA.NewAppError(NotFound, "Does not exist")
@@ -30,7 +32,7 @@ type ClientUpdate struct {
 	Phone string
 }
 
-func (j Job) Create(c *gin.Context, req PPA.Job) (*PPA.Job, error) {
+func (j Job) Create(c *gin.Context, req PPA.Job, editor PPA.Editor) (*PPA.Job, error) {
 	duration := time.Now().Add(5*time.Second)
 	ctx, cancel := context.WithDeadline(c.Request.Context(), duration)
 	defer cancel()
@@ -42,6 +44,9 @@ func (j Job) Create(c *gin.Context, req PPA.Job) (*PPA.Job, error) {
 	created, err := j.jdb.Create(j.db, ctx, &req); if err != nil {
 		return nil, err
 	}
+
+	created.AppendLog(j.eventLogger.LogCreated(ctx, j.eventLogger.GenerateEvent(created, EventTag), editor))
+	j.jdb.LogEvent(j.db, ctx, created)
 
 	if !j.clientExists(ctx, created.ClientPhone) {
 		// create the client
@@ -82,7 +87,7 @@ func (j Job) List(c *gin.Context, opts PPA.BulkFetchOptions) (*[]PPA.Job, error)
 	return j.jdb.List(j.db, ctx, opts)
 }
 
-func (j Job) Delete(c *gin.Context, id string) error {
+func (j Job) Delete(c *gin.Context, id string, editor PPA.Editor) error {
 	duration := time.Now().Add(5*time.Second)
 	ctx, cancel := context.WithDeadline(c.Request.Context(), duration)
 	defer cancel()
@@ -98,10 +103,13 @@ func (j Job) Delete(c *gin.Context, id string) error {
 	if err := j.cdb.RemoveJob(j.db, ctx, job.ClientPhone, oid); err != nil {
 		return err
 	}
+
+	job.AppendLog(j.eventLogger.LogDeleted(ctx, editor))
+	j.jdb.LogEvent(j.db, ctx, job)
 	return j.jdb.Delete(j.db, ctx, oid)
 }
 
-func (j Job) Update(c *gin.Context, req Update, id string) (*PPA.Job, error) {
+func (j Job) Update(c *gin.Context, req Update, id string, editor PPA.Editor) (*PPA.Job, error) {
 	duration := time.Now().Add(5*time.Second)
 	ctx, cancel := context.WithDeadline(c.Request.Context(), duration)
 	defer cancel()
@@ -127,7 +135,6 @@ func (j Job) Update(c *gin.Context, req Update, id string) (*PPA.Job, error) {
 		}
 	}
 
-	// TODO: update name and number on client side too
 
 	if err := j.jdb.Update(j.db, ctx, oid, &PPA.Job {
 		ID: primitive.NilObjectID,
@@ -149,13 +156,17 @@ func (j Job) Update(c *gin.Context, req Update, id string) (*PPA.Job, error) {
 
 	j.updateJobs(ctx, client.Jobs, ClientUpdate{ Name: req.ClientName, Phone: req.ClientPhone })
 
-	/* TODO: Needs discussion...update client name/phone?
-	clientUpdate := ClientUpdate { Name: req.ClientName, Phone: re.ClientPhone }
-	if err := updateClient(ctx, clientUpdate); err != nil {
-		return nil, err
-	}*/
+	updated, err := j.jdb.ViewById(j.db, ctx, oid); if err != nil {
+		return nil, PPA.InternalError
+	}
 
-	return j.jdb.ViewById(j.db, ctx, oid)
+	updated.AppendLog(j.eventLogger.LogUpdated(ctx,
+		j.eventLogger.GenerateEvent(oldJob, EventTag),
+		j.eventLogger.GenerateEvent(updated, EventTag),
+		editor))
+	j.jdb.LogEvent(j.db, ctx, updated)
+
+	return updated, nil
 }
 
 func (j Job) oidExists(ctx context.Context, oid primitive.ObjectID) bool {
