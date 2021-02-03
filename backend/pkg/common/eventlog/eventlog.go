@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/bson"
 )
 
 type Service struct {
@@ -19,7 +20,7 @@ func New(db *mongo.DBConnection) Service {
 	return Service{db}
 }
 
-func (s Service) StructToMap(in interface{}, tag string) (map[PPA.Field]interface{}, error) {
+func (s Service) StructToMap(in interface{}, tag string) (PPA.EventMap, error) {
 	out := make(map[PPA.Field]interface{})
 
 	val := reflect.ValueOf(in)
@@ -42,20 +43,20 @@ func (s Service) StructToMap(in interface{}, tag string) (map[PPA.Field]interfac
 	return out, nil
 }
 
-func (s Service) LogCreated(ctx context.Context, data *map[PPA.Field]interface{}, editor PPA.Editor) PPA.LogEvent {
-	changes := make(map[PPA.Field]PPA.Change)
+func (s Service) LogCreated(ctx context.Context, data *PPA.EventMap, editor PPA.Editor) PPA.LogEvent {
+	changes := make(PPA.ChangesMap)
 
-	for k, v := range data {
+	for k, v := range *data {
 		changes[k] = PPA.Change{Old: nil, New: v}
 	}
 
 	event := PPA.LogEvent {
 		ID: primitive.NewObjectID(),
 		EventType: PPA.Created,
-		Timestamp: time.Now().Unix(),
+		Timestamp: time.Now(),
 		Editor: editor.Name,
 		EditorID: editor.OID,
-		changes: changes,
+		Changes: changes,
 	}
 
 	for s.oidExists(ctx, event.ID, editor.Collection) {
@@ -63,7 +64,7 @@ func (s Service) LogCreated(ctx context.Context, data *map[PPA.Field]interface{}
 	}
 
 	if !s.log(ctx, editor.Collection, &event) {
-		return s.failed(event)
+		return s.failed(&event)
 	}
 	return event
 }
@@ -80,21 +81,18 @@ func (s Service) log(ctx context.Context, collection string, event *PPA.LogEvent
 	var oldDoc PPA.LogEvent
 	err = coll.FindOneAndUpdate(ctx, filter, updateDoc).Decode(&oldDoc)
 
-	if err != nil {
-		return false
-	}
-	return true
+	return err == nil
 }
 
-func (s Service) failed(event *PPA.LogEvent) *PPA.LogEvent {
-	return &PPA.LogEvent{
+func (s Service) failed(event *PPA.LogEvent) PPA.LogEvent {
+	return PPA.LogEvent{
 		ID: primitive.NilObjectID,
 		EventType: event.EventType,
 		Timestamp: event.Timestamp,
 		Editor: event.Editor,
 		EditorID: event.EditorID,
 		Persisted: false,
-		changes: event.Changes,
+		Changes: event.Changes,
 	}
 }
 

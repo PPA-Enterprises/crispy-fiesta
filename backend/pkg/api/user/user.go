@@ -15,6 +15,7 @@ const (
 )
 
 var OidNotFound = PPA.NewAppError(NotFound, "Does not exist")
+var Collection = "users"
 
 func (u User) Create(c *gin.Context, req PPA.User) (*PPA.User, error) {
 	//additional security stuff like if user is allowed to do this
@@ -105,7 +106,7 @@ func (u User) Update(c *gin.Context, req Update, id string) (*PPA.User, error) {
 }
 
 func (u User) oidExists(ctx context.Context, oid primitive.ObjectID) bool {
-	coll := u.db.Use(u.collection)
+	coll := u.db.Use(Collection)
 
 	var inserted PPA.User
 	err := coll.FindOne(ctx, bson.D{{"_id", oid}}).Decode(&inserted)

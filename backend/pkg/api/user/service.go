@@ -18,20 +18,20 @@ type Service interface {
 	Update(*gin.Context, Update, string) (*PPA.User, error)
 }
 
-func New(db *mongo.DBConnection, coll string, udb Repository, rbac RBAC, securer Securer) *User {
-	return &User{db: db, udb: udb, rbac: rbac, securer: securer}
+func New(db *mongo.DBConnection, udb Repository, rbac RBAC, securer Securer, el EventLogger) *User {
+	return &User{db: db, udb: udb, rbac: rbac, securer: securer, eventLogger: el}
 }
 
-func Init(db *mongo.DBConnection, coll string, rbac RBAC, securer Securer) *User {
-	return New(db, coll, dbQuery.User{}, rbac, securer)
+func Init(db *mongo.DBConnection, rbac RBAC, securer Securer, el EventLogger) *User {
+	return New(db, dbQuery.User{}, rbac, securer, el)
 }
 
 type User struct {
 	db *mongo.DBConnection
-	collection string
 	udb Repository
 	rbac RBAC
 	securer Securer
+	eventLogger EventLogger
 }
 
 type Securer interface {
@@ -45,6 +45,11 @@ type Repository interface {
 	Update(*mongo.DBConnection, context.Context, primitive.ObjectID, *PPA.User) error
 	List(*mongo.DBConnection, context.Context) (*[]PPA.User, error)
 	Delete(*mongo.DBConnection, context.Context, primitive.ObjectID) error
+}
+
+type EventLogger interface {
+	StructToMap(interface{}, string) (PPA.EventMap, error)
+	LogCreated(context.Context, *PPA.EventMap, PPA.Editor) PPA.LogEvent
 }
 
 type RBAC interface {

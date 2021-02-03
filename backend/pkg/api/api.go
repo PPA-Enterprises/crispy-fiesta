@@ -7,6 +7,7 @@ import (
 	"pkg/common/rbac"
 	"pkg/common/secure"
 	"pkg/common/jwt"
+	"pkg/common/eventlog"
 	authMw "pkg/common/middleware/auth"
 	userTransport "pkg/api/user/transport"
 	userService "pkg/api/user"
@@ -41,9 +42,10 @@ func Start(cfg *config.Configuration) error {
 	}
 
 	authMiddleware := authMw.Middleware(jwt)
+	logger := eventlog.New(db)
 
 	authTransport.NewHTTP(authService.Init(db, jwt, security, rbac, userRepo.User{}), v1)
-	userTransport.NewHTTP(userService.Init(db, "users", rbac, security), v1, authMiddleware)
+	userTransport.NewHTTP(userService.Init(db, rbac, security, logger), v1, authMiddleware)
 	clientTransport.NewHTTP(clientService.Init(db, rbac, jobRepo.Job{}), v1, authMiddleware)
 	jobTransport.NewHTTP(jobService.Init(db, rbac, clientRepo.Client{}), v1, authMiddleware)
 	server.Run()

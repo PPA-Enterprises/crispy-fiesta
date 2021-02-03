@@ -4,6 +4,8 @@ import (
 	"time"
 )
 
+type EventMap = map[Field]interface{}
+type ChangesMap = map[Field]Change
 type Event = string
 type Field = string
 
@@ -30,7 +32,7 @@ type LogEvent struct {
 	Editor string `json:"editor" bson:"editor"`
 	EditorID primitive.ObjectID `json:"editor_id" bson:"editor_id"`
 	Persisted bool `json:"persisted" bson:"persisted"`
-	Changes map[Field] Change `json:"changes" bson:"changes"`
+	Changes ChangesMap `json:"changes" bson:"changes"`
 }
 
 
