@@ -10,12 +10,12 @@ import(
 )
 
 type Service interface {
-	Create(*gin.Context, PPA.User) (*PPA.User, error)
+	Create(*gin.Context, PPA.User, PPA.Editor) (*PPA.User, error)
 	List(*gin.Context) (*[]PPA.User, error)
 	ViewById(*gin.Context, string) (*PPA.User, error)
 	ViewByEmail(*gin.Context, string) (*PPA.User, error)
-	Delete(*gin.Context, string) error
-	Update(*gin.Context, Update, string) (*PPA.User, error)
+	Delete(*gin.Context, string, PPA.Editor) error
+	Update(*gin.Context, Update, string, PPA.Editor) (*PPA.User, error)
 }
 
 func New(db *mongo.DBConnection, udb Repository, rbac RBAC, securer Securer, el EventLogger) *User {

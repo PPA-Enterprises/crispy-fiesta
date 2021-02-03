@@ -20,7 +20,7 @@ const (
 	EventTag = "m"
 )
 
-func (u User) Create(c *gin.Context, req PPA.User) (*PPA.User, error) {
+func (u User) Create(c *gin.Context, req PPA.User, editor PPA.Editor) (*PPA.User, error) {
 	//additional security stuff like if user is allowed to do this
 	/*if err := self.rbac.AccountCreate(c); err != nil {
 		return PPA.User{}, err
@@ -39,12 +39,6 @@ func (u User) Create(c *gin.Context, req PPA.User) (*PPA.User, error) {
 		return nil, err
 	}
 
-	editor := PPA.Editor {
-		OID: created.ID,
-		Name: "Bob",
-		Collection: "Bob" + created.ID.Hex() + "a",
-
-	}
 	created.AppendLog(u.eventLogger.LogCreated(ctx, u.eventLogger.GenerateEvent(created, EventTag), editor))
 	u.udb.LogEvent(u.db, ctx, created)
 
@@ -83,7 +77,7 @@ func (u User) ViewByEmail(c *gin.Context, email string) (*PPA.User, error) {
 	return u.udb.ViewByEmail(u.db, ctx, email)
 }
 
-func (u User) Delete(c *gin.Context, id string) error {
+func (u User) Delete(c *gin.Context, id string, editor PPA.Editor) error {
 	//additional security stuff?
 	duration := time.Now().Add(5*time.Second)
 	ctx, cancel := context.WithDeadline(c.Request.Context(), duration)
@@ -97,13 +91,6 @@ func (u User) Delete(c *gin.Context, id string) error {
 		return OidNotFound
 	}
 
-	editor := PPA.Editor {
-		OID: oldDoc.ID,
-		Name: "Bob",
-		Collection: "Bob" + oldDoc.ID.Hex() + "a",
-
-	}
-
 	oldDoc.AppendLog(u.eventLogger.LogDeleted(ctx, editor))
 	u.udb.LogEvent(u.db, ctx, oldDoc)
 
@@ -115,7 +102,7 @@ type Update struct {
 	Email string
 }
 
-func (u User) Update(c *gin.Context, req Update, id string) (*PPA.User, error) {
+func (u User) Update(c *gin.Context, req Update, id string, editor PPA.Editor) (*PPA.User, error) {
 	duration := time.Now().Add(5*time.Second)
 	ctx, cancel := context.WithDeadline(c.Request.Context(), duration)
 	defer cancel()
@@ -139,12 +126,6 @@ func (u User) Update(c *gin.Context, req Update, id string) (*PPA.User, error) {
 
 	updated, err := u.udb.ViewById(u.db, ctx, oid); if err != nil {
 		return nil, PPA.InternalError
-	}
-	editor := PPA.Editor {
-		OID: updated.ID,
-		Name: "Bob",
-		Collection: "Bob" + updated.ID.Hex() + "a",
-
 	}
 
 	updated.AppendLog(u.eventLogger.LogUpdated(ctx,
