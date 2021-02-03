@@ -39,6 +39,8 @@ func Init(db *mongo.DBConnection, rbac RBAC, jdb JobRepository, ev EventLogger) 
 type JobRepository interface {
 	Delete(*mongo.DBConnection, context.Context, primitive.ObjectID) error
 	Update(*mongo.DBConnection, context.Context, primitive.ObjectID, *PPA.Job) error
+	ViewById(*mongo.DBConnection, context.Context, primitive.ObjectID) (*PPA.Job, error)
+	LogEvent(*mongo.DBConnection, context.Context, *PPA.Job)
 }
 
 type Repository interface {

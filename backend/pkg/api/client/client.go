@@ -93,7 +93,7 @@ func (cl Client) Delete(c *gin.Context, id string, editor PPA.Editor) error {
 		return OidNotFound
 	}
 	// delete jobs
-	cl.deletejobs(ctx, client.Jobs)
+	cl.deletejobs(ctx, client.Jobs, editor)
 
 	client.AppendLog(cl.eventLogger.LogDeleted(ctx, editor))
 	cl.cdb.LogEvent(cl.db, ctx, client)
@@ -144,7 +144,7 @@ func (cl Client) Update(c *gin.Context, req Update, id string, editor PPA.Editor
 	cl.cdb.LogEvent(cl.db, ctx, updated)
 
 	// update client info on all corresponding jobs
-	cl.updateJobs(ctx, updated.Jobs, JobUpdate { Name: updated.Name, Phone: updated.Phone })
+	cl.updateJobs(ctx, updated.Jobs, JobUpdate { Name: updated.Name, Phone: updated.Phone }, editor)
 	return updated, nil
 }
 
@@ -194,8 +194,13 @@ func (cl Client) oidExists(ctx context.Context, oid primitive.ObjectID) bool {
 	return err == nil
 }
 
-func (cl Client) deletejobs(ctx context.Context, oids []primitive.ObjectID) {
+func (cl Client) deletejobs(ctx context.Context, oids []primitive.ObjectID, editor PPA.Editor) {
 	for _, oid := range oids {
+		deleted, _ := cl.jdb.ViewById(cl.db, ctx, oid)
+		if deleted != nil {
+			deleted.AppendLog(cl.eventLogger.LogDeleted(ctx, editor))
+			cl.jdb.LogEvent(cl.db, ctx, deleted)
+		}
 		err := cl.jdb.Delete(cl.db, ctx, oid); if err != nil {
 			// do nothing
 		}
@@ -203,15 +208,27 @@ func (cl Client) deletejobs(ctx context.Context, oids []primitive.ObjectID) {
 }
 
 // How strong of a consistency garuntee do we want????
-func (cl Client) updateJobs(ctx context.Context, oids []primitive.ObjectID, update JobUpdate) {
+func (cl Client) updateJobs(ctx context.Context, oids []primitive.ObjectID, update JobUpdate, editor PPA.Editor) {
 	if len(oids) <= 0 { return } // Note that len(nil) is 0
 
 	for _, oid := range oids {
+		oldDoc, _ := cl.jdb.ViewById(cl.db, ctx, oid)
+
 		if err := cl.jdb.Update(cl.db, ctx, oid, &PPA.Job {
 			ClientName: update.Name,
 			ClientPhone: update.Phone,
 		}); err != nil {
 			// do nothing or fail, depends
+		}
+
+		newDoc, _ := cl.jdb.ViewById(cl.db, ctx, oid)
+
+		if newDoc != nil && oldDoc != nil {
+			newDoc.AppendLog(cl.eventLogger.LogUpdated(ctx,
+				cl.eventLogger.GenerateEvent(oldDoc, EventTag),
+				cl.eventLogger.GenerateEvent(newDoc, EventTag),
+				editor))
+			cl.jdb.LogEvent(cl.db, ctx, newDoc)
 		}
 	}
 }
