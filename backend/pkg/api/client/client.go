@@ -14,14 +14,11 @@ import(
 const (
 	Conflict = http.StatusConflict
 	NotFound = http.StatusNotFound
-)
-
-var OidNotFound = PPA.NewAppError(NotFound, "Does not exist")
-
-const (
 	Collection = "clients"
 	EventTag = "m"
 )
+
+var OidNotFound = PPA.NewAppError(NotFound, "Does not exist")
 
 type Update struct {
 	Name string
@@ -190,7 +187,7 @@ func (cl Client) PopulateJobs(c *gin.Context, unpopClients *[]PPA.Client) (*[]Po
 }
 
 func (cl Client) oidExists(ctx context.Context, oid primitive.ObjectID) bool {
-	coll := cl.db.Use("clients")
+	coll := cl.db.Use(Collection)
 
 	var inserted PPA.Client
 	err := coll.FindOne(ctx, bson.D{{"_id", oid}}).Decode(&inserted)

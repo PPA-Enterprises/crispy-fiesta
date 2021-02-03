@@ -16,11 +16,13 @@ import (
 const (
 	AlreadyExists = http.StatusConflict
 	NotFound = http.StatusNotFound
+	Collection = "jobs"
+	DeletedJobsCollection = "deleted_jobs"
 )
 type Job struct{}
 
 func (j Job) Create(db *mongo.DBConnection, ctx context.Context, job *PPA.Job) (*PPA.Job, error) {
-	coll := db.Use("jobs")
+	coll := db.Use(Collection)
 
 	if _, err := coll.InsertOne(ctx, job); err != nil {
 		fmt.Println(err)
@@ -30,7 +32,7 @@ func (j Job) Create(db *mongo.DBConnection, ctx context.Context, job *PPA.Job) (
 }
 
 func(j Job) ViewById(db *mongo.DBConnection, ctx context.Context, oid primitive.ObjectID) (*PPA.Job, error) {
-	coll := db.Use("jobs")
+	coll := db.Use(Collection)
 
 	var job PPA.Job
 	if err := coll.FindOne(ctx, bson.D{{"_id", oid}}).Decode(&job); err != nil {
@@ -50,7 +52,7 @@ func(j Job) List(db *mongo.DBConnection, ctx context.Context, fetchOpts PPA.Bulk
 		return fetchAll(db, ctx, fetchOpts.Sort)
 	}
 
-	coll := db.Use("jobs")
+	coll := db.Use(Collection)
 	findOpts := options.
 	Find().
 	SetSkip(int64(fetchOpts.Source)).
@@ -74,7 +76,7 @@ func(j Job) List(db *mongo.DBConnection, ctx context.Context, fetchOpts PPA.Bulk
 }
 
 func(j Job) Delete(db *mongo.DBConnection, ctx context.Context, oid primitive.ObjectID) error {
-	coll := db.Use("deleted_jobs")
+	coll := db.Use(DeletedJobsCollection)
 
 	fetched, err := j.ViewById(db, ctx, oid); if err != nil {
 		return PPA.NewAppError(NotFound, "Job Not Found")
@@ -84,7 +86,7 @@ func(j Job) Delete(db *mongo.DBConnection, ctx context.Context, oid primitive.Ob
 		return PPA.InternalError //insert err, db err
 	}
 
-	coll = db.Use("jobs")
+	coll = db.Use(Collection)
 	if _, delErr := coll.DeleteOne(ctx, bson.D{{"_id", oid}}); delErr != nil {
 		return PPA.InternalError //db error
 	}
@@ -93,7 +95,7 @@ func(j Job) Delete(db *mongo.DBConnection, ctx context.Context, oid primitive.Ob
 }
 
 func (j Job) Update(db *mongo.DBConnection, ctx context.Context, oid primitive.ObjectID, update *PPA.Job) error {
-	coll := db.Use("jobs")
+	coll := db.Use(Collection)
 
 	filter := bson.D{{"_id", oid}}
 	updateDoc := bson.D{{"$set", update}}
@@ -118,7 +120,7 @@ func (j Job) LogEvent(db *mongo.DBConnection, ctx context.Context, update *PPA.J
 }
 
 func fetchAll(db *mongo.DBConnection, ctx context.Context, sort bool) (*[]PPA.Job, error) {
-	coll := db.Use("jobs")
+	coll := db.Use(Collection)
 	opts := options.Find()
 
 	if sort {

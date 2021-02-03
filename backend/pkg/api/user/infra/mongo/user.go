@@ -13,12 +13,14 @@ import (
 const (
 	AlreadyExists = http.StatusConflict
 	NotFound = http.StatusNotFound
+	Collection = "users"
+	DeletedUsersCollection = "deleted_users"
 )
 
 type User struct{}
 
 func (u User) Create(db *mongo.DBConnection, ctx context.Context, user *PPA.User) (*PPA.User, error) {
-	coll := db.Use("users")
+	coll := db.Use(Collection)
 
 	if(emailExists(db, ctx, user.Email)) {
 		return nil, PPA.NewAppError(AlreadyExists, "Email Taken")
@@ -32,7 +34,7 @@ func (u User) Create(db *mongo.DBConnection, ctx context.Context, user *PPA.User
 }
 
 func(u User) ViewById(db *mongo.DBConnection, ctx context.Context, oid primitive.ObjectID) (*PPA.User, error) {
-	coll := db.Use("users")
+	coll := db.Use(Collection)
 
 	var user PPA.User
 	if err := coll.FindOne(ctx, bson.D{{"_id", oid}}).Decode(&user); err != nil {
@@ -48,7 +50,7 @@ func(u User) ViewById(db *mongo.DBConnection, ctx context.Context, oid primitive
 }
 
 func(u User) ViewByEmail(db *mongo.DBConnection, ctx context.Context, email string) (*PPA.User, error) {
-	coll := db.Use("users")
+	coll := db.Use(Collection)
 
 	var user PPA.User
 	err := coll.FindOne(ctx, bson.D{{"email", email}}).Decode(&user)
@@ -62,7 +64,7 @@ func(u User) ViewByEmail(db *mongo.DBConnection, ctx context.Context, email stri
 }
 
 func(u User) List(db *mongo.DBConnection, ctx context.Context) (*[]PPA.User, error) {
-	coll := db.Use("users")
+	coll := db.Use(Collection)
 
 	//check error?
 	cursor, err := coll.Find(ctx, bson.D{{}})
@@ -76,7 +78,7 @@ func(u User) List(db *mongo.DBConnection, ctx context.Context) (*[]PPA.User, err
 }
 
 func(u User) Delete(db *mongo.DBConnection, ctx context.Context, oid primitive.ObjectID) error {
-	coll := db.Use("deleted_users")
+	coll := db.Use(DeletedUsersCollection)
 
 	fetched, err := u.ViewById(db, ctx, oid); if err != nil {
 		return PPA.NewAppError(NotFound, "User Not Found")
@@ -86,7 +88,7 @@ func(u User) Delete(db *mongo.DBConnection, ctx context.Context, oid primitive.O
 		return PPA.InternalError //insert err, db err
 	}
 
-	coll = db.Use("users")
+	coll = db.Use(Collection)
 	if _, delErr := coll.DeleteOne(ctx, bson.D{{"_id", oid}}); delErr != nil {
 		return PPA.InternalError //db error
 	}
@@ -95,7 +97,7 @@ func(u User) Delete(db *mongo.DBConnection, ctx context.Context, oid primitive.O
 }
 
 func (u User) Update(db *mongo.DBConnection, ctx context.Context, oid primitive.ObjectID, update *PPA.User) error {
-	coll := db.Use("users")
+	coll := db.Use(Collection)
 
 	filter := bson.D{{"_id", oid}}
 	updateDoc := bson.D{{"$set", update}}
@@ -120,7 +122,7 @@ func (u User) LogEvent(db *mongo.DBConnection, ctx context.Context, update *PPA.
 }
 
 func fetchByEmail(db *mongo.DBConnection, ctx context.Context, email string) (PPA.User, error) {
-	coll := db.Use("users")
+	coll := db.Use(Collection)
 
 	var user PPA.User
 	err := coll.FindOne(ctx, bson.D{{"email", email}}).Decode(&user)

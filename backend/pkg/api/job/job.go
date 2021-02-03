@@ -12,7 +12,8 @@ import (
 const (
 	NotFound = http.StatusNotFound
 	Conflict = http.StatusConflict
-	Collection = "users"
+	Collection = "jobs"
+	ClientCollection = "clients"
 	EventTag = "m"
 )
 
@@ -170,7 +171,7 @@ func (j Job) Update(c *gin.Context, req Update, id string, editor PPA.Editor) (*
 }
 
 func (j Job) oidExists(ctx context.Context, oid primitive.ObjectID) bool {
-	coll := j.db.Use("jobs")
+	coll := j.db.Use(Collection)
 
 	var inserted PPA.Job
 	err := coll.FindOne(ctx, bson.D{{"_id", oid}}).Decode(&inserted)
@@ -191,7 +192,7 @@ func (j Job) createClient(ctx context.Context, client *PPA.Client) (*PPA.Client,
 }
 
 func (j Job) clientOidExists(ctx context.Context, oid primitive.ObjectID) bool {
-	coll := j.db.Use("clients")
+	coll := j.db.Use(ClientCollection)
 
 	var inserted PPA.Job
 	err := coll.FindOne(ctx, bson.D{{"_id", oid}}).Decode(&inserted)

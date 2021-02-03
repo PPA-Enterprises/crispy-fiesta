@@ -6,9 +6,9 @@ import (
 )
 
 type Client struct {
-	ID primitive.ObjectID `json:"_id,omitempty" bson:"_id,omitempty"`
-	Name string `json:"name" bson:"name,omitempty"`
-	Phone string `json:"phone" bson:"phone,omitempty"`
+	ID primitive.ObjectID `json:"_id,omitempty" bson:"_id,omitempty" m:"Database ID"`
+	Name string `json:"name" bson:"name,omitempty" m:"Name"`
+	Phone string `json:"phone" bson:"phone,omitempty" m:"Phone Number"`
 	Jobs []primitive.ObjectID `json:"jobs" bson:"jobs,omitempty"`
 	History []LogEvent `json:"history" bson:"history,omitempty"`
 }
