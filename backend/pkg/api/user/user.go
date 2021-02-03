@@ -15,7 +15,10 @@ const (
 )
 
 var OidNotFound = PPA.NewAppError(NotFound, "Does not exist")
-var Collection = "users"
+const (
+	Collection = "users"
+	EventTag = "m"
+)
 
 func (u User) Create(c *gin.Context, req PPA.User) (*PPA.User, error) {
 	//additional security stuff like if user is allowed to do this
@@ -32,7 +35,20 @@ func (u User) Create(c *gin.Context, req PPA.User) (*PPA.User, error) {
 	}
 
 	req.Password = u.securer.Hash(req.Password)
-	return u.udb.Create(u.db, ctx, &req)
+	created, err := u.udb.Create(u.db, ctx, &req); if err != nil {
+		return nil, err
+	}
+
+	editor := PPA.Editor {
+		OID: created.ID,
+		Name: "Bob",
+		Collection: "Bob" + created.ID.Hex() + "a",
+
+	}
+	created.AppendLog(u.eventLogger.LogCreated(ctx, u.eventLogger.GenerateEvent(created, EventTag), editor))
+	u.udb.LogEvent(u.db, ctx, created)
+
+	return created, nil
 }
 
 func (u User) ViewById(c *gin.Context, id string) (*PPA.User, error) {

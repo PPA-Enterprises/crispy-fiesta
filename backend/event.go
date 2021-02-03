@@ -15,8 +15,8 @@ const(
 	Deleted Event = "Deleted"
 )
 type Change struct {
-	Old interface{} `json:"old" bson:"old"`
-	New interface{} `json:"new" bson:"new"`
+	Old interface{} `json:"old,omitempty" bson:"old,omitempty"`
+	New interface{} `json:"new,omitempty" bson:"new,omitempty"`
 }
 
 type Editor struct {

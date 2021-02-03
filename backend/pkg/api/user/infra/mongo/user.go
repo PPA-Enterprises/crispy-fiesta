@@ -2,6 +2,7 @@ package mongo
 import (
 	"PPA"
 	"net/http"
+	"fmt"
 	"context"
 	"pkg/common/mongo"
 	"go.mongodb.org/mongo-driver/bson"
@@ -110,6 +111,12 @@ func (u User) Update(db *mongo.DBConnection, ctx context.Context, oid primitive.
 		return PPA.InternalError
 	}
 	return nil
+}
+
+func (u User) LogEvent(db *mongo.DBConnection, ctx context.Context, update *PPA.User) {
+	if err := u.Update(db, ctx, update.ID, update); err != nil {
+		fmt.Println(err)
+	}
 }
 
 func fetchByEmail(db *mongo.DBConnection, ctx context.Context, email string) (PPA.User, error) {

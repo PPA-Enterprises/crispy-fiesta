@@ -45,11 +45,12 @@ type Repository interface {
 	Update(*mongo.DBConnection, context.Context, primitive.ObjectID, *PPA.User) error
 	List(*mongo.DBConnection, context.Context) (*[]PPA.User, error)
 	Delete(*mongo.DBConnection, context.Context, primitive.ObjectID) error
+	LogEvent(*mongo.DBConnection, context.Context, *PPA.User)
 }
 
 type EventLogger interface {
-	StructToMap(interface{}, string) (PPA.EventMap, error)
-	LogCreated(context.Context, *PPA.EventMap, PPA.Editor) PPA.LogEvent
+	LogCreated(context.Context, PPA.EventMap, PPA.Editor) PPA.LogEvent
+	GenerateEvent(interface{}, string) PPA.EventMap
 }
 
 type RBAC interface {

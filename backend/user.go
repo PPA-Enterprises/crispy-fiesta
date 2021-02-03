@@ -6,15 +6,16 @@ import(
 )
 
 type User struct {
-	ID primitive.ObjectID `json:"_id,omitempty" bson:"_id,omitempty"`
-	Name string `json:"name" bson:"name,omitempty"`
-	Email string `json:"email" bson:"email,omitempty"`
+	ID primitive.ObjectID `json:"_id,omitempty" bson:"_id,omitempty" m:"Database ID"`
+	Name string `json:"name" bson:"name,omitempty" m:"Name"`
+	Email string `json:"email" bson:"email,omitempty" m:"Email"`
 	Password string `json:"-" bson:"password,omitempty"`
 
 	LastLogin time.Time `json:"last_login,omitempty"`
 	Token string `json:"-"`
-	Role *Role `json:"role,omitempty"`
-	RoleID AccessRole `json:"-"`
+	Role *Role `json:"role,omitempty" m:"Permission Level"`
+	RoleID AccessRole `json:"-" m:"Access Role"`
+	History []LogEvent `json:"history" bson:"history,omitempty"`
 }
 
 type AuthUser struct {
@@ -26,4 +27,8 @@ type AuthUser struct {
 func (u *User) UpdateLastLogin(token string) {
 	u.Token = token
 	u.LastLogin = time.Now()
+}
+
+func (u *User) AppendLog(event LogEvent) {
+	u.History = append(u.History, event)
 }

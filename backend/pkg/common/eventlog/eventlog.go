@@ -20,7 +20,7 @@ func New(db *mongo.DBConnection) Service {
 	return Service{db}
 }
 
-func (s Service) StructToMap(in interface{}, tag string) (PPA.EventMap, error) {
+func (s Service) structToMap(in interface{}, tag string) (PPA.EventMap, error) {
 	out := make(map[PPA.Field]interface{})
 
 	val := reflect.ValueOf(in)
@@ -43,12 +43,18 @@ func (s Service) StructToMap(in interface{}, tag string) (PPA.EventMap, error) {
 	return out, nil
 }
 
-func (s Service) LogCreated(ctx context.Context, data *PPA.EventMap, editor PPA.Editor) PPA.LogEvent {
+func (s Service) GenerateEvent(in interface{}, tag string) PPA.EventMap {
+	ev, _ := s.structToMap(in, tag)
+	return ev
+}
+
+func (s Service) LogCreated(ctx context.Context, data PPA.EventMap, editor PPA.Editor) PPA.LogEvent {
 	changes := make(PPA.ChangesMap)
 
-	for k, v := range *data {
+	for k, v := range data {
 		changes[k] = PPA.Change{Old: nil, New: v}
 	}
+	fmt.Println(changes)
 
 	event := PPA.LogEvent {
 		ID: primitive.NewObjectID(),
