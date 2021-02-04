@@ -1,13 +1,11 @@
 package eventlog
 import(
 	"PPA"
-	"fmt"
 	"context"
 	"net/http"
 	"time"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/bson"
 )
 
 var OidNotFound = PPA.NewAppError(http.StatusNotFound, "Does not exist")
@@ -18,11 +16,11 @@ func (ev Eventlog) List(c *gin.Context, opts PPA.BulkFetchOptions, id string) (*
 	defer cancel()
 
 	oid, err := primitive.ObjectIDFromHex(id); if err != nil {
-		return OidNotFound
+		return nil, OidNotFound
 	}
 
 	user, err := ev.udb.ViewById(ev.db, ctx, oid); if err != nil {
-		return OidNotFound
+		return nil, OidNotFound
 	}
 
 	collection := user.Name + user.ID.Hex() + "a"

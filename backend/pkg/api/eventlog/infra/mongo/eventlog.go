@@ -2,12 +2,9 @@ package mongo
 import (
 	"PPA"
 	"net/http"
-	"fmt"
 	"context"
 	"pkg/common/mongo"
 	"go.mongodb.org/mongo-driver/bson"
-	mongodb "go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
