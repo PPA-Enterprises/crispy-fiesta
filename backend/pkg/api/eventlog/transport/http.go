@@ -47,7 +47,7 @@ func (h HTTP) list(c *gin.Context) {
 	}
 	options.Next = next
 
-	id, err := c.DefaultQuery("id", ""); if err != nil {
+	id := c.DefaultQuery("id", ""); if err != nil {
 		PPA.Response(c, PPA.NewAppError(BadRequest, "Invalid (id) Param")); return
 	}
 
