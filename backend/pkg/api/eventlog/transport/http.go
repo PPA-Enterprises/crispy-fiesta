@@ -57,5 +57,9 @@ func (h HTTP) list(c *gin.Context) {
 }
 
 func fetchedAll(logs *[]PPA.LogEvent) gin.H {
-	return gin.H{"success": true, "message": "Fetched Clients", "payload": logs}
+	if logs == nil || len(*logs) <= 0 {
+		// JSON serialization bug requires me to do this
+		return gin.H{"success": true, "message": "Fetched Logs", "payload": "[]"}
+	}
+	return gin.H{"success": true, "message": "Fetched Logs", "payload": logs}
 }
