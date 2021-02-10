@@ -20,6 +20,8 @@ import (
 	jobTransport "pkg/api/job/transport"
 	jobService "pkg/api/job"
 	jobRepo "pkg/api/job/infra/mongo"
+	eventlogTransport "pkg/api/eventlog/transport"
+	eventlogService "pkg/api/eventlog"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
@@ -48,6 +50,7 @@ func Start(cfg *config.Configuration) error {
 	userTransport.NewHTTP(userService.Init(db, rbac, security, logger), v1, authMiddleware)
 	clientTransport.NewHTTP(clientService.Init(db, rbac, jobRepo.Job{}, logger), v1, authMiddleware)
 	jobTransport.NewHTTP(jobService.Init(db, rbac, clientRepo.Client{}, logger), v1, authMiddleware)
+	eventlogTransport.NewHTTP(eventlogService.Init(db, userRepo.User{}, rbac), v1, authMiddleware)
 	server.Run()
 	return nil
 }
