@@ -11,16 +11,17 @@ import (
 const (
 	NotFound = http.StatusNotFound
 	UserCollection = "users"
+	Coll = "eventlogs"
 )
 
 type Eventlog struct{}
-func(ev Eventlog) List(db *mongo.DBConnection, ctx context.Context, fetchOpts PPA.BulkFetchOptions, collection string) (*[]PPA.LogEvent, error) {
+func(ev Eventlog) List(db *mongo.DBConnection, ctx context.Context, fetchOpts PPA.BulkFetchOptions) (*[]PPA.LogEvent, error) {
 
 	if fetchOpts.All {
-		return fetchAll(db, ctx, fetchOpts.Sort, collection)
+		return fetchAll(db, ctx, fetchOpts.Sort, Coll)
 	}
 
-	coll := db.Use(collection)
+	coll := db.Use(Coll)
 	findOpts := options.
 	Find().
 	SetSkip(int64(fetchOpts.Source)).
