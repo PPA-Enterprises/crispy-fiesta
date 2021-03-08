@@ -20,7 +20,6 @@ func(ev Eventlog) List(db *mongo.DBConnection, ctx context.Context, fetchOpts PP
 		return fetchAll(db, ctx, fetchOpts.Sort, collection)
 	}
 
-
 	coll := db.Use(collection)
 	findOpts := options.
 	Find().
