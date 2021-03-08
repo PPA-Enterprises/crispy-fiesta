@@ -122,7 +122,7 @@ func (u User) LogEvent(db *mongo.DBConnection, ctx context.Context, update *PPA.
 	}
 }
 
-func(u User) ListEvents(db *mongo.DBConnection, ctx context.Context, fetchOpts PPA.BulkFetchOptions, collection string) (*[]PPA.LogEvent, error) {
+func (u User) ListEvents(db *mongo.DBConnection, ctx context.Context, fetchOpts PPA.BulkFetchOptions, collection string) (*[]PPA.LogEvent, error) {
 
 	if fetchOpts.All {
 		return fetchAll(db, ctx, fetchOpts.Sort, collection)
