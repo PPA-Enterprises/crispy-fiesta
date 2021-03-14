@@ -51,6 +51,6 @@ func Start(cfg *config.Configuration) error {
 	clientTransport.NewHTTP(clientService.Init(db, rbac, jobRepo.Job{}, logger), v1, authMiddleware)
 	jobTransport.NewHTTP(jobService.Init(db, rbac, clientRepo.Client{}, logger), v1, authMiddleware)
 	eventlogTransport.NewHTTP(eventlogService.Init(db, userRepo.User{}, rbac), v1, authMiddleware)
-	server.Run()
+	server.Run(":8888")
 	return nil
 }
