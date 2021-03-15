@@ -2,7 +2,9 @@ import { Component, ViewChild, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators, NgForm } from '@angular/forms';
 import { Router, ActivatedRoute, ParamMap } from '@angular/router';
 import { JobService } from '../shared/services/job.service'
-import { Job } from '../shared/models/job.model'
+import { Job } from '../shared/models/job.model';
+import { startOfDay, endOfDay, subDays, addDays, endOfMonth, isSameDay, isSameMonth, addHours } from 'date-fns';
+
 
 export class JobForm {
   public fname: string;
@@ -21,7 +23,7 @@ export class JobForm {
 
 export class EditJobComponent implements OnInit {
   job: Job;
-  id: number;
+  id: string;
   private sub: any;
   model = new JobForm();
   submitted = false;
@@ -30,7 +32,7 @@ export class EditJobComponent implements OnInit {
 
   constructor(private jobService: JobService, private route: ActivatedRoute, private router: Router) {
     this.sub = this.route.params.subscribe(params => {
-      this.id = +params['id'];
+      this.id = params['id'];
     });
     this.job = this.jobService.getJobById(this.id);
     if(this.job.tag == "CLOSED") {
@@ -64,7 +66,13 @@ export class EditJobComponent implements OnInit {
       appointment_info: this.model.apptInfo,
       notes: this.model.notes,
       tag: "OPEN",
-      date: this.job.date,
+      start: subDays(startOfDay(new Date()), 1),
+      end: addDays(new Date(), 1),
+      title: this.model.carInfo + " - " + this.model.fname + " " + this.model.lname,
+      color: {
+        primary: '#ad2121',
+        secondary: '#FAE3E3',
+      }
     }
 
     if (this.jobService.editJobById(this.id, this.job).id == this.id) {
@@ -86,7 +94,13 @@ export class EditJobComponent implements OnInit {
       appointment_info: this.model.apptInfo,
       notes: this.model.notes,
       tag: "CLOSED",
-      date: this.job.date,
+      start: subDays(startOfDay(new Date()), 1),
+      end: addDays(new Date(), 1),
+      title: this.model.carInfo + " - " + this.model.fname + " " + this.model.lname,
+      color: {
+        primary: '#ad2121',
+        secondary: '#FAE3E3',
+      }
     }
 
     if (this.jobService.editJobById(this.id, this.job).id = this.id) {

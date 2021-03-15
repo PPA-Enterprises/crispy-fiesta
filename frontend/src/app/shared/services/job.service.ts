@@ -80,17 +80,17 @@ export class JobService {
     return this.jobs;
   }
 
-  getJobById(id: number): Job {
-    return this.jobs.find(job => Number(job.id) === id);
+  getJobById(id: string): Job {
+    return this.jobs.find(job => job.id === id);
   }
 
-  editJobById(id: number, job: Job): Job {
-    this.jobs[this.jobs.findIndex(job => Number(job.id) === id)] = job;
+  editJobById(id: string, job: Job): Job {
+    this.jobs[this.jobs.findIndex(job => job.id === id)] = job;
     return job;
   }
 
-  deleteJobById(id: number): number {
-    this.jobs.splice(this.jobs.findIndex(job => Number(job.id) === id), 1);
+  deleteJobById(id: string): string {
+    this.jobs.splice(this.jobs.findIndex(job => job.id === id), 1);
     return id;
   }
 }
