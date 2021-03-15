@@ -11,8 +11,3 @@ export class Job {
     public title: string;
     public color: any;
   }
-
-export class Color {
-  public primary: string;
-  public secondary: string;
-}

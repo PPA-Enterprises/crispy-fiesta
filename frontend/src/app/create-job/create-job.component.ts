@@ -2,7 +2,10 @@ import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators, NgForm } from '@angular/forms';
 import { JobService } from '../shared/services/job.service'
 import { Router, ActivatedRoute, ParamMap } from '@angular/router';
-import { Job } from '../shared/models/job.model'
+import { Job } from '../shared/models/job.model';
+import { Color } from '../shared/models/color.model';
+import { startOfDay, endOfDay, subDays, addDays, endOfMonth, isSameDay, isSameMonth, addHours } from 'date-fns';
+
 
 export class JobForm {
   public fname: string;
@@ -30,14 +33,20 @@ export class CreateJobComponent implements OnInit {
 
   onSubmit(form) {
     this.job = {
-      id: Math.floor(Math.random() * Math.floor(250)),
+      id: (Math.floor(Math.random() * Math.floor(250))).toString(),
       client_name: this.model.fname + " " + this.model.lname,
       client_phone: this.model.phone,
       car_info: this.model.carInfo,
       appointment_info: this.model.apptInfo,
       notes: this.model.notes,
       tag: "NEW",
-      date: new Date().toLocaleString(),
+      start: subDays(startOfDay(new Date()), 1),
+      end: addDays(new Date(), 1),
+      title: this.model.carInfo + " - " + this.model.fname + " " + this.model.lname,
+      color: {
+        primary: '#ad2121',
+        secondary: '#FAE3E3',
+      }
     }
     
     if (this.jobService.createJob(this.job).tag == "NEW") {
