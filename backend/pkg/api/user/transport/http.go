@@ -39,7 +39,7 @@ func (h HTTP) create(c *gin.Context) {
 	editor := PPA.Editor {
 		OID: oid,
 		Name: "Bob",
-		Collection: "Bob" + oid.Hex() + "a",
+		Collection: "events" + oid.Hex() + "a",
 	}
 
 	newUser := h.fromSignupRequest(&data)
@@ -93,7 +93,7 @@ func (h HTTP) delete(c *gin.Context) {
 	editor := PPA.Editor {
 		OID: oid,
 		Name: "Bob",
-		Collection: "Bob" + oid.Hex() + "a",
+		Collection: "events" + oid.Hex() + "a",
 
 	}
 
@@ -119,7 +119,7 @@ func (h HTTP) update(c *gin.Context) {
 	editor := PPA.Editor {
 		OID: oid,
 		Name: "Bob",
-		Collection: "Bob" + oid.Hex() + "a",
+		Collection: "events" + oid.Hex() + "a",
 
 	}
 

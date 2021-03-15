@@ -69,7 +69,7 @@ func (s Service) LogCreated(ctx context.Context, data PPA.EventMap, editor PPA.E
 		event.ID = primitive.NewObjectID()
 	}
 
-	if !s.log(ctx, editor.Collection, &event) {
+	if !s.log(ctx, editor.Collection, &event) || !s.persist(ctx, &event) {
 		return s.failed(&event)
 	}
 	return event
@@ -96,7 +96,7 @@ func (s Service) LogUpdated(ctx context.Context, prev PPA.EventMap, next PPA.Eve
 		event.ID = primitive.NewObjectID()
 	}
 
-	if !s.log(ctx, editor.Collection, &event) {
+	if !s.log(ctx, editor.Collection, &event) || !s.persist(ctx, &event) {
 		return s.failed(&event)
 	}
 	return event
@@ -116,7 +116,7 @@ func (s Service) LogDeleted(ctx context.Context, editor PPA.Editor) PPA.LogEvent
 		event.ID = primitive.NewObjectID()
 	}
 
-	if !s.log(ctx, editor.Collection, &event) {
+	if !s.log(ctx, editor.Collection, &event) || !s.persist(ctx, &event) {
 		return s.failed(&event)
 	}
 	return event
@@ -143,7 +143,7 @@ func (s Service) LogAssignedJob(ctx context.Context, data PPA.EventMap, editor P
 		event.ID = primitive.NewObjectID()
 	}
 
-	if !s.log(ctx, editor.Collection, &event) {
+	if !s.log(ctx, editor.Collection, &event) || !s.persist(ctx, &event) {
 		return s.failed(&event)
 	}
 	return event
@@ -162,6 +162,15 @@ func (s Service) log(ctx context.Context, collection string, event *PPA.LogEvent
 	err = coll.FindOneAndUpdate(ctx, filter, updateDoc).Decode(&oldDoc)
 
 	return err == nil
+}
+
+// TODO MAYBE: deal with the potential failure???
+func (s Service) persist(ctx context.Context, event *PPA.LogEvent) bool {
+	coll := s.db.Use("eventlogs")
+	_, err := coll.InsertOne(ctx, event); if err != nil {
+		return false
+	}
+	return true;
 }
 
 func (s Service) failed(event *PPA.LogEvent) PPA.LogEvent {

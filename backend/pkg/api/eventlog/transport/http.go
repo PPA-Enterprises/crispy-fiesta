@@ -46,11 +46,7 @@ func (h HTTP) list(c *gin.Context) {
 	}
 	options.Next = next
 
-	id := c.DefaultQuery("user_id", ""); if err != nil {
-		PPA.Response(c, PPA.NewAppError(BadRequest, "Invalid (id) Param")); return
-	}
-
-	evlog, err := h.service.List(c, options, id); if err != nil {
+	evlog, err := h.service.List(c, options); if err != nil {
 		PPA.Response(c, err); return
 	}
 	c.JSON(http.StatusOK, fetchedAll(evlog)); return

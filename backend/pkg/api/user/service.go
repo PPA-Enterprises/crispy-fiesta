@@ -16,6 +16,7 @@ type Service interface {
 	ViewByEmail(*gin.Context, string) (*PPA.User, error)
 	Delete(*gin.Context, string, PPA.Editor) error
 	Update(*gin.Context, Update, string, PPA.Editor) (*PPA.User, error)
+	ListEvents(*gin.Context, PPA.BulkFetchOptions, string) (*[]PPA.LogEvent, error)
 }
 
 func New(db *mongo.DBConnection, udb Repository, rbac RBAC, securer Securer, el EventLogger) *User {
@@ -46,6 +47,7 @@ type Repository interface {
 	List(*mongo.DBConnection, context.Context) (*[]PPA.User, error)
 	Delete(*mongo.DBConnection, context.Context, primitive.ObjectID) error
 	LogEvent(*mongo.DBConnection, context.Context, *PPA.User)
+	ListEvents(*mongo.DBConnection, context.Context, PPA.BulkFetchOptions, string) (*[]PPA.LogEvent, error)
 }
 
 type EventLogger interface {

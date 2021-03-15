@@ -41,7 +41,7 @@ func (h HTTP) create(c *gin.Context) {
 	editor := PPA.Editor {
 		OID: oid,
 		Name: "Bob",
-		Collection: "Bob" + oid.Hex() + "a",
+		Collection: "events" + oid.Hex() + "a",
 	}
 
 	newClient := h.fromCreateClientRequest(&data)
@@ -131,7 +131,7 @@ func (h HTTP) update(c *gin.Context) {
 	editor := PPA.Editor {
 		OID: oid,
 		Name: "Bob",
-		Collection: "Bob" + oid.Hex() + "a",
+		Collection: "events" + oid.Hex() + "a",
 	}
 
 	updated, err := h.service.Update(c, h.fromUpdateRequest(&data), id, editor); if err != nil {
@@ -154,7 +154,7 @@ func (h HTTP) delete(c *gin.Context) {
 	editor := PPA.Editor {
 		OID: oid,
 		Name: "Bob",
-		Collection: "Bob" + oid.Hex() + "a",
+		Collection: "events" + oid.Hex() + "a",
 	}
 
 	if err := h.service.Delete(c, id, editor); err != nil {

@@ -16,7 +16,7 @@ type Eventlog struct {
 }
 
 type Service interface {
-	List(*gin.Context, PPA.BulkFetchOptions, string) (*[]PPA.LogEvent, error)
+	List(*gin.Context, PPA.BulkFetchOptions) (*[]PPA.LogEvent, error)
 }
 
 func New(db *mongo.DBConnection, evdb Repository, udb UserRepository, rbac RBAC) *Eventlog {
@@ -28,7 +28,7 @@ func Init(db *mongo.DBConnection, udb UserRepository, rbac RBAC) *Eventlog {
 }
 
 type Repository interface {
-	List(*mongo.DBConnection, context.Context, PPA.BulkFetchOptions, string) (*[]PPA.LogEvent, error)
+	List(*mongo.DBConnection, context.Context, PPA.BulkFetchOptions) (*[]PPA.LogEvent, error)
 }
 
 type UserRepository interface {

@@ -1,10 +1,14 @@
 package PPA
 import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"time"
 )
 
 type Job struct {
 	ID primitive.ObjectID `json:"_id,omitempty" bson:"_id,omitempty"`
+	StartTime time.Time `json:"start" bson":start_time" m:"Start Time"`
+	EndTime time.Time `json:"end" bson:"end_time" m:"End Time"`
+	Tag string `json:"tag" bson:"tag" m:"tag"`
 	ClientName string `json:"client_info" bson:"client_name,omitempty" m:"Client Name"`
 	ClientPhone string `json:"client_phone" bson:"client_phone,omitempty" m:"Client Phone Number"`
 	CarInfo string `json:"car_info" bson:"car_info,omitempty" m:"Car Information"`

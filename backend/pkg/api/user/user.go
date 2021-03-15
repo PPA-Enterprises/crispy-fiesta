@@ -138,6 +138,16 @@ func (u User) Update(c *gin.Context, req Update, id string, editor PPA.Editor) (
 	return updated, nil
 }
 
+func (u User) ListEvents(c *gin.Context, opts PPA.BulkFetchOptions, id string) (*[]PPA.LogEvent, error) {
+	duration := time.Now().Add(5*time.Second)
+	ctx, cancel := context.WithDeadline(c.Request.Context(), duration)
+	defer cancel()
+
+	// TODO: fetch user by ID, get their collection index
+	coll := id
+	return u.udb.ListEvents(u.db, ctx, opts, coll)
+}
+
 func (u User) oidExists(ctx context.Context, oid primitive.ObjectID) bool {
 	coll := u.db.Use(Collection)
 
