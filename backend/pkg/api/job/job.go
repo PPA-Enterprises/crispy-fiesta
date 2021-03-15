@@ -26,6 +26,10 @@ type Update struct {
 	CarInfo string
 	AppointmentInfo string
 	Notes string
+	StartTime string
+	EndTime string
+	Tag string
+	Color *PPA.CalendarMeta
 }
 
 type ClientUpdate struct {
@@ -136,7 +140,6 @@ func (j Job) Update(c *gin.Context, req Update, id string, editor PPA.Editor) (*
 		}
 	}
 
-
 	if err := j.jdb.Update(j.db, ctx, oid, &PPA.Job {
 		ID: primitive.NilObjectID,
 		ClientName: req.ClientName,
@@ -144,6 +147,11 @@ func (j Job) Update(c *gin.Context, req Update, id string, editor PPA.Editor) (*
 		CarInfo: req.CarInfo,
 		AppointmentInfo: req.AppointmentInfo,
 		Notes: req.Notes,
+		Tag: req.Tag,
+		Color: req.Color,
+		StartTime: req.StartTime,
+		EndTime: req.EndTime,
+
 	}); err != nil {
 		return nil, err
 	}

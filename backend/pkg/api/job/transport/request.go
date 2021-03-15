@@ -23,6 +23,10 @@ type updateRequest struct {
 	CarInfo string `json:"car_info,omitempty"`
 	AppointmentInfo string `json:"appointment_info,omitempty"`
 	Notes string `json:"notes,omitempty"`
+	StartTime string `json:"start,omitempty"`
+	EndTime string `json:"end,omitempty"`
+	Tag string `json:"tag,omitempty"`
+	Color *PPA.CalendarMeta `json:"color,omitempty"`
 }
 
 func (h HTTP) fromUpdateRequest(data *updateRequest) job.Update {
@@ -32,6 +36,10 @@ func (h HTTP) fromUpdateRequest(data *updateRequest) job.Update {
 		CarInfo: data.CarInfo,
 		AppointmentInfo: data.AppointmentInfo,
 		Notes: data.Notes,
+		StartTime: data.StartTime,
+		EndTime: data.EndTime,
+		Tag: data.Tag,
+		Color: data.Color,
 	}
 }
 
@@ -45,6 +53,7 @@ func (h HTTP) fromSubmitJobRequest(data *submitJobRequest) PPA.Job {
 		Notes: data.Notes,
 		StartTime: data.StartTime,
 		EndTime: data.EndTime,
-		Color: data.Color,
+		Color: &data.Color,
+		Tag: data.Tag,
 	}
 }
