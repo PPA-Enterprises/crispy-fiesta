@@ -5,26 +5,9 @@ import {
   SelectionType
 } from '@swimlane/ngx-datatable';
 import { ClientService } from '../shared/services/client.service'
+import { Job } from '../shared/models/job.model'
+import { Client } from '../shared/models/client.model'
 
-
-export class Job {
-  public id: number;
-  public client_name: string
-  public client_phone: string;
-  public car_info: string;
-  public appointment_info: string;
-  public notes: string;
-  public tag: string;
-  public date: string;
-}
-
-export class Client {
-  public id: number;
-  public name: string
-  public phone: string;
-  public email: string;
-  public jobs: Job[];
-}
 
 @Component({
   selector: 'app-page',

@@ -11,6 +11,10 @@ type submitJobRequest struct {
 	CarInfo string `json:"car_info" binding:"required"`
 	AppointmentInfo string `json:"appointment_info" binding:"required"`
 	Notes string `json:"notes"`
+	StartTime string `json:"start" binding:"required"`
+	EndTime string `json:"end" binding:"required"`
+	Tag string `json:"tag" binding:"required"`
+	Color PPA.CalendarMeta `json:"color" binding:"required"`
 }
 
 type updateRequest struct {
@@ -39,5 +43,8 @@ func (h HTTP) fromSubmitJobRequest(data *submitJobRequest) PPA.Job {
 		CarInfo: data.CarInfo,
 		AppointmentInfo: data.AppointmentInfo,
 		Notes: data.Notes,
+		StartTime: data.StartTime,
+		EndTime: data.EndTime,
+		Color: data.Color,
 	}
 }
