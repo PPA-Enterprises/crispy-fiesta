@@ -23,7 +23,7 @@
                             </thead>
                             <tbody>
                             <tr class="cursor-pointer" *ngFor="let job of newJobs" [routerLink]="['/edit-job', job.id]">
-                                <th scope="row">{{ job.date }}</th>
+                                <th scope="row">{{ job.start }}</th>
                                 <td>{{ job.car_info }}</td>
                                 <td>{{ job.client_name }}</td>
                                 <td class="text-success">{{ job.tag }}</td>
@@ -52,7 +52,7 @@
                             </thead>
                             <tbody>
                             <tr class="cursor-pointer" *ngFor="let job of openJobs" [routerLink]="['/edit-job', job.id]">
-                                <th scope="row">{{ job.date }}</th>
+                                <th scope="row">{{ job.start }}</th>
                                 <td>{{ job.car_info }}</td>
                                 <td>{{ job.client_name }}</td>
                                 <td class="text-primary">{{ job.tag }}</td>
@@ -83,7 +83,7 @@
                             </thead>
                             <tbody>
                             <tr class="cursor-pointer" *ngFor="let job of closedJobs" [routerLink]="['/edit-job', job.id]">
-                                <th scope="row">{{ job.date }}</th>
+                                <th scope="row">{{ job.start }}</th>
                                 <td>{{ job.car_info }}</td>
                                 <td>{{ job.client_name }}</td>
                                 <td class="text-danger">{{ job.tag }}</td>

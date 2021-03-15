@@ -33,7 +33,6 @@ export class CreateJobComponent implements OnInit {
 
   onSubmit(form) {
     this.job = {
-      id: (Math.floor(Math.random() * Math.floor(250))).toString(),
       client_name: this.model.fname + " " + this.model.lname,
       client_phone: this.model.phone,
       car_info: this.model.carInfo,
@@ -48,13 +47,9 @@ export class CreateJobComponent implements OnInit {
         secondary: '#FAE3E3',
       }
     }
-    
-    if (this.jobService.createJob(this.job).tag == "NEW") {
-      this.router.navigate(['/jobs']);
-    } else {
-      console.log("ERROR CREATING JOB!")
-    }
-    
-  }
 
+    this.jobService.createJob(this.job).subscribe((job: Job) => {
+        this.router.navigate(['/jobs']);
+    })
+  }
 }

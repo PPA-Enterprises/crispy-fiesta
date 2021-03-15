@@ -1,5 +1,5 @@
 export class Job {
-    public id: string;
+    public _id?: string;
     public client_name: string
     public client_phone: string;
     public car_info: string;

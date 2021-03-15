@@ -4,6 +4,7 @@ import { Observable, throwError } from 'rxjs';
 import { catchError, retry } from 'rxjs/operators';
 import { startOfDay, endOfDay, subDays, addDays, endOfMonth, isSameDay, isSameMonth, addHours } from 'date-fns';
 import { Job } from '../models/job.model';
+import { map } from 'rxjs/operators';
 
 const colors: any = {
   red: {
@@ -26,71 +27,60 @@ const colors: any = {
 })
 export class JobService {
 
-  jobs: Job[] = [
-    { 
-      id: '0',
-      client_name: "Tristan Hull",
-      client_phone: "661-208-1140",
-      car_info: "2003 Saturn Vue",
-      appointment_info: "The Appointment is at 12/27/2020 5:00pm",
-      notes: "These are some example notes",
-      tag: "OPEN",
-      start: subDays(startOfDay(new Date()), 1),
-      end: addDays(new Date(), 1),
-      color: colors.red,
-      title: '2003 Saturn Vue - Tristan Hull',
-    },
-    { 
-      id: '1',
-      client_name: "Frank Hull",
-      client_phone: "661-208-1140",
-      car_info: "2003 Saturn L200",
-      appointment_info: "The Appointment is at 12/27/2020 5:00pm",
-      notes: "waddup",
-      tag: "CLOSED",
-      start: subDays(startOfDay(new Date()), 2),
-      end: addDays(new Date(), 2),
-      color: colors.yellow,
-      title: '2003 Saturn L200 - Frank Hull',
-    },
-    { 
-      id: '2',
-      client_name: "Tristan Hull",
-      client_phone: "661-208-1140",
-      car_info: "2020 Audi S5",
-      appointment_info: "The Appointment is at 12/27/2020 5:00pm",
-      notes: "These are some example notes",
-      tag: "NEW",
-      start: subDays(startOfDay(new Date()), 5),
-      end: addDays(new Date(), 5),
-      color: colors.yellow,
-      title: '2020 Audi S5 - Frank Swartz',
-    },
-  ];
-
   constructor(private http: HttpClient) { }
 
-  createJob (job: Job): Job {
-    // return this.http.post<Job>("http://192.168.1.21:8080/api/v1/jobs", job)
-    this.jobs.push(job);
-    return job;
+  createJob (job: Job): Observable<Job> {
+    return this.http.post<any>("http://localhost:8888/api/v1/jobs", job)
+    .pipe(map((response) => {
+			if(response.success) {
+				return Object.values(response.payload) as Job;
+			} else {
+				return null;
+			}
+		  }));
   }
 
-  getAllJobs(): Job[]{
-    return this.jobs;
+  getAllJobs(): Observable<Job[]>{
+    return this.http.get<any>("http://localhost:8888/api/v1/jobs")
+    .pipe(map((response) => {
+			if(response.success) {
+				return Object.values(response.payload) as Job[];
+			} else {
+				return [];
+			}
+		  }));
   }
 
-  getJobById(id: string): Job {
-    return this.jobs.find(job => job.id === id);
+  getJobById(id: string): Observable<Job> {
+    return this.http.get<any>("http://localhost:8888/api/v1/jobs/id/"+id)
+    .pipe(map((response) => {
+			if(response.success) {
+				return response.payload as Job;
+			} else {
+				return null;
+			}
+		  }));
   }
 
-  editJobById(id: string, job: Job): Job {
-    this.jobs[this.jobs.findIndex(job => job.id === id)] = job;
-    return job;
+  editJobById(id: string, job: Job): Observable<Job> {
+    return this.http.patch<any>("http://localhost:8888/api/v1/jobs/"+id, job)
+    .pipe(map((response) => {
+			if(response.success) {
+				return response.payload as Job;
+			} else {
+				return null;
+			}
+		  }));
   }
 
-  deleteJobById(id: string): string {
-    this.jobs.splice(this.jobs.findIndex(job => job.id === id), 1);
-    return id;
+  deleteJobById(id: string): Observable<any> {
+    return this.http.delete<any>("http://localhost:8888/api/v1/jobs/"+id)
+    .pipe(map((response) => {
+			if(response.success) {
+				return true;
+			} else {
+				return null;
+			}
+		}));
   }
 }
