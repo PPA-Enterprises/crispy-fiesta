@@ -1,4 +1,5 @@
 import { Component, ChangeDetectionStrategy, ViewChild, TemplateRef, ViewEncapsulation } from '@angular/core';
+import { Router } from '@angular/router';
 import { startOfDay, endOfDay, subDays, addDays, endOfMonth, isSameDay, isSameMonth, addHours } from 'date-fns';
 import { Subject } from 'rxjs';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
@@ -20,7 +21,7 @@ import { Client } from '../shared/models/client.model'
 export class CalComponent {
   @ViewChild('modalContent', { static: true }) modalContent: TemplateRef<any>;
 
-  constructor(private modal: NgbModal, private jobService: JobService) {}
+  constructor(private modal: NgbModal, private jobService: JobService, private router: Router) {}
 
   view: CalendarView = CalendarView.Month;
   CalendarView = CalendarView;
@@ -49,50 +50,14 @@ export class CalComponent {
     }
   }
 
-  eventTimesChanged({
-    event,
-    newStart,
-    newEnd,
-  }: CalendarEventTimesChangedEvent): void {
-    this.events = this.events.map((iEvent) => {
-      if (iEvent === event) {
-        return {
-          ...event,
-          start: newStart,
-          end: newEnd,
-        };
-      }
-      return iEvent;
-    });
-    this.handleEvent('Dropped or resized', event);
-  }
 
   handleEvent(action: string, event: CalendarEvent): void {
     this.modalData = { event, action };
     this.modal.open(this.modalContent, { size: 'lg' });
-    console.log(this.events[0].start)
+
+    //this.router.navigateByUrl('/edit-job/'+event.id);
   }
 
-  addEvent(): void {
-    this.events = [
-      ...this.events,
-      {
-        title: 'New event',
-        start: startOfDay(new Date()),
-        end: endOfDay(new Date()),
-        color: colors.red,
-        draggable: true,
-        resizable: {
-          beforeStart: true,
-          afterEnd: true,
-        },
-      },
-    ];
-  }
-
-  deleteEvent(eventToDelete: CalendarEvent) {
-    this.events = this.events.filter((event) => event !== eventToDelete);
-  }
 
   setView(view: CalendarView) {
     this.view = view;
