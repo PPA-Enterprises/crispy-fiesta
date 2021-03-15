@@ -2,6 +2,7 @@ import { Component, ViewChild, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators, NgForm } from '@angular/forms';
 import { Router, ActivatedRoute, ParamMap } from '@angular/router';
 import { JobService } from '../shared/services/job.service'
+import { Job } from '../shared/models/job.model'
 
 export class JobForm {
   public fname: string;
@@ -10,17 +11,6 @@ export class JobForm {
   public carInfo: string;
   public apptInfo: string;
   public notes: string;
-}
-
-export class Job {
-  public id: number;
-  public client_name: string
-  public client_phone: string;
-  public car_info: string;
-  public appointment_info: string;
-  public notes: string;
-  public tag: string;
-  public date: string;
 }
 
 @Component({

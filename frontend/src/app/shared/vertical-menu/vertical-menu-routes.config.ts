@@ -11,6 +11,9 @@ export const ROUTES: RouteInfo[] = [
   {
     path: '/clients', title: 'Clients', icon: 'ft-user', class: 'dropdown nav-item', isExternalLink: false, submenu: []
   },
+  {
+    path: '/calendar', title: 'Calendar', icon: 'ft-user', class: 'dropdown nav-item', isExternalLink: false, submenu: []
+  },
 //   {
 //     path: '', title: 'Menu Levels', icon: 'ft-align-left', class: 'has-sub', badge: '3', badgeClass: 'badge badge-pill badge-danger float-right mr-1 mt-1', isExternalLink: false,
 //     submenu: [
