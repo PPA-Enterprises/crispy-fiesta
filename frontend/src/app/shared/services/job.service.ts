@@ -33,7 +33,7 @@ export class JobService {
     return this.http.post<any>("http://localhost:8888/api/v1/jobs", job)
     .pipe(map((response) => {
 			if(response.success) {
-				return Object.values(response.payload) as Job;
+				return response.payload as Job;
 			} else {
 				return null;
 			}

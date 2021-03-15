@@ -34,23 +34,25 @@ export class EditJobComponent implements OnInit {
     this.sub = this.route.params.subscribe(params => {
       this.id = params['id'];
     });
-    this.job = this.jobService.getJobById(this.id);
-    if(this.job.tag == "CLOSED") {
-      this.notClosed = false;
-    }
-    this.name = this.job.client_name.split(" ");
-    this.model = {
-      fname: this.name[0],
-      lname: this.name[1],
-      phone: this.job.client_phone,
-      carInfo: this.job.car_info,
-      apptInfo: this.job.appointment_info,
-      notes: this.job.notes
-    }
+
+    this.jobService.getJobById(this.id).subscribe((job: Job) => {
+      this.job = job
+      if(this.job.tag == "CLOSED") {
+        this.notClosed = false;
+      }
+      this.name = this.job.client_name.split(" ");
+      this.model = {
+        fname: this.name[0],
+        lname: this.name[1],
+        phone: this.job.client_phone,
+        carInfo: this.job.car_info,
+        apptInfo: this.job.appointment_info,
+        notes: this.job.notes
+      }
+    })
   }
 
   ngOnInit() {
-
   }
 
   ngOnDestroy() {
@@ -59,7 +61,7 @@ export class EditJobComponent implements OnInit {
 
   onSubmit(form) {
     this.job = {
-      id: this.job.id,
+      _id: this.job._id,
       client_name: this.model.fname + " " + this.model.lname,
       client_phone: this.model.phone,
       car_info: this.model.carInfo,
@@ -75,19 +77,16 @@ export class EditJobComponent implements OnInit {
       }
     }
 
-    if (this.jobService.editJobById(this.id, this.job).id == this.id) {
+    this.jobService.editJobById(this.id, this.job).subscribe((job: Job) => {
+      this.job = job
       this.router.navigate(['/jobs']);
-    } else {
-      console.log("ERROR CREATING JOB!")
-    }
-
-
+    })
   }
 
   sendToTintWork() {
     console.log("Before:" + this.job);
     this.job = {
-      id: this.job.id,
+      _id: this.job._id,
       client_name: this.model.fname + " " + this.model.lname,
       client_phone: this.model.phone,
       car_info: this.model.carInfo,
@@ -103,21 +102,17 @@ export class EditJobComponent implements OnInit {
       }
     }
 
-    if (this.jobService.editJobById(this.id, this.job).id = this.id) {
-      console.log("After:" + this.job);
+    this.jobService.editJobById(this.id, this.job).subscribe((job: Job) => {
+      this.job = job
       this.router.navigate(['/jobs']);
-    } else {
-      console.log("ERROR CREATING JOB!");
-    }
+    })
 
   }
 
   delete() {
-    if(this.jobService.deleteJobById(this.job.id) == this.id) {
-      this.router.navigate(['/jobs']);
-    } else {
-      console.log("ERROR DELETING JOB!");
-    }
+    this.jobService.deleteJobById(this.id).subscribe((deleted: any) => {
+      if (deleted) this.router.navigate(['/jobs']);
+    })
   }
 
 
