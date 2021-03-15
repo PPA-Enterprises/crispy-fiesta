@@ -8,7 +8,7 @@ type Job struct {
 	StartTime string `json:"start" bson:"start_time,omitempty" m:"Start Time"`
 	EndTime string `json:"end" bson:"end_time,omitempty" m:"End Time"`
 	Tag string `json:"tag" bson:"tag,omitempty" m:"tag"`
-	ClientName string `json:"client_info" bson:"client_name,omitempty" m:"Client Name"`
+	ClientName string `json:"client_name" bson:"client_name,omitempty" m:"Client Name"`
 	ClientPhone string `json:"client_phone" bson:"client_phone,omitempty" m:"Client Phone Number"`
 	CarInfo string `json:"car_info" bson:"car_info,omitempty" m:"Car Information"`
 	AppointmentInfo string `json:"appointment_info" bson:"appointment_info,omitempty" m:"Appointment Information"`
