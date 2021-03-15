@@ -54,5 +54,6 @@ func (h HTTP) fromSubmitJobRequest(data *submitJobRequest) PPA.Job {
 		StartTime: data.StartTime,
 		EndTime: data.EndTime,
 		Color: &data.Color,
+		Tag: data.Tag,
 	}
 }
