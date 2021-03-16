@@ -21,8 +21,6 @@ import { Client } from '../shared/models/client.model'
 export class CalComponent {
   @ViewChild('modalContent', { static: true }) modalContent: TemplateRef<any>;
 
-  constructor(private modal: NgbModal, private jobService: JobService, private router: Router) {}
-
   view: CalendarView = CalendarView.Month;
   CalendarView = CalendarView;
   viewDate: Date = new Date();
@@ -31,8 +29,24 @@ export class CalComponent {
     event: CalendarEvent;
   };
   refresh: Subject<any> = new Subject();
-  events: CalendarEvent[] = this.jobService.getAllJobs();
+
+  events: CalendarEvent[] = [];
   activeDayIsOpen: boolean = true;
+
+  constructor(private modal: NgbModal, private jobService: JobService, private router: Router) {
+  }
+
+  ngOnInit() {
+    this.jobService.getAllJobs().subscribe((jobs: any[]) => {
+      for(let job of jobs) {
+        job.start = new Date(job.start);
+        job.end = new Date(job.end);
+
+        this.events.push(job);
+      }
+      console.log(this.events);
+    })
+  }
 
 
 
