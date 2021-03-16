@@ -21,6 +21,7 @@ var OidNotFound = PPA.NewAppError(NotFound, "Does not exist")
 var JobNotFound = PPA.NewAppError(NotFound, "Does not exist")
 
 type Update struct {
+	Title string
 	ClientName string
 	ClientPhone string
 	CarInfo string
@@ -142,6 +143,7 @@ func (j Job) Update(c *gin.Context, req Update, id string, editor PPA.Editor) (*
 
 	if err := j.jdb.Update(j.db, ctx, oid, &PPA.Job {
 		ID: primitive.NilObjectID,
+		Title: req.Title,
 		ClientName: req.ClientName,
 		ClientPhone: req.ClientPhone,
 		CarInfo: req.CarInfo,

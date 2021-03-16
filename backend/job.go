@@ -5,6 +5,7 @@ import (
 
 type Job struct {
 	ID primitive.ObjectID `json:"_id,omitempty" bson:"_id,omitempty"`
+	Title string `json:"title" bson:"title" m:"Title of Job"`
 	StartTime string `json:"start" bson:"start_time,omitempty" m:"Start Time"`
 	EndTime string `json:"end" bson:"end_time,omitempty" m:"End Time"`
 	Tag string `json:"tag" bson:"tag,omitempty" m:"tag"`

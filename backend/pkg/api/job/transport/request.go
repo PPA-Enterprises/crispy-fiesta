@@ -6,6 +6,7 @@ import (
 )
 
 type submitJobRequest struct {
+	Title string`json:"title" binding:"required"`
 	ClientName string `json:"client_name" binding:"required"`
 	ClientPhone string `json:"client_phone" binding:"required"`
 	CarInfo string `json:"car_info" binding:"required"`
@@ -18,6 +19,7 @@ type submitJobRequest struct {
 }
 
 type updateRequest struct {
+	Title string`json:"title,omitempty:`
 	ClientName string `json:"client_name,omitempty"`
 	ClientPhone string `json:"client_phone,omitempty"`
 	CarInfo string `json:"car_info,omitempty"`
@@ -31,6 +33,7 @@ type updateRequest struct {
 
 func (h HTTP) fromUpdateRequest(data *updateRequest) job.Update {
 	return job.Update {
+		Title: data.Title,
 		ClientName: data.ClientName,
 		ClientPhone: data.ClientPhone,
 		CarInfo: data.CarInfo,
@@ -46,6 +49,7 @@ func (h HTTP) fromUpdateRequest(data *updateRequest) job.Update {
 func (h HTTP) fromSubmitJobRequest(data *submitJobRequest) PPA.Job {
 	return PPA.Job {
 		ID: primitive.NewObjectID(),
+		Title: data.Title,
 		ClientName: data.ClientName,
 		ClientPhone: data.ClientPhone,
 		CarInfo: data.CarInfo,
