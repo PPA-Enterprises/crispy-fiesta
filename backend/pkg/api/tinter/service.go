@@ -9,7 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type  Tinter struct {
+type Tinter struct {
 	db *mongo.DBConnection
 	tdb Repository
 	jdb JobRepository
