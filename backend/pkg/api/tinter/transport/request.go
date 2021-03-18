@@ -3,10 +3,10 @@ package transport
 import (
 	"PPA"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"pkg/api/client"
+	"pkg/api/tinter"
 )
 
-type createClientRequest struct {
+type createTinterRequest struct {
 	Name string `json:"name" binding:"required"`
 	Phone string `json:"phone" binding:"required"`
 }
@@ -16,15 +16,15 @@ type updateRequest struct {
 	Phone string `json:"phone,omitempty"`
 }
 
-func (h HTTP) fromUpdateRequest(data *updateRequest) client.Update {
+func (h HTTP) fromUpdateRequest(data *updateRequest) tinter.Update {
 	return client.Update {
 		Name: data.Name,
 		Phone: data.Phone,
 	}
 }
 
-func (h HTTP) fromCreateClientRequest(data *createClientRequest) PPA.Client {
-	return PPA.Client {
+func (h HTTP) fromCreateClientRequest(data *createtinterRequest) PPA.Tinter {
+	return PPA.Tinter {
 		ID: primitive.NewObjectID(),
 		Name: data.Name,
 		Phone: data.Phone,
