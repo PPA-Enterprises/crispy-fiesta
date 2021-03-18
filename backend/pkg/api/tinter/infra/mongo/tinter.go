@@ -14,55 +14,55 @@ import (
 const (
 	AlreadyExists = http.StatusConflict
 	NotFound = http.StatusNotFound
-	Collection = "clients"
-	DeletedClientCollection = "deleted_clients"
+	Collection = "tinters"
+	DeletedTintersCollection = "deleted_tinters"
 	JobsCollection = "jobs"
 )
 
 type Tinter struct{}
-func (t Tinter) Create(db *mongo.DBConnection, ctx context.Context, client *PPA.Client) (*PPA.Client, error) {
+func (t Tinter) Create(db *mongo.DBConnection, ctx context.Context, tinter *PPA.Tinter) (*PPA.Tinter, error) {
 	coll := db.Use(Collection)
 
-	if(c.phoneExists(db, ctx, client.Phone)) {
+	if(c.phoneExists(db, ctx, tinter.Phone)) {
 		return nil, PPA.NewAppError(AlreadyExists, "Phone Number Already In Use")
 	}
 
-	if _, err := coll.InsertOne(ctx, client); err != nil {
+	if _, err := coll.InsertOne(ctx, tinter); err != nil {
 		return nil, PPA.InternalError
 	}
-	return client, nil
+	return tinter, nil
 }
 
-func(t Tinter) ViewById(db *mongo.DBConnection, ctx context.Context, oid primitive.ObjectID) (*PPA.Client, error) {
+func(t Tinter) ViewById(db *mongo.DBConnection, ctx context.Context, oid primitive.ObjectID) (*PPA.Tinter, error) {
 	coll := db.Use(Collection)
 
-	var client PPA.Client
-	if err := coll.FindOne(ctx, bson.D{{"_id", oid}}).Decode(&client); err != nil {
+	var tinter PPA.Tinter
+	if err := coll.FindOne(ctx, bson.D{{"_id", oid}}).Decode(&tinter); err != nil {
 		if err == mongodb.ErrNoDocuments {
-			return nil, PPA.NewAppError(NotFound, "Client Not Found")
+			return nil, PPA.NewAppError(NotFound, "Tinter Not Found")
 		}
 		if err != nil {
 			return nil, PPA.InternalError
 		}
 	}
-	return &client, nil
+	return &tinter, nil
 }
 
-func(t Tinter) ViewByPhone(db *mongo.DBConnection, ctx context.Context, phone string) (*PPA.Client, error) {
+func(t Tinter) ViewByPhone(db *mongo.DBConnection, ctx context.Context, phone string) (*PPA.Tinter, error) {
 	coll := db.Use(Collection)
 
-	var client PPA.Client
-	err := coll.FindOne(ctx, bson.D{{"phone", phone}}).Decode(&client)
+	var tinter PPA.Tinter
+	err := coll.FindOne(ctx, bson.D{{"phone", phone}}).Decode(&tinter)
 		if err == mongodb.ErrNoDocuments {
-			return nil, PPA.NewAppError(NotFound, "Client Not Found")
+			return nil, PPA.NewAppError(NotFound, "Tinter Not Found")
 		}
 		if err != nil {
 			return nil, PPA.InternalError
 		}
-	return &client, nil
+	return &tinter, nil
 }
 
-func(t Tinter) List(db *mongo.DBConnection, ctx context.Context, fetchOpts PPA.BulkFetchOptions) (*[]PPA.Client, error) {
+func(t Tinter) List(db *mongo.DBConnection, ctx context.Context, fetchOpts PPA.BulkFetchOptions) (*[]PPA.Tinter, error) {
 	if fetchOpts.All {
 		return fetchAll(db, ctx, fetchOpts.Sort)
 	}
@@ -83,18 +83,18 @@ func(t Tinter) List(db *mongo.DBConnection, ctx context.Context, fetchOpts PPA.B
 	}
 	defer cursor.Close(ctx)
 
-	var clients []PPA.Client
-	if err = cursor.All(ctx, &clients); err != nil {
+	var tinters []PPA.Tinter
+	if err = cursor.All(ctx, &tinters); err != nil {
 		return nil, PPA.InternalError
 	}
-	return &clients, nil
+	return &tinters, nil
 }
 
 func(t Tinter) Delete(db *mongo.DBConnection, ctx context.Context, oid primitive.ObjectID) error {
-	coll := db.Use(DeletedClientCollection)
+	coll := db.Use(DeletedTintersCollection)
 
 	fetched, err := c.ViewById(db, ctx, oid); if err != nil {
-		return PPA.NewAppError(NotFound, "Client Not Found")
+		return PPA.NewAppError(NotFound, "Tinter Not Found")
 	}
 
 	if _, insertErr := coll.InsertOne(ctx, fetched); insertErr != nil {
@@ -108,17 +108,17 @@ func(t Tinter) Delete(db *mongo.DBConnection, ctx context.Context, oid primitive
 	return nil
 }
 
-func (t Tinter) Update(db *mongo.DBConnection, ctx context.Context, oid primitive.ObjectID, update *PPA.Client) error {
+func (t Tinter) Update(db *mongo.DBConnection, ctx context.Context, oid primitive.ObjectID, update *PPA.Tinter) error {
 	coll := db.Use(Collection)
 
 	filter := bson.D{{"_id", oid}}
 	updateDoc := bson.D{{"$set", update}}
 
-	var oldDoc PPA.Client
+	var oldDoc PPA.Tinter
 	err := coll.FindOneAndUpdate(ctx, filter, updateDoc).Decode(&oldDoc)
 
 	if err == mongodb.ErrNoDocuments {
-		return PPA.NewAppError(NotFound, "Client Not Found")
+		return PPA.NewAppError(NotFound, "Tinter Not Found")
 	}
 
 	if err != nil {
@@ -127,7 +127,7 @@ func (t Tinter) Update(db *mongo.DBConnection, ctx context.Context, oid primitiv
 	return nil
 }
 
-func (t Tinter) LogEvent(db *mongo.DBConnection, ctx context.Context, update *PPA.Client) {
+func (t Tinter) LogEvent(db *mongo.DBConnection, ctx context.Context, update *PPA.Tinter) {
 	if err := c.Update(db, ctx, update.ID, update); err != nil {
 		fmt.Println(err)
 	}
@@ -147,8 +147,8 @@ func (t Tinter) Populate(db *mongo.DBConnection, ctx context.Context, oids []pri
 	return jobs, nil
 }
 
-func (t Tinter) RemoveJob(db *mongo.DBConnection, ctx context.Context, clientPhone string, jobOid primitive.ObjectID) error {
-	fetched, err := c.ViewByPhone(db, ctx, clientPhone); if err != nil {
+func (t Tinter) RemoveJob(db *mongo.DBConnection, ctx context.Context, tinterPhone string, jobOid primitive.ObjectID) error {
+	fetched, err := c.ViewByPhone(db, ctx, tinterPhone); if err != nil {
 		return err
 	}
 	fetched.FindAndRemoveJob(jobOid)
@@ -158,11 +158,11 @@ func (t Tinter) RemoveJob(db *mongo.DBConnection, ctx context.Context, clientPho
 	filter := bson.D{{"_id", fetched.ID}}
 	updateDoc := bson.D{{"$set", fetched}}
 
-	var oldDoc PPA.Client
+	var oldDoc PPA.Tinter
 	err = coll.FindOneAndUpdate(ctx, filter, updateDoc).Decode(&oldDoc)
 
 	if err == mongodb.ErrNoDocuments {
-		return PPA.NewAppError(NotFound, "Client Not Found")
+		return PPA.NewAppError(NotFound, "Tinter Not Found")
 	}
 
 	if err != nil {
@@ -178,7 +178,7 @@ func (t Tinter) phoneExists(db *mongo.DBConnection, ctx context.Context, phone s
 	return true
 }
 
-func fetchAll(db *mongo.DBConnection, ctx context.Context, sort bool) (*[]PPA.Client, error) {
+func fetchAll(db *mongo.DBConnection, ctx context.Context, sort bool) (*[]PPA.Tinter, error) {
 	coll := db.Use(Collection)
 	opts := options.Find()
 
@@ -191,10 +191,10 @@ func fetchAll(db *mongo.DBConnection, ctx context.Context, sort bool) (*[]PPA.Cl
 	}
 	defer cursor.Close(ctx)
 
-	var clients []PPA.Client
-	if err = cursor.All(ctx, &clients); err != nil {
+	var tinters []PPA.Tinter
+	if err = cursor.All(ctx, &tinters); err != nil {
 		// TODO: check for err no docs?
 		return nil, PPA.InternalError
 	}
-	return &clients, nil
+	return &tinters, nil
 }
