@@ -20,7 +20,7 @@ const (
 
 func NewHTTP(service client.Service, router *gin.RouterGroup, authMw gin.HandlerFunc) {
 	httpTransport := HTTP{service}
-	routes := router.Group("/clients")
+	routes := router.Group("/tinters")
 	routes.POST("/", httpTransport.create)
 	routes.GET("/", httpTransport.list)
 	routes.GET("/id/:id", httpTransport.viewById)
