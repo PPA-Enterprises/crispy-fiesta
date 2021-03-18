@@ -25,7 +25,7 @@ type Update struct {
 	Phone string
 }
 
-func (t Tinter) Create(c *gin.Context, req PPA.Client, editor PPA.Editor) (*PPA.Client, error) {
+func (t Tinter) Create(c *gin.Context, req PPA.Tinter, editor PPA.Editor) (*PPA.Tinter, error) {
 	duration := time.Now().Add(5*time.Second)
 	ctx, cancel := context.WithDeadline(c.Request.Context(), duration)
 	defer cancel()
@@ -44,7 +44,7 @@ func (t Tinter) Create(c *gin.Context, req PPA.Client, editor PPA.Editor) (*PPA.
 	return cl.cdb.Create(cl.db, ctx, &req)
 }
 
-func (t Tinter) ViewById(c *gin.Context, id string) (*PPA.Client, error) {
+func (t Tinter) ViewById(c *gin.Context, id string) (*PPA.Tinter, error) {
 	duration := time.Now().Add(5*time.Second)
 	ctx, cancel := context.WithDeadline(c.Request.Context(), duration)
 	defer cancel()
@@ -56,7 +56,7 @@ func (t Tinter) ViewById(c *gin.Context, id string) (*PPA.Client, error) {
 	return cl.cdb.ViewById(cl.db, ctx, oid)
 }
 
-func (t Tinter) List(c *gin.Context, opts PPA.BulkFetchOptions) (*[]PPA.Client, error) {
+func (t Tinter) List(c *gin.Context, opts PPA.BulkFetchOptions) (*[]PPA.Tinter, error) {
 	//additional security stuff?
 	duration := time.Now().Add(5*time.Second)
 	ctx, cancel := context.WithDeadline(c.Request.Context(), duration)
@@ -65,7 +65,7 @@ func (t Tinter) List(c *gin.Context, opts PPA.BulkFetchOptions) (*[]PPA.Client, 
 	return cl.cdb.List(cl.db, ctx, opts)
 }
 
-func (t Tinter) ViewByPhone(c *gin.Context, phone string) (*PPA.Client, error) {
+func (t Tinter) ViewByPhone(c *gin.Context, phone string) (*PPA.Tinter, error) {
 	//additional security stuff?
 	duration := time.Now().Add(5*time.Second)
 	ctx, cancel := context.WithDeadline(c.Request.Context(), duration)
@@ -84,19 +84,19 @@ func (t Tinter) Delete(c *gin.Context, id string, editor PPA.Editor) error {
 		return OidNotFound
 	}
 
-	client, err := cl.cdb.ViewById(cl.db, ctx, oid); if err != nil {
+	tiner, err := cl.cdb.ViewById(cl.db, ctx, oid); if err != nil {
 		return OidNotFound
 	}
 	// delete jobs
-	cl.deletejobs(ctx, client.Jobs, editor)
+	//cl.deletejobs(ctx, client.Jobs, editor)
 
-	client.AppendLog(cl.eventLogger.LogDeleted(ctx, editor))
-	cl.cdb.LogEvent(cl.db, ctx, client)
+	tinter.AppendLog(cl.eventLogger.LogDeleted(ctx, editor))
+	cl.cdb.LogEvent(cl.db, ctx, tinter)
 	return cl.cdb.Delete(cl.db, ctx, oid)
 
 }
 
-func (t Tinter) Update(c *gin.Context, req Update, id string, editor PPA.Editor) (*PPA.Client, error) {
+func (t Tinter) Update(c *gin.Context, req Update, id string, editor PPA.Editor) (*PPA.Tinter, error) {
 	duration := time.Now().Add(5*time.Second)
 	ctx, cancel := context.WithDeadline(c.Request.Context(), duration)
 	defer cancel()
@@ -120,7 +120,7 @@ func (t Tinter) Update(c *gin.Context, req Update, id string, editor PPA.Editor)
 		return nil, err
 	}
 
-	if err := cl.cdb.Update(cl.db, ctx, oid, &PPA.Client {
+	if err := cl.cdb.Update(cl.db, ctx, oid, &PPA.Tinter {
 		ID: primitive.NilObjectID,
 		Name: req.Name,
 		Phone: req.Phone,
@@ -139,10 +139,10 @@ func (t Tinter) Update(c *gin.Context, req Update, id string, editor PPA.Editor)
 	cl.cdb.LogEvent(cl.db, ctx, updated)
 
 	// update client info on all corresponding jobs
-	cl.updateJobs(ctx, updated.Jobs, JobUpdate { Name: updated.Name, Phone: updated.Phone }, editor)
+	//cl.updateJobs(ctx, updated.Jobs, JobUpdate { Name: updated.Name, Phone: updated.Phone }, editor)
 	return updated, nil
 }
-
+/*
 func (t Tinter) PopulateJob(c *gin.Context, unpopClient *PPA.Client) (*PopulatedClient, error) {
 	duration := time.Now().Add(5*time.Second)
 	ctx, cancel := context.WithDeadline(c.Request.Context(), duration)
@@ -181,12 +181,12 @@ func (t Tinter) PopulateJobs(c *gin.Context, unpopClients *[]PPA.Client) (*[]Pop
 		})
 	}
 	return &popClients, nil
-}
+}*/
 
 func (t Tinter) oidExists(ctx context.Context, oid primitive.ObjectID) bool {
 	coll := cl.db.Use(Collection)
 
-	var inserted PPA.Client
+	var inserted PPA.Tinter
 	err := coll.FindOne(ctx, bson.D{{"_id", oid}}).Decode(&inserted)
 	return err == nil
 }
@@ -204,6 +204,7 @@ func (t Tinter) deletejobs(ctx context.Context, oids []primitive.ObjectID, edito
 	}
 }
 
+/*
 // How strong of a consistency garuntee do we want????
 func (t Tinter) updateJobs(ctx context.Context, oids []primitive.ObjectID, update JobUpdate, editor PPA.Editor) {
 	if len(oids) <= 0 { return } // Note that len(nil) is 0
@@ -227,5 +228,5 @@ func (t Tinter) updateJobs(ctx context.Context, oids []primitive.ObjectID, updat
 				editor))
 			cl.jdb.LogEvent(cl.db, ctx, newDoc)
 		}
-	}
+	}*/
 }
