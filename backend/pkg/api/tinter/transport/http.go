@@ -11,14 +11,14 @@ import(
 )
 
 type HTTP struct {
-	service client.Service
+	service tinter.Service
 }
 
 const (
 	BadRequest = http.StatusBadRequest
 )
 
-func NewHTTP(service client.Service, router *gin.RouterGroup, authMw gin.HandlerFunc) {
+func NewHTTP(service tinter.Service, router *gin.RouterGroup, authMw gin.HandlerFunc) {
 	httpTransport := HTTP{service}
 	routes := router.Group("/tinters")
 	routes.POST("/", httpTransport.create)
@@ -32,7 +32,7 @@ func NewHTTP(service client.Service, router *gin.RouterGroup, authMw gin.Handler
 func (h HTTP) create(c *gin.Context) {
 	//check that user is allowed to make this request
 
-	var data createClientRequest
+	var data createTinterRequest
 	if err := c.ShouldBindJSON(&data); err != nil {
 		PPA.Response(c, err); return
 	}
@@ -44,11 +44,11 @@ func (h HTTP) create(c *gin.Context) {
 		Collection: "events" + oid.Hex() + "a",
 	}
 
-	newClient := h.fromCreateClientRequest(&data)
-	created, err := h.service.Create(c, newClient, editor); if err != nil {
+	newTinter := h.fromCreateTinterRequest(&data)
+	created, err := h.service.Create(c, newTinter, editor); if err != nil {
 		PPA.Response(c, err); return
 	}
-	c.JSON(http.StatusCreated, clientCreated(created)); return
+	c.JSON(http.StatusCreated, tinterCreated(created)); return
 }
 
 func (h HTTP) list(c *gin.Context) {
@@ -74,10 +74,10 @@ func (h HTTP) list(c *gin.Context) {
 	}
 	options.Next = next
 
-	clients, err := h.service.List(c, options); if err != nil {
+	tinterss, err := h.service.List(c, options); if err != nil {
 		PPA.Response(c, err); return
 	}
-	populated, err := h.service.PopulateJobs(c, clients); if err != nil {
+	populated, err := h.service.PopulateJobs(c, tinters); if err != nil {
 		PPA.Response(c, err); return
 	}
 	c.JSON(http.StatusOK, fetchedAll(populated)); return
@@ -90,11 +90,11 @@ func (h HTTP) viewById(c *gin.Context) {
 		PPA.Response(c, PPA.NewAppError(BadRequest, "ID Required")); return
 	}
 
-	fetchedClient, err := h.service.ViewById(c, id); if err != nil {
+	fetchedTinter, err := h.service.ViewById(c, id); if err != nil {
 		PPA.Response(c, err); return
 	}
 
-	populated, err := h.service.PopulateJob(c, fetchedClient); if err != nil {
+	populated, err := h.service.PopulateJob(c, fetchedTinter); if err != nil {
 		PPA.Response(c, err); return
 	}
 	c.JSON(http.StatusOK, fetched(populated)); return
@@ -106,11 +106,11 @@ func (h HTTP) viewByPhone(c *gin.Context) {
 		PPA.Response(c, PPA.NewAppError(BadRequest, "Phone Number Required")); return
 	}
 
-	fetchedClient, err := h.service.ViewByPhone(c, phone); if err != nil {
+	fetchedTinter, err := h.service.ViewByPhone(c, phone); if err != nil {
 		PPA.Response(c, err); return
 	}
 
-	populated, err := h.service.PopulateJob(c, fetchedClient); if err != nil {
+	populated, err := h.service.PopulateJob(c, fetchedTinter); if err != nil {
 		PPA.Response(c, err); return
 	}
 	c.JSON(http.StatusOK, fetched(populated)); return
@@ -164,21 +164,21 @@ func (h HTTP) delete(c *gin.Context) {
 }
 
 func deleted() gin.H {
-	return gin.H{"success": true, "message": "Client And Associated Jobs Deleted"}
+	return gin.H{"success": true, "message": "Tinter Deleted"}
 }
 
-func fetched(c *client.PopulatedClient) gin.H {
-	return gin.H{"success": true, "message": "Fetched Client", "payload": c}
+func fetched(c *PPA.Tinter) gin.H {
+	return gin.H{"success": true, "message": "Fetched Tinter", "payload": c}
 }
 
-func fetchedAll(c *[]client.PopulatedClient) gin.H {
-	return gin.H{"success": true, "message": "Fetched Clients", "payload": c}
+func fetchedAll(c *[]PPA.Tinter) gin.H {
+	return gin.H{"success": true, "message": "Fetched Tinters", "payload": c}
 }
 
-func clientCreated(c *PPA.Client) gin.H {
-	return gin.H{"success": true, "message": "Client Created", "payload": c}
+func tinterCreated(c *PPA.Tinter) gin.H {
+	return gin.H{"success": true, "message": "Tinter Created", "payload": c}
 }
 
-func clientUpdated(c *client.PopulatedClient) gin.H {
-	return gin.H{"success": true, "message": "Client Updated", "payload": c}
+func tinterUpdated(c *PPA.Tinter) gin.H {
+	return gin.H{"success": true, "message": "Tinter Updated", "payload": c}
 }

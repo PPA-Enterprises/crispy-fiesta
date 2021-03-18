@@ -28,6 +28,6 @@ func (h HTTP) fromCreateClientRequest(data *createtinterRequest) PPA.Tinter {
 		ID: primitive.NewObjectID(),
 		Name: data.Name,
 		Phone: data.Phone,
-		Jobs: []primitive.ObjectID{},
+		//Jobs: []primitive.ObjectID{},
 	}
 }
