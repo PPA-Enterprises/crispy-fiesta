@@ -29,7 +29,7 @@ export class JobsComponent implements OnInit {
           this.closedJobs.push(job);
         }
       }
-    })
+    });
   }
 
 }

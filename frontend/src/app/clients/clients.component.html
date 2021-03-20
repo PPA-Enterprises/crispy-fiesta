@@ -29,7 +29,7 @@
                   <ng-template let-row="row" let-name="value" ngx-datatable-cell-template>
                     <div class="d-flex align-items-center">
                       <div class="cell-line-height">
-                        <p class="font-medium-1 line-height-1 mb-0 cursor-pointer" [routerLink]="['/client', row.id]">{{ name }}</p>
+                        <p class="font-medium-1 line-height-1 mb-0 cursor-pointer" [routerLink]="['/client', row._id]">{{ name }}</p>
                       </div>
                     </div>
                   </ng-template>

@@ -40,11 +40,11 @@ export class JobService {
 		  }));
   }
 
-  getAllJobs(): Observable<Job[]>{
+  getAllJobs(): Observable<Job[]> {
     return this.http.get<any>("http://localhost:8888/api/v1/jobs")
     .pipe(map((response) => {
 			if(response.success) {
-				return Object.values(response.payload) as Job[];
+				return response.payload as Job[];
 			} else {
 				return [];
 			}
