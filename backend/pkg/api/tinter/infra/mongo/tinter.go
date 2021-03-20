@@ -23,7 +23,7 @@ type Tinter struct{}
 func (t Tinter) Create(db *mongo.DBConnection, ctx context.Context, tinter *PPA.Tinter) (*PPA.Tinter, error) {
 	coll := db.Use(Collection)
 
-	if(c.phoneExists(db, ctx, tinter.Phone)) {
+	if(t.phoneExists(db, ctx, tinter.Phone)) {
 		return nil, PPA.NewAppError(AlreadyExists, "Phone Number Already In Use")
 	}
 
@@ -93,7 +93,7 @@ func(t Tinter) List(db *mongo.DBConnection, ctx context.Context, fetchOpts PPA.B
 func(t Tinter) Delete(db *mongo.DBConnection, ctx context.Context, oid primitive.ObjectID) error {
 	coll := db.Use(DeletedTintersCollection)
 
-	fetched, err := c.ViewById(db, ctx, oid); if err != nil {
+	fetched, err := t.ViewById(db, ctx, oid); if err != nil {
 		return PPA.NewAppError(NotFound, "Tinter Not Found")
 	}
 
@@ -128,7 +128,7 @@ func (t Tinter) Update(db *mongo.DBConnection, ctx context.Context, oid primitiv
 }
 
 func (t Tinter) LogEvent(db *mongo.DBConnection, ctx context.Context, update *PPA.Tinter) {
-	if err := c.Update(db, ctx, update.ID, update); err != nil {
+	if err := t.Update(db, ctx, update.ID, update); err != nil {
 		fmt.Println(err)
 	}
 }
@@ -147,8 +147,9 @@ func (t Tinter) Populate(db *mongo.DBConnection, ctx context.Context, oids []pri
 	return jobs, nil
 }
 
+/*
 func (t Tinter) RemoveJob(db *mongo.DBConnection, ctx context.Context, tinterPhone string, jobOid primitive.ObjectID) error {
-	fetched, err := c.ViewByPhone(db, ctx, tinterPhone); if err != nil {
+	fetched, err := t.ViewByPhone(db, ctx, tinterPhone); if err != nil {
 		return err
 	}
 	fetched.FindAndRemoveJob(jobOid)
@@ -169,10 +170,10 @@ func (t Tinter) RemoveJob(db *mongo.DBConnection, ctx context.Context, tinterPho
 		return PPA.InternalError
 	}
 	return nil
-}
+}*/
 
 func (t Tinter) phoneExists(db *mongo.DBConnection, ctx context.Context, phone string) bool {
-	if _, err := c.ViewByPhone(db, ctx, phone); err != nil {
+	if _, err := t.ViewByPhone(db, ctx, phone); err != nil {
 		return false
 	}
 	return true

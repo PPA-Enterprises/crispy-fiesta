@@ -17,13 +17,13 @@ type updateRequest struct {
 }
 
 func (h HTTP) fromUpdateRequest(data *updateRequest) tinter.Update {
-	return client.Update {
+	return tinter.Update {
 		Name: data.Name,
 		Phone: data.Phone,
 	}
 }
 
-func (h HTTP) fromCreateClientRequest(data *createtinterRequest) PPA.Tinter {
+func (h HTTP) fromCreateTinterRequest(data *createTinterRequest) PPA.Tinter {
 	return PPA.Tinter {
 		ID: primitive.NewObjectID(),
 		Name: data.Name,
