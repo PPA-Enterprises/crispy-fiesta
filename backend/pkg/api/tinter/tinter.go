@@ -2,7 +2,6 @@ package tinter
 
 import(
 	"PPA"
-	"fmt"
 	"context"
 	"net/http"
 	"time"
@@ -41,7 +40,7 @@ func (t Tinter) Create(c *gin.Context, req PPA.Tinter, editor PPA.Editor) (*PPA.
 
 	created.AppendLog(t.eventLogger.LogCreated(ctx, t.eventLogger.GenerateEvent(created, EventTag), editor))
 	t.tdb.LogEvent(t.db, ctx, created)
-	return t.tdb.Create(t.db, ctx, &req)
+	return created, nil
 }
 
 func (t Tinter) ViewById(c *gin.Context, id string) (*PPA.Tinter, error) {
@@ -104,7 +103,6 @@ func (t Tinter) Update(c *gin.Context, req Update, id string, editor PPA.Editor)
 	// Note that len(nil) is 0
 	if len(req.Phone) > 0 {
 		fetched, _ := t.tdb.ViewByPhone(t.db, ctx, req.Phone)
-		fmt.Println(fetched)
 		if fetched != nil {
 			if fetched.ID.Hex() != id {
 				return nil, PPA.NewAppError(Conflict, "Phone number already already in use")

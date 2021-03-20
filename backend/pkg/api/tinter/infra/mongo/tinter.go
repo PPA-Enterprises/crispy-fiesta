@@ -21,6 +21,7 @@ const (
 
 type Tinter struct{}
 func (t Tinter) Create(db *mongo.DBConnection, ctx context.Context, tinter *PPA.Tinter) (*PPA.Tinter, error) {
+	fmt.Println("CALLED")
 	coll := db.Use(Collection)
 
 	if(t.phoneExists(db, ctx, tinter.Phone)) {
