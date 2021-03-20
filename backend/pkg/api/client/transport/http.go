@@ -139,9 +139,12 @@ func (h HTTP) update(c *gin.Context) {
 	}
 
 	populated, err := h.service.PopulateJob(c, updated); if err != nil {
+		if populated == nil {
+			c.JSON(http.StatusOK, clientUpdatedUnpop(updated)); return
+		}
 		PPA.Response(c, err); return
 	}
-	c.JSON(http.StatusOK, fetched(populated)); return
+	c.JSON(http.StatusOK, clientUpdatedUnpop(updated)); return
 }
 
 func (h HTTP) delete(c *gin.Context) {
@@ -180,5 +183,9 @@ func clientCreated(c *PPA.Client) gin.H {
 }
 
 func clientUpdated(c *client.PopulatedClient) gin.H {
+	return gin.H{"success": true, "message": "Client Updated", "payload": c}
+}
+
+func clientUpdatedUnpop(c *PPA.Client) gin.H {
 	return gin.H{"success": true, "message": "Client Updated", "payload": c}
 }

@@ -149,9 +149,13 @@ func (cl Client) Update(c *gin.Context, req Update, id string, editor PPA.Editor
 }
 
 func (cl Client) PopulateJob(c *gin.Context, unpopClient *PPA.Client) (*PopulatedClient, error) {
+	if unpopClient.Jobs == nil {
+		return nil, nil
+	}
 	duration := time.Now().Add(5*time.Second)
 	ctx, cancel := context.WithDeadline(c.Request.Context(), duration)
 	defer cancel()
+
 
 	jobs, err := cl.cdb.Populate(cl.db, ctx, unpopClient.Jobs); if err != nil {
 		return nil, err
