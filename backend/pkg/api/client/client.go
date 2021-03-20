@@ -46,7 +46,7 @@ func (cl Client) Create(c *gin.Context, req PPA.Client, editor PPA.Editor) (*PPA
 
 	created.AppendLog(cl.eventLogger.LogCreated(ctx, cl.eventLogger.GenerateEvent(created, EventTag), editor))
 	cl.cdb.LogEvent(cl.db, ctx, created)
-	return cl.cdb.Create(cl.db, ctx, &req)
+	return created, nil
 }
 
 func (cl Client) ViewById(c *gin.Context, id string) (*PPA.Client, error) {
