@@ -46,6 +46,22 @@ func(cl ClientLabel) ViewById(db *mongo.DBConnection, ctx context.Context, oid p
 	return &label, nil
 }
 
+func(cl ClientLabel) ViewByLabelName(db *mongo.DBConnection, ctx context.Context, labelName string) (*PPA.ClientLabel, error) {
+	coll := db.Use(Collection)
+
+	var label PPA.ClientLabel
+	if err := coll.FindOne(ctx, bson.D{{"label_name", labelName}, {"is_deleted", false}}).Decode(&label); err != nil {
+		if err == mongodb.ErrNoDocuments {
+			return nil, PPA.NewAppError(NotFound, "Label Not Found")
+		}
+		if err != nil {
+			return nil, PPA.InternalError
+		}
+	}
+
+	return &label, nil
+}
+
 func(cl ClientLabel) List(db *mongo.DBConnection, ctx context.Context) (*[]PPA.ClientLabel, error) {
 	coll := db.Use(Collection)
 

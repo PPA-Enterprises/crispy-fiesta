@@ -13,6 +13,7 @@ type Client struct {
 	db *mongo.DBConnection
 	cdb Repository
 	jdb JobRepository
+	ldb Labeler
 	eventLogger EventLogger
 	rbac RBAC
 }
@@ -24,16 +25,17 @@ type Service interface {
 	ViewByPhone(*gin.Context, string) (*PPA.Client, error)
 	Delete(*gin.Context, string, PPA.Editor) error
 	Update(*gin.Context, Update, string, PPA.Editor) (*PPA.Client, error)
+	//AssignLabels(*gin.Context, []string, PPA.Editor) (*PPA.Client, error)
 	PopulateJob(*gin.Context, *PPA.Client) (*PopulatedClient, error)
 	PopulateJobs(*gin.Context, *[]PPA.Client) (*[]PopulatedClient, error)
 }
 
-func New(db *mongo.DBConnection, cdb Repository, jdb JobRepository, rbac RBAC, ev EventLogger) *Client {
-	return &Client{db: db, cdb: cdb, jdb: jdb, eventLogger: ev, rbac: rbac}
+func New(db *mongo.DBConnection, cdb Repository, jdb JobRepository, ldb Labeler, rbac RBAC, ev EventLogger) *Client {
+	return &Client{db: db, cdb: cdb, jdb: jdb, ldb: ldb, eventLogger: ev, rbac: rbac}
 }
 
-func Init(db *mongo.DBConnection, rbac RBAC, jdb JobRepository, ev EventLogger) *Client {
-	return New(db, dbQuery.Client{}, jdb, rbac, ev)
+func Init(db *mongo.DBConnection, rbac RBAC, jdb JobRepository, ldb Labeler, ev EventLogger) *Client {
+	return New(db, dbQuery.Client{}, jdb, ldb, rbac, ev)
 }
 
 type JobRepository interface {
@@ -59,6 +61,11 @@ type EventLogger interface {
 	LogUpdated(context.Context, PPA.EventMap, PPA.EventMap, PPA.Editor) PPA.LogEvent
 	LogDeleted(context.Context, PPA.Editor) PPA.LogEvent
 	GenerateEvent(interface{}, string) PPA.EventMap
+}
+
+type Labeler interface {
+	Update(*mongo.DBConnection, context.Context, primitive.ObjectID, *PPA.ClientLabel) error
+	ViewByLabelName(*mongo.DBConnection, context.Context, string) (*PPA.ClientLabel, error)
 }
 
 type PopulatedClient struct {

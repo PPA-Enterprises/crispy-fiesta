@@ -35,6 +35,7 @@ type ClientLabel struct {
 type Repository interface {
 	Create(*mongo.DBConnection, context.Context, *PPA.ClientLabel) (*PPA.ClientLabel, error)
 	ViewById(*mongo.DBConnection, context.Context, primitive.ObjectID) (*PPA.ClientLabel, error)
+	ViewByLabelName(*mongo.DBConnection, context.Context, string) (*PPA.ClientLabel, error)
 	Update(*mongo.DBConnection, context.Context, primitive.ObjectID, *PPA.ClientLabel) error
 	List(*mongo.DBConnection, context.Context) (*[]PPA.ClientLabel, error)
 	LogEvent(*mongo.DBConnection, context.Context, *PPA.ClientLabel)
