@@ -36,7 +36,7 @@ func (c *Client) AppendLog(event LogEvent) {
 type ClientLabel struct {
 	ID primitive.ObjectID `json:"_id,omitempty" bson:"_id,omitempty" m:"Database ID"`
 	LabelName string `json:"label_name" bson:"label_name,omitempty" m:"Label Name"`
-	IsDeleted bool `json:"-" bson:"is_deleted,omitempty"`
+	IsDeleted bool `json:"-" bson:"is_deleted"`
 	Clients []primitive.ObjectID `json:"clients" bson:"clients,omitempty"`
 	History []LogEvent `json:"history" bson:"history,omitempty"`
 }

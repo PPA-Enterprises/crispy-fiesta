@@ -114,6 +114,7 @@ func (cl ClientLabel) Update(c *gin.Context, req Update, id string, editor PPA.E
 	if err := cl.cldb.Update(cl.db, ctx, oid, &PPA.ClientLabel {
 		ID: primitive.NilObjectID,
 		LabelName: req.LabelName,
+		IsDeleted: false,
 	}); err != nil {
 		return nil, err
 	}

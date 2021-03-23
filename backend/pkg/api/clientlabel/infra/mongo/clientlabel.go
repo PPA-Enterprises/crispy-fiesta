@@ -21,6 +21,7 @@ type ClientLabel struct{}
 
 func (cl ClientLabel) Create(db *mongo.DBConnection, ctx context.Context, label *PPA.ClientLabel) (*PPA.ClientLabel, error) {
 	coll := db.Use(Collection)
+	label.IsDeleted = false
 
 	if _, err := coll.InsertOne(ctx, label); err != nil {
 		return nil, PPA.InternalError
@@ -33,7 +34,7 @@ func(cl ClientLabel) ViewById(db *mongo.DBConnection, ctx context.Context, oid p
 	coll := db.Use(Collection)
 
 	var label PPA.ClientLabel
-	if err := coll.FindOne(ctx, bson.D{{"_id", oid}}).Decode(&label); err != nil {
+	if err := coll.FindOne(ctx, bson.D{{"_id", oid}, {"is_deleted", false}}).Decode(&label); err != nil {
 		if err == mongodb.ErrNoDocuments {
 			return nil, PPA.NewAppError(NotFound, "Label Not Found")
 		}
@@ -49,7 +50,7 @@ func(cl ClientLabel) List(db *mongo.DBConnection, ctx context.Context) (*[]PPA.C
 	coll := db.Use(Collection)
 
 	//check error?
-	cursor, err := coll.Find(ctx, bson.D{{}})
+	cursor, err := coll.Find(ctx, bson.D{{"is_deleted", false}})
 	defer cursor.Close(ctx)
 
 	var labels []PPA.ClientLabel
