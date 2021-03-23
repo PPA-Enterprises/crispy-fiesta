@@ -10,7 +10,7 @@ import(
 )
 
 type Service interface {
-	Create(*gin.Context, PPA.User, PPA.Editor) (*PPA.ClientLabel, error)
+	Create(*gin.Context, PPA.ClientLabel, PPA.Editor) (*PPA.ClientLabel, error)
 	List(*gin.Context) (*[]PPA.ClientLabel, error)
 	ViewById(*gin.Context, string) (*PPA.ClientLabel, error)
 	Delete(*gin.Context, string, PPA.Editor) error
@@ -33,12 +33,11 @@ type ClientLabel struct {
 }
 
 type Repository interface {
-	Create(*mongo.DBConnection, context.Context, *PPA.User) (*PPA.User, error)
-	ViewById(*mongo.DBConnection, context.Context, primitive.ObjectID) (*PPA.User, error)
-	Update(*mongo.DBConnection, context.Context, primitive.ObjectID, *PPA.User) error
-	List(*mongo.DBConnection, context.Context) (*[]PPA.User, error)
-	Delete(*mongo.DBConnection, context.Context, primitive.ObjectID) error
-	LogEvent(*mongo.DBConnection, context.Context, *PPA.User)
+	Create(*mongo.DBConnection, context.Context, *PPA.ClientLabel) (*PPA.ClientLabel, error)
+	ViewById(*mongo.DBConnection, context.Context, primitive.ObjectID) (*PPA.ClientLabel, error)
+	Update(*mongo.DBConnection, context.Context, primitive.ObjectID, *PPA.ClientLabel) error
+	List(*mongo.DBConnection, context.Context) (*[]PPA.ClientLabel, error)
+	LogEvent(*mongo.DBConnection, context.Context, *PPA.ClientLabel)
 }
 
 type EventLogger interface {

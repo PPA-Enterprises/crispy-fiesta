@@ -81,14 +81,20 @@ func (cl ClientLabel) Delete(c *gin.Context, id string, editor PPA.Editor) error
 		return OidNotFound
 	}
 
-	oldDoc, err := cl.cldb.ViewById(u.db, ctx, oid); if err != nil {
+	oldDoc, err := cl.cldb.ViewById(cl.db, ctx, oid); if err != nil {
 		return OidNotFound
+	}
+
+	if err := cl.cldb.Update(cl.db, ctx, oid, &PPA.ClientLabel {
+		IsDeleted: true,
+	}); err != nil {
+		return err
 	}
 
 	oldDoc.AppendLog(cl.eventLogger.LogDeleted(ctx, editor))
 	cl.cldb.LogEvent(cl.db, ctx, oldDoc)
 
-	return cl.cldb.Delete(cl.db, ctx, oid)
+	return nil
 }
 
 

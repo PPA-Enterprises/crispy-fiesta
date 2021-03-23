@@ -7,7 +7,7 @@ import (
 )
 
 type createRequest struct {
-	LabelName string `json:"label_name" binding:"required,alphanum"`
+	LabelName string `json:"label_name" binding:"required"`
 }
 
 type updateRequest struct {
@@ -26,6 +26,7 @@ func (h HTTP) fromCreateRequest(data *createRequest) PPA.ClientLabel {
 	return PPA.ClientLabel {
 		ID: oid,
 		LabelName: data.LabelName,
+		IsDeleted: false,
 		Clients: make([]primitive.ObjectID, 0),
 		History: make([]PPA.LogEvent, 0),
 	}
