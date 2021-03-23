@@ -24,6 +24,8 @@ import (
 	eventlogService "pkg/api/eventlog"
 	tinterTransport "pkg/api/tinter/transport"
 	tinterService "pkg/api/tinter"
+	clientLabelTransport "pkg/api/clientlabel/transport"
+	clientLabelService "pkg/api/clientlabel"
 	//jobRepo "pkg/api/job/infra/mongo"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -54,6 +56,7 @@ func Start(cfg *config.Configuration) error {
 	clientTransport.NewHTTP(clientService.Init(db, rbac, jobRepo.Job{}, logger), v1, authMiddleware)
 	jobTransport.NewHTTP(jobService.Init(db, rbac, clientRepo.Client{}, logger), v1, authMiddleware)
 	tinterTransport.NewHTTP(tinterService.Init(db, rbac, jobRepo.Job{}, logger), v1, authMiddleware)
+	clientLabelTransport.NewHTTP(clientLabelService.Init(db, rbac, logger), v1, authMiddleware)
 	eventlogTransport.NewHTTP(eventlogService.Init(db, userRepo.User{}, rbac), v1, authMiddleware)
 	server.Run(cfg.Server.Port)
 	return nil
