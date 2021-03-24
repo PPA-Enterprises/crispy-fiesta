@@ -25,7 +25,8 @@ type Service interface {
 	ViewByPhone(*gin.Context, string) (*PPA.Client, error)
 	Delete(*gin.Context, string, PPA.Editor) error
 	Update(*gin.Context, Update, string, PPA.Editor) (*PPA.Client, error)
-	//AssignLabels(*gin.Context, []string, PPA.Editor) (*PPA.Client, error)
+	UpdateLabels(*gin.Context, []string, string, PPA.Editor) (*PPA.Client, error)
+	FetchLabelOIDs(*gin.Context, []string) ([]primitive.ObjectID, error)
 	PopulateJob(*gin.Context, *PPA.Client) (*PopulatedClient, error)
 	PopulateJobs(*gin.Context, *[]PPA.Client) (*[]PopulatedClient, error)
 }
@@ -65,6 +66,7 @@ type EventLogger interface {
 
 type Labeler interface {
 	Update(*mongo.DBConnection, context.Context, primitive.ObjectID, *PPA.ClientLabel) error
+	ViewById(*mongo.DBConnection, context.Context, primitive.ObjectID) (*PPA.ClientLabel, error)
 	ViewByLabelName(*mongo.DBConnection, context.Context, string) (*PPA.ClientLabel, error)
 }
 

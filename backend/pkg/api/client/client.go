@@ -40,6 +40,16 @@ func (cl Client) Create(c *gin.Context, req PPA.Client, editor PPA.Editor) (*PPA
 		req.ID = primitive.NewObjectID()
 	}
 
+	for _, labelOID := range req.Labels {
+		clientLabel, labelErr := cl.ldb.ViewById(cl.db, ctx, labelOID); if labelErr != nil {
+			return nil, PPA.NewAppError(NotFound, "Label Does Not Exist")
+		}
+		clientLabel.AppendClient(req.ID)
+		updateErr := cl.ldb.Update(cl.db, ctx, clientLabel.ID, clientLabel); if updateErr != nil {
+			return nil, PPA.InternalError
+		}
+	}
+
 	created, err := cl.cdb.Create(cl.db, ctx, &req); if err != nil {
 		return nil, err
 	}
@@ -112,7 +122,7 @@ func (cl Client) Update(c *gin.Context, req Update, id string, editor PPA.Editor
 		fmt.Println(fetched)
 		if fetched != nil {
 			if fetched.ID.Hex() != id {
-				return nil, PPA.NewAppError(Conflict, "Phone number already already in use")
+				return nil, PPA.NewAppError(Conflict, "Phone vnumber already already in use")
 			}
 		}
 	}
@@ -190,6 +200,57 @@ func (cl Client) PopulateJobs(c *gin.Context, unpopClients *[]PPA.Client) (*[]Po
 		})
 	}
 	return &popClients, nil
+}
+
+func (cl Client) UpdateLabels(c *gin.Context, labels []string, clientID string, editor PPA.Editor) (*PPA.Client, error) {
+	duration := time.Now().Add(5*time.Second)
+	ctx, cancel := context.WithDeadline(c.Request.Context(), duration)
+	defer cancel()
+
+	clientOID, err := primitive.ObjectIDFromHex(clientID); if err != nil {
+		return nil, OidNotFound
+	}
+
+	client, clientErr := cl.cdb.ViewById(cl.db, ctx, clientOID); if clientErr != nil {
+		return nil, PPA.NewAppError(NotFound, "Client Not Found")
+	}
+	oldDoc := *client
+
+	labelOIDs := make([]primitive.ObjectID, 0)
+
+	for _, label := range labels {
+		clientLabel, labelErr := cl.ldb.ViewByLabelName(cl.db, ctx, label); if labelErr != nil {
+			return nil, PPA.NewAppError(NotFound, "Label Does Not Exist")
+		}
+		clientLabel.AppendClient(clientOID)
+		updateErr := cl.ldb.Update(cl.db, ctx, clientLabel.ID, clientLabel); if updateErr != nil {
+			return nil, PPA.InternalError
+		}
+		labelOIDs = append(labelOIDs, clientLabel.ID)
+	}
+	client.Labels = labelOIDs
+	client.AppendLog(cl.eventLogger.LogUpdated(ctx,
+		cl.eventLogger.GenerateEvent(oldDoc, EventTag),
+		cl.eventLogger.GenerateEvent(client, EventTag),
+		editor))
+	cl.cdb.LogEvent(cl.db, ctx, client)
+	return client, nil
+}
+
+func (cl Client) FetchLabelOIDs(c *gin.Context, labels []string) ([]primitive.ObjectID, error) {
+	duration := time.Now().Add(5*time.Second)
+	ctx, cancel := context.WithDeadline(c.Request.Context(), duration)
+	defer cancel()
+
+	labelOIDs := make([]primitive.ObjectID, 0)
+
+	for _, label := range labels {
+		clientLabel, labelErr := cl.ldb.ViewByLabelName(cl.db, ctx, label); if labelErr != nil {
+			return nil, PPA.NewAppError(NotFound, "Label Does Not Exist")
+		}
+		labelOIDs = append(labelOIDs, clientLabel.ID)
+	}
+	return labelOIDs, nil
 }
 
 func (cl Client) oidExists(ctx context.Context, oid primitive.ObjectID) bool {

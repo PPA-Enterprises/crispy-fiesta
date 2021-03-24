@@ -132,7 +132,6 @@ func (cl ClientLabel) Update(c *gin.Context, req Update, id string, editor PPA.E
 	return updated, nil
 }
 
-
 func (cl ClientLabel) oidExists(ctx context.Context, oid primitive.ObjectID) bool {
 	coll := cl.db.Use(Collection)
 

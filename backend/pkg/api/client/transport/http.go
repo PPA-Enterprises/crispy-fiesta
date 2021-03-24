@@ -2,7 +2,6 @@ package transport
 
 import(
 	"PPA"
-	"fmt"
 	"strconv"
 	"net/http"
 	"pkg/api/client"
@@ -27,6 +26,7 @@ func NewHTTP(service client.Service, router *gin.RouterGroup, authMw gin.Handler
 	routes.GET("/phone/:phone", httpTransport.viewByPhone)
 	routes.PATCH("/:id", httpTransport.update)
 	routes.DELETE("/:id", httpTransport.delete)
+	routes.PUT("/:id", httpTransport.putClientLabels)
 }
 
 func (h HTTP) create(c *gin.Context) {
@@ -44,7 +44,10 @@ func (h HTTP) create(c *gin.Context) {
 		Collection: "events" + oid.Hex() + "a",
 	}
 
-	newClient := h.fromCreateClientRequest(&data)
+	newClient, labelErr := h.tryFromCreateClientRequest(c, &data); if labelErr != nil {
+		PPA.Response(c, labelErr); return
+	}
+
 	created, err := h.service.Create(c, newClient, editor); if err != nil {
 		PPA.Response(c, err); return
 	}
@@ -84,13 +87,40 @@ func (h HTTP) list(c *gin.Context) {
 }
 
 func (h HTTP) viewById(c *gin.Context) {
-	fmt.Println(h)
 	id := c.Param("id")
 	if len(id) <= 0 {
 		PPA.Response(c, PPA.NewAppError(BadRequest, "ID Required")); return
 	}
 
 	fetchedClient, err := h.service.ViewById(c, id); if err != nil {
+		PPA.Response(c, err); return
+	}
+
+	populated, err := h.service.PopulateJob(c, fetchedClient); if err != nil {
+		PPA.Response(c, err); return
+	}
+	c.JSON(http.StatusOK, fetched(populated)); return
+}
+
+func (h HTTP) putClientLabels(c *gin.Context) {
+	id := c.Param("id")
+	if len(id) <= 0 {
+		PPA.Response(c, PPA.NewAppError(BadRequest, "ID Required")); return
+	}
+
+	var data putLabelsRequest
+	if err := c.ShouldBindJSON(&data); err != nil {
+		PPA.Response(c, err); return
+	}
+
+	oid := primitive.NewObjectID()
+	editor := PPA.Editor {
+		OID: oid,
+		Name: "Bob",
+		Collection: "events" + oid.Hex() + "a",
+	}
+
+	fetchedClient, err := h.service.UpdateLabels(c, data.Labels, id, editor); if err != nil {
 		PPA.Response(c, err); return
 	}
 
