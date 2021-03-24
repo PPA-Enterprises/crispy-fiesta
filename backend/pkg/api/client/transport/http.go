@@ -2,6 +2,7 @@ package transport
 
 import(
 	"PPA"
+	"fmt"
 	"strconv"
 	"net/http"
 	"pkg/api/client"
@@ -99,6 +100,7 @@ func (h HTTP) viewById(c *gin.Context) {
 	populated, err := h.service.Populate(c, fetchedClient); if err != nil {
 		PPA.Response(c, err); return
 	}
+	fmt.Println(populated);
 	c.JSON(http.StatusOK, fetched(populated)); return
 }
 

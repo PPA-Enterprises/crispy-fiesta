@@ -2,7 +2,6 @@ package client
 
 import(
 	"PPA"
-	"fmt"
 	"context"
 	"net/http"
 	"time"
@@ -143,7 +142,6 @@ func (cl Client) Update(c *gin.Context, req Update, id string, editor PPA.Editor
 	// Note that len(nil) is 0
 	if len(req.Phone) > 0 {
 		fetched, _ := cl.cdb.ViewByPhone(cl.db, ctx, req.Phone)
-		fmt.Println(fetched)
 		if fetched != nil {
 			if fetched.ID.Hex() != id {
 				return nil, PPA.NewAppError(Conflict, "Phone vnumber already already in use")
@@ -183,20 +181,28 @@ func (cl Client) Update(c *gin.Context, req Update, id string, editor PPA.Editor
 }
 
 func (cl Client) Populate(c *gin.Context, unpopClient *PPA.Client) (*PopulatedClient, error) {
-	if unpopClient.Jobs == nil {
+	/*if unpopClient.Jobs == nil {
 		return nil, nil
-	}
+	}*/
 	duration := time.Now().Add(5*time.Second)
 	ctx, cancel := context.WithDeadline(c.Request.Context(), duration)
 	defer cancel()
 
 
-	jobs, err := cl.cdb.PopulateJobs(cl.db, ctx, unpopClient.Jobs); if err != nil {
-		return nil, err
+	jobs := make([]PPA.Job, 0)
+	if unpopClient.Jobs != nil {
+		res, err := cl.cdb.PopulateJobs(cl.db, ctx, unpopClient.Jobs); if err != nil {
+			return nil, err
+		}
+		jobs = res;
 	}
 
-	labels, lErr := cl.cdb.PopulateLabels(cl.db, ctx, unpopClient.Labels); if lErr != nil {
-		return nil, lErr
+	labels := make([]string, 0)
+	if unpopClient.Labels != nil {
+		res, lErr := cl.cdb.PopulateLabels(cl.db, ctx, unpopClient.Labels); if lErr != nil {
+			return nil, lErr
+		}
+		labels = res
 	}
 
 	return &PopulatedClient {
@@ -217,13 +223,22 @@ func (cl Client) PopulateAll(c *gin.Context, unpopClients *[]PPA.Client) (*[]Pop
 	var popClients = make([]PopulatedClient, 0, len(*unpopClients))
 
 	for _, unpop := range *unpopClients {
-		jobs, err := cl.cdb.PopulateJobs(cl.db, ctx, unpop.Jobs); if err != nil {
-			//return nil, err
-			//just skip it???
+		jobs := make([]PPA.Job, 0)
+		if unpop.Jobs != nil {
+			res, err := cl.cdb.PopulateJobs(cl.db, ctx, unpop.Jobs); if err != nil {
+				//return nil, err 
+				// skip
+			}
+			jobs = res;
 		}
 
-		labels, lErr := cl.cdb.PopulateLabels(cl.db, ctx, unpop.Labels); if lErr != nil {
-			return nil, lErr
+		labels := make([]string, 0)
+		if unpop.Labels != nil {
+			res, lErr := cl.cdb.PopulateLabels(cl.db, ctx, unpop.Labels); if lErr != nil {
+				//return nil, lErr
+				// skip
+			}
+			labels = res
 		}
 		popClients = append(popClients, PopulatedClient {
 			ID: unpop.ID,
