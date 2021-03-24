@@ -80,7 +80,7 @@ func (h HTTP) list(c *gin.Context) {
 	clients, err := h.service.List(c, options); if err != nil {
 		PPA.Response(c, err); return
 	}
-	populated, err := h.service.PopulateJobs(c, clients); if err != nil {
+	populated, err := h.service.PopulateAll(c, clients); if err != nil {
 		PPA.Response(c, err); return
 	}
 	c.JSON(http.StatusOK, fetchedAll(populated)); return
@@ -96,7 +96,7 @@ func (h HTTP) viewById(c *gin.Context) {
 		PPA.Response(c, err); return
 	}
 
-	populated, err := h.service.PopulateJob(c, fetchedClient); if err != nil {
+	populated, err := h.service.Populate(c, fetchedClient); if err != nil {
 		PPA.Response(c, err); return
 	}
 	c.JSON(http.StatusOK, fetched(populated)); return
@@ -124,7 +124,7 @@ func (h HTTP) putClientLabels(c *gin.Context) {
 		PPA.Response(c, err); return
 	}
 
-	populated, err := h.service.PopulateJob(c, fetchedClient); if err != nil {
+	populated, err := h.service.Populate(c, fetchedClient); if err != nil {
 		PPA.Response(c, err); return
 	}
 	c.JSON(http.StatusOK, fetched(populated)); return
@@ -140,7 +140,7 @@ func (h HTTP) viewByPhone(c *gin.Context) {
 		PPA.Response(c, err); return
 	}
 
-	populated, err := h.service.PopulateJob(c, fetchedClient); if err != nil {
+	populated, err := h.service.Populate(c, fetchedClient); if err != nil {
 		PPA.Response(c, err); return
 	}
 	c.JSON(http.StatusOK, fetched(populated)); return
@@ -168,7 +168,7 @@ func (h HTTP) update(c *gin.Context) {
 		PPA.Response(c, err); return
 	}
 
-	populated, err := h.service.PopulateJob(c, updated); if err != nil {
+	populated, err := h.service.Populate(c, updated); if err != nil {
 		if populated == nil {
 			c.JSON(http.StatusOK, clientUpdatedUnpop(updated)); return
 		}

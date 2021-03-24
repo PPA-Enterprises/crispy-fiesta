@@ -20,6 +20,14 @@ const (
 
 var OidNotFound = PPA.NewAppError(NotFound, "Does not exist")
 
+type PopulatedClient struct {
+	ID primitive.ObjectID `json:"_id"`
+	Name string `json:"name"`
+	Phone string `json:"phone"`
+	Jobs []PPA.Job `json:"jobs"`
+	Labels []string `json:"labels"`
+	History []PPA.LogEvent `json:"history"`
+}
 type Update struct {
 	Name string
 	Phone string
@@ -174,7 +182,7 @@ func (cl Client) Update(c *gin.Context, req Update, id string, editor PPA.Editor
 	return updated, nil
 }
 
-func (cl Client) PopulateJob(c *gin.Context, unpopClient *PPA.Client) (*PopulatedClient, error) {
+func (cl Client) Populate(c *gin.Context, unpopClient *PPA.Client) (*PopulatedClient, error) {
 	if unpopClient.Jobs == nil {
 		return nil, nil
 	}
@@ -183,19 +191,25 @@ func (cl Client) PopulateJob(c *gin.Context, unpopClient *PPA.Client) (*Populate
 	defer cancel()
 
 
-	jobs, err := cl.cdb.Populate(cl.db, ctx, unpopClient.Jobs); if err != nil {
+	jobs, err := cl.cdb.PopulateJobs(cl.db, ctx, unpopClient.Jobs); if err != nil {
 		return nil, err
 	}
+
+	labels, lErr := cl.cdb.PopulateLabels(cl.db, ctx, unpopClient.Labels); if lErr != nil {
+		return nil, lErr
+	}
+
 	return &PopulatedClient {
 		ID: unpopClient.ID,
 		Name: unpopClient.Name,
 		Phone: unpopClient.Phone,
 		Jobs: jobs,
+		Labels: labels,
 		History: unpopClient.History,
 	}, nil
 }
 
-func (cl Client) PopulateJobs(c *gin.Context, unpopClients *[]PPA.Client) (*[]PopulatedClient, error) {
+func (cl Client) PopulateAll(c *gin.Context, unpopClients *[]PPA.Client) (*[]PopulatedClient, error) {
 	duration := time.Now().Add(5*time.Second)
 	ctx, cancel := context.WithDeadline(c.Request.Context(), duration)
 	defer cancel()
@@ -203,15 +217,20 @@ func (cl Client) PopulateJobs(c *gin.Context, unpopClients *[]PPA.Client) (*[]Po
 	var popClients = make([]PopulatedClient, 0, len(*unpopClients))
 
 	for _, unpop := range *unpopClients {
-		jobs, err := cl.cdb.Populate(cl.db, ctx, unpop.Jobs); if err != nil {
+		jobs, err := cl.cdb.PopulateJobs(cl.db, ctx, unpop.Jobs); if err != nil {
 			//return nil, err
 			//just skip it???
+		}
+
+		labels, lErr := cl.cdb.PopulateLabels(cl.db, ctx, unpop.Labels); if lErr != nil {
+			return nil, lErr
 		}
 		popClients = append(popClients, PopulatedClient {
 			ID: unpop.ID,
 			Name: unpop.Name,
 			Phone: unpop.Phone,
 			Jobs: jobs,
+			Labels: labels,
 			History: unpop.History,
 		})
 	}

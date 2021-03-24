@@ -27,8 +27,8 @@ type Service interface {
 	Update(*gin.Context, Update, string, PPA.Editor) (*PPA.Client, error)
 	UpdateLabels(*gin.Context, []string, string, PPA.Editor) (*PPA.Client, error)
 	FetchLabelOIDs(*gin.Context, []string) ([]primitive.ObjectID, error)
-	PopulateJob(*gin.Context, *PPA.Client) (*PopulatedClient, error)
-	PopulateJobs(*gin.Context, *[]PPA.Client) (*[]PopulatedClient, error)
+	Populate(*gin.Context, *PPA.Client) (*PopulatedClient, error)
+	PopulateAll(*gin.Context, *[]PPA.Client) (*[]PopulatedClient, error)
 }
 
 func New(db *mongo.DBConnection, cdb Repository, jdb JobRepository, ldb Labeler, rbac RBAC, ev EventLogger) *Client {
@@ -53,7 +53,8 @@ type Repository interface {
 	List(*mongo.DBConnection, context.Context, PPA.BulkFetchOptions) (*[]PPA.Client, error)
 	Delete(*mongo.DBConnection, context.Context, primitive.ObjectID) error
 	Update(*mongo.DBConnection, context.Context, primitive.ObjectID, *PPA.Client) error
-	Populate(*mongo.DBConnection, context.Context, []primitive.ObjectID) ([]PPA.Job, error)
+	PopulateJobs(*mongo.DBConnection, context.Context, []primitive.ObjectID) ([]PPA.Job, error)
+	PopulateLabels(*mongo.DBConnection, context.Context, []primitive.ObjectID) ([]string, error)
 	LogEvent(*mongo.DBConnection, context.Context, *PPA.Client)
 }
 
@@ -68,14 +69,6 @@ type Labeler interface {
 	Update(*mongo.DBConnection, context.Context, primitive.ObjectID, *PPA.ClientLabel) error
 	ViewById(*mongo.DBConnection, context.Context, primitive.ObjectID) (*PPA.ClientLabel, error)
 	ViewByLabelName(*mongo.DBConnection, context.Context, string) (*PPA.ClientLabel, error)
-}
-
-type PopulatedClient struct {
-	ID primitive.ObjectID `json:"_id"`
-	Name string `json:"name"`
-	Phone string `json:"phone"`
-	Jobs []PPA.Job `json:"jobs"`
-	History []PPA.LogEvent `json:"history"`
 }
 
 type RBAC interface {
