@@ -96,6 +96,25 @@ func (cl ClientLabel) Update(db *mongo.DBConnection, ctx context.Context, oid pr
 	return nil
 }
 
+func (cl ClientLabel) PutLabels(db *mongo.DBConnection, ctx context.Context, oid primitive.ObjectID, clientOIDs []primitive.ObjectID) error {
+	coll := db.Use(Collection)
+
+	filter := bson.D{{"_id", oid}}
+	updateDoc := bson.D{{"$set", bson.D{{"clients", clientOIDs}} }}
+
+	var oldDoc PPA.ClientLabel
+	err := coll.FindOneAndUpdate(ctx, filter, updateDoc).Decode(&oldDoc)
+
+	if err == mongodb.ErrNoDocuments {
+		return PPA.NewAppError(NotFound, "Label Not Found")
+	}
+
+	if err != nil {
+		return PPA.InternalError
+	}
+	return nil
+}
+
 func (cl ClientLabel) LogEvent(db *mongo.DBConnection, ctx context.Context, update *PPA.ClientLabel) {
 	if err := cl.Update(db, ctx, update.ID, update); err != nil {
 		fmt.Println(err)

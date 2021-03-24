@@ -127,6 +127,7 @@ func (cl Client) Delete(c *gin.Context, id string, editor PPA.Editor) error {
 	}
 	// delete jobs
 	cl.deletejobs(ctx, client.Jobs, editor)
+	cl.deleteFromLabels(ctx, client.ID, client.Labels)
 
 	client.AppendLog(cl.eventLogger.LogDeleted(ctx, editor))
 	cl.cdb.LogEvent(cl.db, ctx, client)
@@ -349,6 +350,14 @@ func (cl Client) deletejobs(ctx context.Context, oids []primitive.ObjectID, edit
 		err := cl.jdb.Delete(cl.db, ctx, oid); if err != nil {
 			// do nothing
 		}
+	}
+}
+
+func (cl Client) deleteFromLabels(ctx context.Context, clientOID primitive.ObjectID, oids []primitive.ObjectID) {
+	for _, oid := range oids {
+		label, _ := cl.ldb.ViewById(cl.db, ctx, oid)
+		label.FindAndRemoveClient(clientOID)
+		_ = cl.ldb.PutLabels(cl.db, ctx, label.ID, label.Clients)
 	}
 }
 

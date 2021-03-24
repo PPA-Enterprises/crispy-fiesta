@@ -69,6 +69,7 @@ type Labeler interface {
 	Update(*mongo.DBConnection, context.Context, primitive.ObjectID, *PPA.ClientLabel) error
 	ViewById(*mongo.DBConnection, context.Context, primitive.ObjectID) (*PPA.ClientLabel, error)
 	ViewByLabelName(*mongo.DBConnection, context.Context, string) (*PPA.ClientLabel, error)
+	PutLabels(*mongo.DBConnection, context.Context, primitive.ObjectID, []primitive.ObjectID) error
 }
 
 type RBAC interface {

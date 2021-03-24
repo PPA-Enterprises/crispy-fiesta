@@ -2,6 +2,7 @@ package PPA
 
 import (
 	"bytes"
+	"fmt"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -52,4 +53,19 @@ func (l *ClientLabel) AppendClient(clientOID primitive.ObjectID) {
 
 func(l *ClientLabel) AppendLog(event LogEvent) {
 	l.History = append(l.History, event)
+}
+
+func (c *ClientLabel) FindAndRemoveClient(clientOid primitive.ObjectID) {
+	const matched int = 0
+	for i, oid := range c.Clients {
+		fmt.Println(oid)
+		fmt.Println(clientOid)
+		result := bytes.Compare([]byte(clientOid.Hex()), []byte(oid.Hex()))
+		if result == matched {
+			// preserve the order. Idiomatic way
+			c.Clients = append(c.Clients[:i], c.Clients[i+1:]...)
+			fmt.Println(c.Clients)
+			return
+		}
+	}
 }
