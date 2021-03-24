@@ -30,6 +30,14 @@ type JobUpdate struct {
 	Phone string
 }
 
+// This is used for Logging only
+type logableLabeledClient struct {
+	ID primitive.ObjectID `m:"Database ID"`
+	Name string `m:"Name"`
+	Phone string `m:"Phone Number"`
+	Labels []string `m:"Labels"`
+}
+
 func (cl Client) Create(c *gin.Context, req PPA.Client, editor PPA.Editor) (*PPA.Client, error) {
 	duration := time.Now().Add(5*time.Second)
 	ctx, cancel := context.WithDeadline(c.Request.Context(), duration)
@@ -40,10 +48,13 @@ func (cl Client) Create(c *gin.Context, req PPA.Client, editor PPA.Editor) (*PPA
 		req.ID = primitive.NewObjectID()
 	}
 
+	labelNames := make([]string, 0)
 	for _, labelOID := range req.Labels {
 		clientLabel, labelErr := cl.ldb.ViewById(cl.db, ctx, labelOID); if labelErr != nil {
 			return nil, PPA.NewAppError(NotFound, "Label Does Not Exist")
 		}
+
+		labelNames = append(labelNames, clientLabel.LabelName)
 		clientLabel.AppendClient(req.ID)
 		updateErr := cl.ldb.Update(cl.db, ctx, clientLabel.ID, clientLabel); if updateErr != nil {
 			return nil, PPA.InternalError
@@ -54,7 +65,12 @@ func (cl Client) Create(c *gin.Context, req PPA.Client, editor PPA.Editor) (*PPA
 		return nil, err
 	}
 
-	created.AppendLog(cl.eventLogger.LogCreated(ctx, cl.eventLogger.GenerateEvent(created, EventTag), editor))
+	created.AppendLog(cl.eventLogger.LogCreated(ctx, cl.eventLogger.GenerateEvent(&logableLabeledClient {
+		ID: created.ID,
+		Name: created.Name,
+		Phone: created.Phone,
+		Labels: labelNames,
+	}, EventTag), editor))
 	cl.cdb.LogEvent(cl.db, ctx, created)
 	return created, nil
 }
@@ -217,11 +233,14 @@ func (cl Client) UpdateLabels(c *gin.Context, labels []string, clientID string, 
 	oldDoc := *client
 
 	labelOIDs := make([]primitive.ObjectID, 0)
+	newDocLabels := make([]string, 0)
 
 	for _, label := range labels {
 		clientLabel, labelErr := cl.ldb.ViewByLabelName(cl.db, ctx, label); if labelErr != nil {
 			return nil, PPA.NewAppError(NotFound, "Label Does Not Exist")
 		}
+
+		newDocLabels = append(newDocLabels, clientLabel.LabelName)
 		clientLabel.AppendClient(clientOID)
 		updateErr := cl.ldb.Update(cl.db, ctx, clientLabel.ID, clientLabel); if updateErr != nil {
 			return nil, PPA.InternalError
@@ -229,9 +248,34 @@ func (cl Client) UpdateLabels(c *gin.Context, labels []string, clientID string, 
 		labelOIDs = append(labelOIDs, clientLabel.ID)
 	}
 	client.Labels = labelOIDs
+
+	oldDocLabels := make([]string, 0)
+	for _, labelOID := range oldDoc.Labels {
+		clientLabel, labelErr := cl.ldb.ViewById(cl.db, ctx, labelOID); if labelErr != nil {
+			return nil, PPA.NewAppError(NotFound, "Label Does Not Exist")
+		}
+		oldDocLabels = append(oldDocLabels, clientLabel.LabelName)
+	}
+
+
+	logableOldDoc := logableLabeledClient {
+		ID: oldDoc.ID,
+		Name: oldDoc.Name,
+		Phone: oldDoc.Phone,
+		Labels: oldDocLabels,
+	}
+
+	logableNewDoc := logableLabeledClient {
+		ID: client.ID,
+		Name: client.Name,
+		Phone: client.Phone,
+		Labels: newDocLabels,
+
+	}
+
 	client.AppendLog(cl.eventLogger.LogUpdated(ctx,
-		cl.eventLogger.GenerateEvent(oldDoc, EventTag),
-		cl.eventLogger.GenerateEvent(client, EventTag),
+		cl.eventLogger.GenerateEvent(logableOldDoc, EventTag),
+		cl.eventLogger.GenerateEvent(logableNewDoc, EventTag),
 		editor))
 	cl.cdb.LogEvent(cl.db, ctx, client)
 	return client, nil

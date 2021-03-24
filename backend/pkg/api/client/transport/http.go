@@ -26,7 +26,7 @@ func NewHTTP(service client.Service, router *gin.RouterGroup, authMw gin.Handler
 	routes.GET("/phone/:phone", httpTransport.viewByPhone)
 	routes.PATCH("/:id", httpTransport.update)
 	routes.DELETE("/:id", httpTransport.delete)
-	routes.PUT("/:id", httpTransport.putClientLabels)
+	routes.PUT("/labels/:id", httpTransport.putClientLabels)
 }
 
 func (h HTTP) create(c *gin.Context) {
