@@ -79,9 +79,17 @@ func(cl ClientLabel) List(db *mongo.DBConnection, ctx context.Context) (*[]PPA.C
 
 func (cl ClientLabel) Update(db *mongo.DBConnection, ctx context.Context, oid primitive.ObjectID, update *PPA.ClientLabel) error {
 	coll := db.Use(Collection)
+	var filter bson.D
+	var updateDoc bson.D
 
-	filter := bson.D{{"_id", oid}}
-	updateDoc := bson.D{{"$set", update}}
+	// Mongo Driver has trouble setting booleans apparently
+	if !update.IsDeleted {
+		filter = bson.D{{"_id", oid}}
+		updateDoc = bson.D{{"$set", update}}
+	} else {
+		filter = bson.D{{"_id", oid}}
+		updateDoc = bson.D{{"$set", bson.D{{"is_deleted", true}} }}
+	}
 
 	var oldDoc PPA.ClientLabel
 	err := coll.FindOneAndUpdate(ctx, filter, updateDoc).Decode(&oldDoc)
