@@ -275,12 +275,14 @@ func (cl Client) UpdateLabels(c *gin.Context, labels []string, clientID string, 
 			return nil, PPA.NewAppError(NotFound, "Label Does Not Exist")
 		}
 
-		newDocLabels = append(newDocLabels, clientLabel.LabelName)
-		clientLabel.AppendClient(clientOID)
-		updateErr := cl.ldb.Update(cl.db, ctx, clientLabel.ID, clientLabel); if updateErr != nil {
-			return nil, PPA.InternalError
+		if !clientLabel.IsDeleted {
+			newDocLabels = append(newDocLabels, clientLabel.LabelName)
+			clientLabel.AppendClient(clientOID)
+			updateErr := cl.ldb.Update(cl.db, ctx, clientLabel.ID, clientLabel); if updateErr != nil {
+				return nil, PPA.InternalError
+			}
+			labelOIDs = append(labelOIDs, clientLabel.ID)
 		}
-		labelOIDs = append(labelOIDs, clientLabel.ID)
 	}
 	client.Labels = labelOIDs
 
@@ -289,7 +291,9 @@ func (cl Client) UpdateLabels(c *gin.Context, labels []string, clientID string, 
 		clientLabel, labelErr := cl.ldb.ViewById(cl.db, ctx, labelOID); if labelErr != nil {
 			return nil, PPA.NewAppError(NotFound, "Label Does Not Exist")
 		}
-		oldDocLabels = append(oldDocLabels, clientLabel.LabelName)
+		if !clientLabel.IsDeleted {
+			oldDocLabels = append(oldDocLabels, clientLabel.LabelName)
+		}
 	}
 
 
@@ -327,7 +331,9 @@ func (cl Client) FetchLabelOIDs(c *gin.Context, labels []string) ([]primitive.Ob
 		clientLabel, labelErr := cl.ldb.ViewByLabelName(cl.db, ctx, label); if labelErr != nil {
 			return nil, PPA.NewAppError(NotFound, "Label Does Not Exist")
 		}
-		labelOIDs = append(labelOIDs, clientLabel.ID)
+		if !clientLabel.IsDeleted {
+			labelOIDs = append(labelOIDs, clientLabel.ID)
+		}
 	}
 	return labelOIDs, nil
 }

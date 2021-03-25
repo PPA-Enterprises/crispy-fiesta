@@ -162,7 +162,9 @@ func (c Client) PopulateLabels(db *mongo.DBConnection, ctx context.Context, oids
 
 	tags := make([]string, 0)
 	for _, label := range clientlabels {
-		tags = append(tags, label.LabelName)
+		if !label.IsDeleted {
+			tags = append(tags, label.LabelName)
+		}
 	}
 	return tags, nil
 
