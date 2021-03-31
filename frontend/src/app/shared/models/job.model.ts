@@ -3,7 +3,6 @@ export class Job {
     public client_name: string
     public client_phone: string;
     public car_info: string;
-    public appointment_info: string;
     public notes: string;
     public tag: string;
     public start: Date;

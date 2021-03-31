@@ -87,7 +87,7 @@
                       </div>
                     </div>
                     <div class="form-row">
-                      <div class="form-group col">
+                      <div class="form-group col pl-4">
                           <label>Starts At:</label><br>
                           <!-- <input class="form-control" type="text" placeholder="yyyy-mm-dd" [(ngModel)]="startDateModel" ngbDatepicker #d1="ngbDatepicker" (focus)="d1.toggle()" (dateSelect)="updateStart($event)" /> -->
                           <ngb-datepicker [(ngModel)]="startDateModel" ngbDatepicker #d1="ngbDatepicker" (dateSelect)="updateStart($event)"></ngb-datepicker>
@@ -95,7 +95,7 @@
                           <ngb-timepicker [(ngModel)]="startTimeModel" meridian="true" formControlName="time"></ngb-timepicker>
                           </form>
                       </div>
-                      <div class="form-group col">
+                      <div class="form-group col pl-4">
                           <label>Ends At:</label><br>
                           <!-- <input class="form-control" type="text" placeholder="yyyy-mm-dd" [(ngModel)]="endDateModel" ngbDatepicker #d2="ngbDatepicker" (focus)="d2.toggle()" (dateSelect)="updateEnd($event)" /> -->
                           <ngb-datepicker [(ngModel)]="endDateModel" ngbDatepicker #d2="ngbDatepicker" (dateSelect)="updateEnd($event)"></ngb-datepicker>

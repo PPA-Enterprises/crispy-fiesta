@@ -48,8 +48,8 @@ export class CreateJobComponent implements OnInit {
   endDateModel: NgbDateStruct;
   startTimeModel = {hour: 12, minute: 0};
   endTimeModel = {hour: 12, minute: 0};
-  startDate: Date;
-  endDate: Date;
+  startDate: NgbDateStruct;
+  endDate: NgbDateStruct;
   form1: FormGroup;
   form2: FormGroup
 
@@ -66,43 +66,33 @@ export class CreateJobComponent implements OnInit {
   }
 
   public updateStart(date: NgbDateStruct) {
-    // Use this method to set any other date format you want 
-    this.startDate = new Date(date.year, date.month -1, date.day);
-    console.log(this.startDate);
+    this.startDate = date;
   }
 
   public updateEnd(date: NgbDateStruct) {
-    // Use this method to set any other date format you want 
-    this.endDate = new Date(date.year, date.month -1, date.day);
-    console.log(this.endDate);
+    this.endDate = date;
   }
 
   onSubmit(form) {
-    console.log(this.startTimeModel);
-    console.log(this.endTimeModel);
-    console.log(this.startDate)
-    
-    
     this.submitted = true
 
-    // this.job = {
-    //   client_name: this.model.fname + " " + this.model.lname,
-    //   client_phone: this.model.phone,
-    //   car_info: this.model.carInfo,
-    //   appointment_info: this.model.apptInfo,
-    //   notes: this.model.notes,
-    //   tag: "NEW",
-    //   start: new Date(this.model.start.year, this.model.start.month - 1, this.model.start.day),
-    //   end: new Date(this.model.end.year, this.model.end.month - 1, this.model.end.day),
-    //   title: this.model.carInfo + " - " + this.model.fname + " " + this.model.lname,
-    //   color: {
-    //     primary: this.model.primary,
-    //     secondary: this.model.secondary,
-    //   }
-    // }   
+    this.job = {
+      client_name: this.model.fname + " " + this.model.lname,
+      client_phone: this.model.phone,
+      car_info: this.model.carInfo,
+      notes: this.model.notes,
+      tag: "NEW",
+      start: new Date(this.startDate.year, this.startDate.month - 1, this.startDate.day, this.startTimeModel.hour, this.startTimeModel.minute),
+      end: new Date(this.endDate.year, this.endDate.month - 1, this.endDate.day, this.endTimeModel.hour, this.endTimeModel.minute),
+      title: this.model.carInfo + " - " + this.model.fname + " " + this.model.lname,
+      color: {
+        primary: this.model.primary,
+        secondary: this.model.secondary,
+      }
+    }   
 
-    // this.jobService.createJob(this.job).subscribe((job: Job) => {
-    //     this.router.navigate(['/jobs']);
-    // })
+    this.jobService.createJob(this.job).subscribe((job: Job) => {
+        this.router.navigate(['/jobs']);
+    })
   }
 }

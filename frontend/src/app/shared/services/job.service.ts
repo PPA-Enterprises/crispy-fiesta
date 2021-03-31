@@ -30,7 +30,7 @@ export class JobService {
   constructor(private http: HttpClient) { }
 
   createJob (job: Job): Observable<Job> {
-    return this.http.post<any>("http://localhost:8888/api/v1/jobs", job)
+    return this.http.post<any>("http://localhost:8888/api/v1/jobs/", job)
     .pipe(map((response) => {
 			if(response.success) {
 				return response.payload as Job;
@@ -41,7 +41,7 @@ export class JobService {
   }
 
   getAllJobs(): Observable<Job[]> {
-    return this.http.get<any>("http://localhost:8888/api/v1/jobs")
+    return this.http.get<any>("http://localhost:8888/api/v1/jobs/")
     .pipe(map((response) => {
 			if(response.success) {
 				return response.payload as Job[];
