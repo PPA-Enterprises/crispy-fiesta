@@ -48,6 +48,9 @@ func validationErrorMessage(s string) string {
 }
 
 func Response(c *gin.Context, err error) {
+	if err != nil {
+		fmt.Println(err)
+	}
 	switch err.(type) {
 	case *AppError:
 		e := err.(*AppError)
