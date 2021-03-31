@@ -25,7 +25,6 @@ type Update struct {
 	ClientName string
 	ClientPhone string
 	CarInfo string
-	AppointmentInfo string
 	Notes string
 	StartTime string
 	EndTime string
@@ -147,7 +146,6 @@ func (j Job) Update(c *gin.Context, req Update, id string, editor PPA.Editor) (*
 		ClientName: req.ClientName,
 		ClientPhone: req.ClientPhone,
 		CarInfo: req.CarInfo,
-		AppointmentInfo: req.AppointmentInfo,
 		Notes: req.Notes,
 		Tag: req.Tag,
 		Color: req.Color,

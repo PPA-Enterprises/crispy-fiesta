@@ -13,7 +13,6 @@ type submitJobRequest struct {
 	ClientName      string           `json:"client_name" binding:"required"`
 	ClientPhone     string           `json:"client_phone" binding:"required"`
 	CarInfo         string           `json:"car_info" binding:"required"`
-	AppointmentInfo string           `json:"appointment_info" binding:"required"`
 	Notes           string           `json:"notes"`
 	StartTime       string           `json:"start" binding:"required"`
 	EndTime         string           `json:"end" binding:"required"`
@@ -26,7 +25,6 @@ type updateRequest struct {
 	ClientName      string            `json:"client_name,omitempty"`
 	ClientPhone     string            `json:"client_phone,omitempty"`
 	CarInfo         string            `json:"car_info,omitempty"`
-	AppointmentInfo string            `json:"appointment_info,omitempty"`
 	Notes           string            `json:"notes,omitempty"`
 	StartTime       string            `json:"start,omitempty"`
 	EndTime         string            `json:"end,omitempty"`
@@ -40,7 +38,6 @@ func (h HTTP) fromUpdateRequest(data *updateRequest) job.Update {
 		ClientName:      data.ClientName,
 		ClientPhone:     data.ClientPhone,
 		CarInfo:         data.CarInfo,
-		AppointmentInfo: data.AppointmentInfo,
 		Notes:           data.Notes,
 		StartTime:       data.StartTime,
 		EndTime:         data.EndTime,
@@ -50,14 +47,12 @@ func (h HTTP) fromUpdateRequest(data *updateRequest) job.Update {
 }
 
 func (h HTTP) fromSubmitJobRequest(data *submitJobRequest) PPA.Job {
-	fmt.Print("ASDASDASAA")
 	return PPA.Job{
 		ID:              primitive.NewObjectID(),
 		Title:           data.Title,
 		ClientName:      data.ClientName,
 		ClientPhone:     data.ClientPhone,
 		CarInfo:         data.CarInfo,
-		AppointmentInfo: data.AppointmentInfo,
 		Notes:           data.Notes,
 		StartTime:       data.StartTime,
 		EndTime:         data.EndTime,

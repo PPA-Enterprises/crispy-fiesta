@@ -34,14 +34,11 @@ func (h HTTP) create(c *gin.Context) {
 
 	var data submitJobRequest
 	if err := c.ShouldBindJSON(&data); err != nil {
-		fmt.Print(err)
 		PPA.Response(c, err)
 		return
 	}
 
 	newJob := h.fromSubmitJobRequest(&data)
-
-	fmt.Print(newJob)
 
 	oid := primitive.NewObjectID()
 	editor := PPA.Editor{
