@@ -51,7 +51,7 @@
     <div class="row">
       <div class="col-8">
         <!-- Kick start -->
-        <div id="kick-start" class="card height-500">
+        <div id="kick-start" class="card height-550">
           <div class="card-header">
             <h4 class="card-title">Job Informaton</h4>
           </div>
@@ -88,15 +88,17 @@
                     </div>
                     <div class="form-row">
                       <div class="form-group col">
-                          <label>Starts At:</label>
-                          <input class="form-control" type="text" placeholder="yyyy-mm-dd" [(ngModel)]="startDateModel" ngbDatepicker #d1="ngbDatepicker" (focus)="d1.toggle()" (dateSelect)="updateStart($event)" />
+                          <label>Starts At:</label><br>
+                          <!-- <input class="form-control" type="text" placeholder="yyyy-mm-dd" [(ngModel)]="startDateModel" ngbDatepicker #d1="ngbDatepicker" (focus)="d1.toggle()" (dateSelect)="updateStart($event)" /> -->
+                          <ngb-datepicker [(ngModel)]="startDateModel" ngbDatepicker #d1="ngbDatepicker" (dateSelect)="updateStart($event)"></ngb-datepicker>
                           <form [formGroup]="form1">
                           <ngb-timepicker [(ngModel)]="startTimeModel" meridian="true" formControlName="time"></ngb-timepicker>
                           </form>
                       </div>
                       <div class="form-group col">
-                          <label>Ends At:</label>
-                          <input class="form-control" type="text" placeholder="yyyy-mm-dd" [(ngModel)]="endDateModel" ngbDatepicker #d2="ngbDatepicker" (focus)="d2.toggle()" (dateSelect)="updateEnd($event)" />
+                          <label>Ends At:</label><br>
+                          <!-- <input class="form-control" type="text" placeholder="yyyy-mm-dd" [(ngModel)]="endDateModel" ngbDatepicker #d2="ngbDatepicker" (focus)="d2.toggle()" (dateSelect)="updateEnd($event)" /> -->
+                          <ngb-datepicker [(ngModel)]="endDateModel" ngbDatepicker #d2="ngbDatepicker" (dateSelect)="updateEnd($event)"></ngb-datepicker>
                           <form [formGroup]="form1">
                             <ngb-timepicker [(ngModel)]="endTimeModel" meridian="true" formControlName="time"></ngb-timepicker>
                           </form>
@@ -115,7 +117,7 @@
   
       <div class="col-4">
         <!-- Kick start -->
-        <div id="kick-start" class="card height-500">
+        <div id="kick-start" class="card height-550">
           <div class="card-header">
             <h4 class="card-title">Notes</h4>
           </div>

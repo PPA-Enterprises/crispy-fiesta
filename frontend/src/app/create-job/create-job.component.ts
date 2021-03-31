@@ -80,6 +80,7 @@ export class CreateJobComponent implements OnInit {
   onSubmit(form) {
     console.log(this.startTimeModel);
     console.log(this.endTimeModel);
+    console.log(this.startDate)
     
     
     this.submitted = true
