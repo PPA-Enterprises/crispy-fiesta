@@ -24,6 +24,7 @@ type Update struct {
 	Title string
 	ClientName string
 	ClientPhone string
+	AssignedWorker primitive.ObjectID
 	CarInfo string
 	Notes string
 	StartTime string
