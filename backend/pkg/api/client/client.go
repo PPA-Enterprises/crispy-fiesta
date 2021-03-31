@@ -2,7 +2,6 @@ package client
 
 import(
 	"PPA"
-	"fmt"
 	"context"
 	"net/http"
 	"time"
@@ -20,6 +19,14 @@ const (
 
 var OidNotFound = PPA.NewAppError(NotFound, "Does not exist")
 
+type PopulatedClient struct {
+	ID primitive.ObjectID `json:"_id"`
+	Name string `json:"name"`
+	Phone string `json:"phone"`
+	Jobs []PPA.Job `json:"jobs"`
+	Labels []string `json:"labels"`
+	History []PPA.LogEvent `json:"history"`
+}
 type Update struct {
 	Name string
 	Phone string
@@ -28,6 +35,14 @@ type Update struct {
 type JobUpdate struct {
 	Name string
 	Phone string
+}
+
+// This is used for Logging only
+type logableLabeledClient struct {
+	ID primitive.ObjectID `m:"Database ID"`
+	Name string `m:"Name"`
+	Phone string `m:"Phone Number"`
+	Labels []string `m:"Labels"`
 }
 
 func (cl Client) Create(c *gin.Context, req PPA.Client, editor PPA.Editor) (*PPA.Client, error) {
@@ -40,11 +55,29 @@ func (cl Client) Create(c *gin.Context, req PPA.Client, editor PPA.Editor) (*PPA
 		req.ID = primitive.NewObjectID()
 	}
 
+	labelNames := make([]string, 0)
+	for _, labelOID := range req.Labels {
+		clientLabel, labelErr := cl.ldb.ViewById(cl.db, ctx, labelOID); if labelErr != nil {
+			return nil, PPA.NewAppError(NotFound, "Label Does Not Exist")
+		}
+
+		labelNames = append(labelNames, clientLabel.LabelName)
+		clientLabel.AppendClient(req.ID)
+		updateErr := cl.ldb.Update(cl.db, ctx, clientLabel.ID, clientLabel); if updateErr != nil {
+			return nil, PPA.InternalError
+		}
+	}
+
 	created, err := cl.cdb.Create(cl.db, ctx, &req); if err != nil {
 		return nil, err
 	}
 
-	created.AppendLog(cl.eventLogger.LogCreated(ctx, cl.eventLogger.GenerateEvent(created, EventTag), editor))
+	created.AppendLog(cl.eventLogger.LogCreated(ctx, cl.eventLogger.GenerateEvent(&logableLabeledClient {
+		ID: created.ID,
+		Name: created.Name,
+		Phone: created.Phone,
+		Labels: labelNames,
+	}, EventTag), editor))
 	cl.cdb.LogEvent(cl.db, ctx, created)
 	return created, nil
 }
@@ -94,6 +127,7 @@ func (cl Client) Delete(c *gin.Context, id string, editor PPA.Editor) error {
 	}
 	// delete jobs
 	cl.deletejobs(ctx, client.Jobs, editor)
+	cl.deleteFromLabels(ctx, client.ID, client.Labels)
 
 	client.AppendLog(cl.eventLogger.LogDeleted(ctx, editor))
 	cl.cdb.LogEvent(cl.db, ctx, client)
@@ -109,10 +143,9 @@ func (cl Client) Update(c *gin.Context, req Update, id string, editor PPA.Editor
 	// Note that len(nil) is 0
 	if len(req.Phone) > 0 {
 		fetched, _ := cl.cdb.ViewByPhone(cl.db, ctx, req.Phone)
-		fmt.Println(fetched)
 		if fetched != nil {
 			if fetched.ID.Hex() != id {
-				return nil, PPA.NewAppError(Conflict, "Phone number already already in use")
+				return nil, PPA.NewAppError(Conflict, "Phone vnumber already already in use")
 			}
 		}
 	}
@@ -148,28 +181,42 @@ func (cl Client) Update(c *gin.Context, req Update, id string, editor PPA.Editor
 	return updated, nil
 }
 
-func (cl Client) PopulateJob(c *gin.Context, unpopClient *PPA.Client) (*PopulatedClient, error) {
-	if unpopClient.Jobs == nil {
+func (cl Client) Populate(c *gin.Context, unpopClient *PPA.Client) (*PopulatedClient, error) {
+	/*if unpopClient.Jobs == nil {
 		return nil, nil
-	}
+	}*/
 	duration := time.Now().Add(5*time.Second)
 	ctx, cancel := context.WithDeadline(c.Request.Context(), duration)
 	defer cancel()
 
 
-	jobs, err := cl.cdb.Populate(cl.db, ctx, unpopClient.Jobs); if err != nil {
-		return nil, err
+	jobs := make([]PPA.Job, 0)
+	if unpopClient.Jobs != nil {
+		res, err := cl.cdb.PopulateJobs(cl.db, ctx, unpopClient.Jobs); if err != nil {
+			return nil, err
+		}
+		jobs = res;
 	}
+
+	labels := make([]string, 0)
+	if unpopClient.Labels != nil {
+		res, lErr := cl.cdb.PopulateLabels(cl.db, ctx, unpopClient.Labels); if lErr != nil {
+			return nil, lErr
+		}
+		labels = res
+	}
+
 	return &PopulatedClient {
 		ID: unpopClient.ID,
 		Name: unpopClient.Name,
 		Phone: unpopClient.Phone,
 		Jobs: jobs,
+		Labels: labels,
 		History: unpopClient.History,
 	}, nil
 }
 
-func (cl Client) PopulateJobs(c *gin.Context, unpopClients *[]PPA.Client) (*[]PopulatedClient, error) {
+func (cl Client) PopulateAll(c *gin.Context, unpopClients *[]PPA.Client) (*[]PopulatedClient, error) {
 	duration := time.Now().Add(5*time.Second)
 	ctx, cancel := context.WithDeadline(c.Request.Context(), duration)
 	defer cancel()
@@ -177,19 +224,118 @@ func (cl Client) PopulateJobs(c *gin.Context, unpopClients *[]PPA.Client) (*[]Po
 	var popClients = make([]PopulatedClient, 0, len(*unpopClients))
 
 	for _, unpop := range *unpopClients {
-		jobs, err := cl.cdb.Populate(cl.db, ctx, unpop.Jobs); if err != nil {
-			//return nil, err
-			//just skip it???
+		jobs := make([]PPA.Job, 0)
+		if unpop.Jobs != nil {
+			res, err := cl.cdb.PopulateJobs(cl.db, ctx, unpop.Jobs); if err != nil {
+				//return nil, err 
+				// skip
+			}
+			jobs = res;
+		}
+
+		labels := make([]string, 0)
+		if unpop.Labels != nil {
+			res, lErr := cl.cdb.PopulateLabels(cl.db, ctx, unpop.Labels); if lErr != nil {
+				//return nil, lErr
+				// skip
+			}
+			labels = res
 		}
 		popClients = append(popClients, PopulatedClient {
 			ID: unpop.ID,
 			Name: unpop.Name,
 			Phone: unpop.Phone,
 			Jobs: jobs,
+			Labels: labels,
 			History: unpop.History,
 		})
 	}
 	return &popClients, nil
+}
+
+func (cl Client) UpdateLabels(c *gin.Context, labels []string, clientID string, editor PPA.Editor) (*PPA.Client, error) {
+	duration := time.Now().Add(5*time.Second)
+	ctx, cancel := context.WithDeadline(c.Request.Context(), duration)
+	defer cancel()
+
+	clientOID, err := primitive.ObjectIDFromHex(clientID); if err != nil {
+		return nil, OidNotFound
+	}
+
+	client, clientErr := cl.cdb.ViewById(cl.db, ctx, clientOID); if clientErr != nil {
+		return nil, PPA.NewAppError(NotFound, "Client Not Found")
+	}
+	oldDoc := *client
+
+	labelOIDs := make([]primitive.ObjectID, 0)
+	newDocLabels := make([]string, 0)
+
+	for _, label := range labels {
+		clientLabel, labelErr := cl.ldb.ViewByLabelName(cl.db, ctx, label); if labelErr != nil {
+			return nil, PPA.NewAppError(NotFound, "Label Does Not Exist")
+		}
+
+		if !clientLabel.IsDeleted {
+			newDocLabels = append(newDocLabels, clientLabel.LabelName)
+			clientLabel.AppendClient(clientOID)
+			updateErr := cl.ldb.Update(cl.db, ctx, clientLabel.ID, clientLabel); if updateErr != nil {
+				return nil, PPA.InternalError
+			}
+			labelOIDs = append(labelOIDs, clientLabel.ID)
+		}
+	}
+	client.Labels = labelOIDs
+
+	oldDocLabels := make([]string, 0)
+	for _, labelOID := range oldDoc.Labels {
+		clientLabel, labelErr := cl.ldb.ViewById(cl.db, ctx, labelOID); if labelErr != nil {
+			return nil, PPA.NewAppError(NotFound, "Label Does Not Exist")
+		}
+		if !clientLabel.IsDeleted {
+			oldDocLabels = append(oldDocLabels, clientLabel.LabelName)
+		}
+	}
+
+
+	logableOldDoc := logableLabeledClient {
+		ID: oldDoc.ID,
+		Name: oldDoc.Name,
+		Phone: oldDoc.Phone,
+		Labels: oldDocLabels,
+	}
+
+	logableNewDoc := logableLabeledClient {
+		ID: client.ID,
+		Name: client.Name,
+		Phone: client.Phone,
+		Labels: newDocLabels,
+
+	}
+
+	client.AppendLog(cl.eventLogger.LogUpdated(ctx,
+		cl.eventLogger.GenerateEvent(logableOldDoc, EventTag),
+		cl.eventLogger.GenerateEvent(logableNewDoc, EventTag),
+		editor))
+	cl.cdb.LogEvent(cl.db, ctx, client)
+	return client, nil
+}
+
+func (cl Client) FetchLabelOIDs(c *gin.Context, labels []string) ([]primitive.ObjectID, error) {
+	duration := time.Now().Add(5*time.Second)
+	ctx, cancel := context.WithDeadline(c.Request.Context(), duration)
+	defer cancel()
+
+	labelOIDs := make([]primitive.ObjectID, 0)
+
+	for _, label := range labels {
+		clientLabel, labelErr := cl.ldb.ViewByLabelName(cl.db, ctx, label); if labelErr != nil {
+			return nil, PPA.NewAppError(NotFound, "Label Does Not Exist")
+		}
+		if !clientLabel.IsDeleted {
+			labelOIDs = append(labelOIDs, clientLabel.ID)
+		}
+	}
+	return labelOIDs, nil
 }
 
 func (cl Client) oidExists(ctx context.Context, oid primitive.ObjectID) bool {
@@ -210,6 +356,14 @@ func (cl Client) deletejobs(ctx context.Context, oids []primitive.ObjectID, edit
 		err := cl.jdb.Delete(cl.db, ctx, oid); if err != nil {
 			// do nothing
 		}
+	}
+}
+
+func (cl Client) deleteFromLabels(ctx context.Context, clientOID primitive.ObjectID, oids []primitive.ObjectID) {
+	for _, oid := range oids {
+		label, _ := cl.ldb.ViewById(cl.db, ctx, oid)
+		label.FindAndRemoveClient(clientOID)
+		_ = cl.ldb.PutLabels(cl.db, ctx, label.ID, label.Clients)
 	}
 }
 

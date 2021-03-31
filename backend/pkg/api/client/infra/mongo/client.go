@@ -17,6 +17,7 @@ const (
 	Collection = "clients"
 	DeletedClientCollection = "deleted_clients"
 	JobsCollection = "jobs"
+	ClientLabelsCollection = "clientlabels"
 )
 
 type Client struct{}
@@ -133,7 +134,7 @@ func (c Client) LogEvent(db *mongo.DBConnection, ctx context.Context, update *PP
 	}
 }
 
-func (c Client) Populate(db *mongo.DBConnection, ctx context.Context, oids []primitive.ObjectID) ([]PPA.Job, error) {
+func (c Client) PopulateJobs(db *mongo.DBConnection, ctx context.Context, oids []primitive.ObjectID) ([]PPA.Job, error) {
 	coll := db.Use(JobsCollection)
 	cursor, err := db.Populate(ctx, coll, oids); if err != nil {
 		return []PPA.Job{}, PPA.InternalError
@@ -145,6 +146,28 @@ func (c Client) Populate(db *mongo.DBConnection, ctx context.Context, oids []pri
 		return []PPA.Job{}, PPA.InternalError
 	}
 	return jobs, nil
+}
+
+func (c Client) PopulateLabels(db *mongo.DBConnection, ctx context.Context, oids []primitive.ObjectID) ([]string, error) {
+	coll := db.Use(ClientLabelsCollection)
+	cursor, err := db.Populate(ctx, coll, oids); if err != nil {
+		return []string{}, PPA.InternalError
+	}
+
+	defer cursor.Close(ctx)
+	var clientlabels []PPA.ClientLabel
+	if err = cursor.All(ctx, &clientlabels); err != nil {
+		return []string{}, PPA.InternalError
+	}
+
+	tags := make([]string, 0)
+	for _, label := range clientlabels {
+		if !label.IsDeleted {
+			tags = append(tags, label.LabelName)
+		}
+	}
+	return tags, nil
+
 }
 
 func (c Client) RemoveJob(db *mongo.DBConnection, ctx context.Context, clientPhone string, jobOid primitive.ObjectID) error {
