@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { FlatpickrModule } from 'angularx-flatpickr';
 import { CalendarModule, DateAdapter } from 'angular-calendar';
 import { adapterFactory } from 'angular-calendar/date-adapters/date-fns';
-import { NgbModalModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { CalRoutingModule } from "./cal-routing.module";
 
 import { CalComponent } from "./cal.component";
@@ -15,12 +15,12 @@ import { CalComponent } from "./cal.component";
     CalRoutingModule,
     CommonModule,
     FormsModule,
-    NgbModalModule,
+    NgbModule,
     FlatpickrModule.forRoot(),
     CalendarModule.forRoot({
       provide: DateAdapter,
-      useFactory: adapterFactory,
-    }),
+      useFactory: adapterFactory
+    })
   ],
   exports: [],
   declarations: [

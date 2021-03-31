@@ -27,7 +27,7 @@
     "@angular/platform-browser-dynamic": "9.1.9",
     "@angular/platform-server": "9.1.9",
     "@angular/router": "9.1.9",
-    "@ng-bootstrap/ng-bootstrap": "6.0.0",
+    "@ng-bootstrap/ng-bootstrap": "^6.0.0",
     "@ngrx/store": "9.0.0",
     "@ngx-translate/core": "12.1.2",
     "@ngx-translate/http-loader": "4.0.0",

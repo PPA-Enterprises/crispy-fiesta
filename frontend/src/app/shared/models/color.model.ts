@@ -1,4 +1,4 @@
 export class Color {
-    public primary: string;
-    public secondary: string;
+    public primary: any;
+    public secondary: any;
   }

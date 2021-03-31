@@ -16,7 +16,7 @@ import { Client } from '../shared/models/client.model'
   encapsulation: ViewEncapsulation.None
 })
 
-export class ClientsComponent {
+export class ClientsComponent implements OnInit{
   @ViewChild(DatatableComponent) table: DatatableComponent;
   DatatableData: Client[];
   private tempData = [];
