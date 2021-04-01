@@ -39,6 +39,8 @@ type ClientUpdate struct {
 	Phone string
 }
 
+// TODO: Loggable Job
+
 func (j Job) Create(c *gin.Context, req PPA.Job, editor PPA.Editor) (*PPA.Job, error) {
 	duration := time.Now().Add(5*time.Second)
 	ctx, cancel := context.WithDeadline(c.Request.Context(), duration)
