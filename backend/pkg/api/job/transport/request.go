@@ -21,7 +21,7 @@ type submitJobRequest struct {
 }
 
 type updateRequest struct {
-	Title           string				`json:"title,omitempty:`
+	Title           string				`json:"title,omitempty"`
 	ClientName      string				`json:"client_name,omitempty"`
 	ClientPhone     string				`json:"client_phone,omitempty"`
 	AssignedWorker	string				`json:"assigned_worker,omitempty"`
@@ -33,8 +33,11 @@ type updateRequest struct {
 	Color           *PPA.CalendarMeta	`json:"color,omitempty"`
 }
 
-func (h HTTP) fromUpdateRequest(data *updateRequest) job.Update {
+func (h HTTP) tryFromUpdateRequest(data *updateRequest) (job.Update, error) {
 	assignedWorkerOID, err := primitive.ObjectIDFromHex(data.AssignedWorker); if err != nil {
+		if len(data.AssignedWorker) > 0 {
+			return job.Update{}, PPA.NewAppError(PPA.BadRequest.Status, "Invalid OID")
+		}
 		assignedWorkerOID = primitive.NilObjectID
 	}
 	return job.Update{
@@ -48,11 +51,14 @@ func (h HTTP) fromUpdateRequest(data *updateRequest) job.Update {
 		EndTime:         data.EndTime,
 		Tag:             data.Tag,
 		Color:           data.Color,
-	}
+	}, nil
 }
 
-func (h HTTP) fromSubmitJobRequest(data *submitJobRequest) PPA.Job {
+func (h HTTP) tryFromSubmitJobRequest(data *submitJobRequest) (PPA.Job, error) {
 	assignedWorkerOID, err := primitive.ObjectIDFromHex(data.AssignedWorker); if err != nil {
+		if len(data.AssignedWorker) > 0 {
+			return PPA.Job{}, PPA.NewAppError(PPA.BadRequest.Status, "Invalid OID")
+		}
 		assignedWorkerOID = primitive.NilObjectID
 	}
 	return PPA.Job{
@@ -67,5 +73,5 @@ func (h HTTP) fromSubmitJobRequest(data *submitJobRequest) PPA.Job {
 		EndTime:         data.EndTime,
 		Color:           &data.Color,
 		Tag:             data.Tag,
-	}
+	}, nil
 }

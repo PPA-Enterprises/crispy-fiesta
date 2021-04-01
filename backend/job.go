@@ -9,7 +9,7 @@ type Job struct {
 	StartTime string `json:"start" bson:"start_time,omitempty" m:"Start Time"`
 	EndTime string `json:"end" bson:"end_time,omitempty" m:"End Time"`
 	Tag string `json:"tag" bson:"tag,omitempty" m:"tag"`
-	AssignedWorker primitive.ObjectID `json:"assigned_worker" bson:"assigned_worker,omitempty"`
+	AssignedWorker primitive.ObjectID `json:"assigned_worker" bson:"assigned_worker,omitempty" m:"Assigned Worker"`
 	ClientName string `json:"client_name" bson:"client_name,omitempty" m:"Client Name"`
 	ClientPhone string `json:"client_phone" bson:"client_phone,omitempty" m:"Client Phone Number"`
 	CarInfo string `json:"car_info" bson:"car_info,omitempty" m:"Car Information"`

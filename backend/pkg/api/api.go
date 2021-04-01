@@ -24,6 +24,7 @@ import (
 	eventlogService "pkg/api/eventlog"
 	tinterTransport "pkg/api/tinter/transport"
 	tinterService "pkg/api/tinter"
+	tinterRepo "pkg/api/tinter/infra/mongo"
 	clientLabelTransport "pkg/api/clientlabel/transport"
 	clientLabelService "pkg/api/clientlabel"
 	labelRepo "pkg/api/clientlabel/infra/mongo"
@@ -55,7 +56,7 @@ func Start(cfg *config.Configuration) error {
 	authTransport.NewHTTP(authService.Init(db, jwt, security, rbac, userRepo.User{}), v1)
 	userTransport.NewHTTP(userService.Init(db, rbac, security, logger), v1, authMiddleware)
 	clientTransport.NewHTTP(clientService.Init(db, rbac, jobRepo.Job{}, labelRepo.ClientLabel{}, logger), v1, authMiddleware)
-	jobTransport.NewHTTP(jobService.Init(db, rbac, clientRepo.Client{}, logger), v1, authMiddleware)
+	jobTransport.NewHTTP(jobService.Init(db, rbac, clientRepo.Client{}, tinterRepo.Tinter{}, logger), v1, authMiddleware)
 	tinterTransport.NewHTTP(tinterService.Init(db, rbac, jobRepo.Job{}, logger), v1, authMiddleware)
 	clientLabelTransport.NewHTTP(clientLabelService.Init(db, rbac, logger), v1, authMiddleware)
 	eventlogTransport.NewHTTP(eventlogService.Init(db, userRepo.User{}, rbac), v1, authMiddleware)

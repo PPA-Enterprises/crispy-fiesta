@@ -37,8 +37,10 @@ func (h HTTP) create(c *gin.Context) {
 		return
 	}
 
-	newJob := h.fromSubmitJobRequest(&data)
-
+	newJob, reqErr := h.tryFromSubmitJobRequest(&data); if reqErr != nil {
+		PPA.Response(c, reqErr)
+		return
+	}
 	oid := primitive.NewObjectID()
 	editor := PPA.Editor{
 		OID:        oid,
@@ -154,7 +156,11 @@ func (h HTTP) update(c *gin.Context) {
 		Collection: "events" + oid.Hex() + "a",
 	}
 
-	updated, err := h.service.Update(c, h.fromUpdateRequest(&data), id, editor)
+	updateData, reqErr := h.tryFromUpdateRequest(&data); if reqErr != nil {
+		PPA.Response(c, reqErr)
+		return
+	}
+	updated, err := h.service.Update(c, updateData, id, editor)
 	if err != nil {
 		PPA.Response(c, err)
 		return

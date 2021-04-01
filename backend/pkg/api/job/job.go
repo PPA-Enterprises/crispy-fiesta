@@ -2,6 +2,7 @@ package job
 import (
 	"PPA"
 	"context"
+	"bytes"
 	"net/http"
 	"time"
 	"github.com/gin-gonic/gin"
@@ -47,6 +48,18 @@ func (j Job) Create(c *gin.Context, req PPA.Job, editor PPA.Editor) (*PPA.Job, e
 		req.ID = primitive.NewObjectID()
 	}
 
+	const matched int = 0
+	if bytes.Compare([]byte(req.AssignedWorker.Hex()), []byte(primitive.NilObjectID.Hex())) != matched {
+		// update tinter
+		tinter, tinterErr := j.tdb.ViewById(j.db, ctx, req.AssignedWorker); if tinterErr == nil {
+			tinter.AttatchJob(req.AssignedWorker)
+			_ = j.tdb.Update(j.db, ctx, tinter.ID, tinter)
+			// TODO: Append Tinter Log?
+		} else {
+			return nil, PPA.NewAppError(NotFound, "Tinter does not exist")
+		}
+	}
+
 	created, err := j.jdb.Create(j.db, ctx, &req); if err != nil {
 		return nil, err
 	}
@@ -70,6 +83,16 @@ func (j Job) Create(c *gin.Context, req PPA.Job, editor PPA.Editor) (*PPA.Job, e
 	if err := j.attatchJobToClient(ctx, created.ClientPhone, created, editor); err != nil {
 		return nil, err
 	}
+
+	/*const matched int = 0
+	if bytes.Compare([]byte(req.AssignedWorker.Hex()), []byte(primitive.NilObjectID.Hex())) != matched {
+		// update tinter
+		tinter, tinterErr := j.tdb.ViewById(j.db, ctx, req.AssignedWorker); if tinterErr != nil {
+			tinter.AttatchJob(req.AssignedWorker)
+			_ = j.tdb.Update(j.db, ctx, tinter.ID, tinter)
+			// TODO: Append Tinter Log?
+		}
+	}*/
 
 	return created, nil
 }

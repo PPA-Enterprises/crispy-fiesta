@@ -12,6 +12,7 @@ type Job struct {
 	db *mongo.DBConnection
 	jdb Repository
 	cdb ClientRepository
+	tdb TinterRepository
 	eventLogger EventLogger
 	rbac RBAC
 }
@@ -24,12 +25,12 @@ type Service interface {
 	Update(*gin.Context, Update, string, PPA.Editor) (*PPA.Job, error)
 }
 
-func New(db *mongo.DBConnection, jdb Repository, cdb ClientRepository, ev EventLogger, rbac RBAC) *Job {
-	return &Job{db: db, jdb: jdb, cdb: cdb, eventLogger: ev, rbac: rbac}
+func New(db *mongo.DBConnection, jdb Repository, cdb ClientRepository, tdb TinterRepository, ev EventLogger, rbac RBAC) *Job {
+	return &Job{db: db, jdb: jdb, cdb: cdb, tdb: tdb, eventLogger: ev, rbac: rbac}
 }
 
-func Init(db *mongo.DBConnection, rbac RBAC, cdb ClientRepository, ev EventLogger) *Job {
-	return New(db, dbQuery.Job{}, cdb, ev, rbac)
+func Init(db *mongo.DBConnection, rbac RBAC, cdb ClientRepository, tdb TinterRepository, ev EventLogger) *Job {
+	return New(db, dbQuery.Job{}, cdb, tdb, ev, rbac)
 }
 
 type Repository interface {
@@ -47,6 +48,11 @@ type ClientRepository interface {
 	Update(*mongo.DBConnection, context.Context, primitive.ObjectID, *PPA.Client) error
 	RemoveJob(*mongo.DBConnection, context.Context, string, primitive.ObjectID) error
 	LogEvent(*mongo.DBConnection, context.Context, *PPA.Client)
+}
+
+type TinterRepository interface {
+	ViewById(*mongo.DBConnection, context.Context, primitive.ObjectID) (*PPA.Tinter, error)
+	Update(*mongo.DBConnection, context.Context, primitive.ObjectID, *PPA.Tinter) error
 }
 
 type EventLogger interface {
