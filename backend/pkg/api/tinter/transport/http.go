@@ -44,8 +44,7 @@ func (h HTTP) create(c *gin.Context) {
 		Collection: "events" + oid.Hex() + "a",
 	}
 
-	newTinter := h.fromCreateTinterRequest(&data)
-	created, err := h.service.Create(c, newTinter, editor); if err != nil {
+	created, err := h.service.Create(c, h.fromCreateTinterRequest(&data), editor); if err != nil {
 		PPA.Response(c, err); return
 	}
 	c.JSON(http.StatusCreated, tinterCreated(created)); return

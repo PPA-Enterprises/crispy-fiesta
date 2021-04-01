@@ -113,6 +113,26 @@ func (j Job) Update(db *mongo.DBConnection, ctx context.Context, oid primitive.O
 	return nil
 }
 
+func (j Job) UnassignTinter(db *mongo.DBConnection, ctx context.Context, update *PPA.Job) error {
+	coll := db.Use(Collection)
+
+	filter := bson.D{{"_id", update.ID}}
+	updateDoc := bson.D{{"$set", bson.D{{"assigned_worker", primitive.NilObjectID}} }}
+
+	var oldDoc PPA.Job
+	err := coll.FindOneAndUpdate(ctx, filter, updateDoc).Decode(&oldDoc)
+	fmt.Println(oldDoc)
+
+	if err == mongodb.ErrNoDocuments {
+		return PPA.NewAppError(NotFound, "Job Not Found")
+	}
+
+	if err != nil {
+		return PPA.InternalError
+	}
+	return nil
+}
+
 func (j Job) LogEvent(db *mongo.DBConnection, ctx context.Context, update *PPA.Job) {
 	if err := j.Update(db, ctx, update.ID, update); err != nil {
 		fmt.Println(err)

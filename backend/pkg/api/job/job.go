@@ -2,6 +2,7 @@ package job
 import (
 	"PPA"
 	"context"
+	"bytes"
 	"net/http"
 	"time"
 	"github.com/gin-gonic/gin"
@@ -24,6 +25,7 @@ type Update struct {
 	Title string
 	ClientName string
 	ClientPhone string
+	AssignedWorker primitive.ObjectID
 	CarInfo string
 	Notes string
 	StartTime string
@@ -46,11 +48,33 @@ func (j Job) Create(c *gin.Context, req PPA.Job, editor PPA.Editor) (*PPA.Job, e
 		req.ID = primitive.NewObjectID()
 	}
 
+	var workerAssignChanged bool = false
+	var cpyTinter *PPA.Tinter
+	const matched int = 0
+	if bytes.Compare([]byte(req.AssignedWorker.Hex()), []byte(primitive.NilObjectID.Hex())) != matched {
+		// update tinter
+		tinter, tinterErr := j.tdb.ViewById(j.db, ctx, req.AssignedWorker); if tinterErr == nil {
+			workerAssignChanged = true
+			cpyTinter = tinter
+			_ = j.tdb.AssignJobId(j.db, ctx, tinter.JobsCollection, req.ID)
+		} else {
+			return nil, PPA.NewAppError(NotFound, "Tinter does not exist")
+		}
+	}
 	created, err := j.jdb.Create(j.db, ctx, &req); if err != nil {
 		return nil, err
 	}
 
-	created.AppendLog(j.eventLogger.LogCreated(ctx, j.eventLogger.GenerateEvent(created, EventTag), editor))
+	loggableTinter := cpyTinter.Loggable()
+	loggableJob := created.Loggable(loggableTinter)
+
+	if workerAssignChanged {
+		cpyTinter.AppendLog(j.eventLogger.LogAssignedJob(ctx, j.eventLogger.GenerateEvent(loggableJob, EventTag), editor))
+		j.tdb.LogEvent(j.db, ctx, cpyTinter)
+
+	}
+
+	created.AppendLog(j.eventLogger.LogCreated(ctx, j.eventLogger.GenerateEvent(loggableJob, EventTag), editor))
 	j.jdb.LogEvent(j.db, ctx, created)
 
 	if !j.clientExists(ctx, created.ClientPhone) {
@@ -109,6 +133,14 @@ func (j Job) Delete(c *gin.Context, id string, editor PPA.Editor) error {
 		return err
 	}
 
+	tinter, tinterErr := j.tdb.ViewById(j.db, ctx, job.AssignedWorker); if tinterErr == nil {
+	_ = j.tdb.RemoveJobId(j.db, ctx, tinter.JobsCollection, job.AssignedWorker)
+		tinter.AppendLog(j.eventLogger.LogDeleted(ctx, editor))
+		j.tdb.LogEvent(j.db, ctx, tinter)
+	} else {
+		return PPA.NewAppError(NotFound, "Tinter does not exist")
+	}
+
 	job.AppendLog(j.eventLogger.LogDeleted(ctx, editor))
 	j.jdb.LogEvent(j.db, ctx, job)
 	return j.jdb.Delete(j.db, ctx, oid)
@@ -131,6 +163,24 @@ func (j Job) Update(c *gin.Context, req Update, id string, editor PPA.Editor) (*
 		return nil, err
 	}
 
+
+	var workerAssignChanged bool = false
+	var cpyTinter *PPA.Tinter
+	const matched int = 0
+	if bytes.Compare([]byte(req.AssignedWorker.Hex()), []byte(primitive.NilObjectID.Hex())) != matched {
+		workerAssignChanged = true
+		// update tinter
+		tinter, tinterErr := j.tdb.ViewById(j.db, ctx, req.AssignedWorker); if tinterErr == nil {
+			cpyTinter = tinter
+			// remove old OID
+			_ = j.tdb.RemoveJobId(j.db, ctx, tinter.JobsCollection, oldJob.AssignedWorker)
+			// insert the replacement
+			_ = j.tdb.AssignJobId(j.db, ctx, tinter.JobsCollection, req.AssignedWorker)
+		} else {
+			return nil, PPA.NewAppError(NotFound, "Tinter does not exist")
+		}
+	}
+
 	if len(req.ClientPhone) > 0 {
 		fetched, _ := j.cdb.ViewByPhone(j.db, ctx, req.ClientPhone)
 		if fetched != nil {
@@ -145,6 +195,7 @@ func (j Job) Update(c *gin.Context, req Update, id string, editor PPA.Editor) (*
 		Title: req.Title,
 		ClientName: req.ClientName,
 		ClientPhone: req.ClientPhone,
+		AssignedWorker: req.AssignedWorker,
 		CarInfo: req.CarInfo,
 		Notes: req.Notes,
 		Tag: req.Tag,
@@ -169,9 +220,27 @@ func (j Job) Update(c *gin.Context, req Update, id string, editor PPA.Editor) (*
 		return nil, PPA.InternalError
 	}
 
+	loggableTinter := cpyTinter.Loggable()
+	loggableJob := updated.Loggable(loggableTinter)
+
+	// fetch the old job's tinter for logging
+	var loggableOldTinter *PPA.LoggableTinter
+	oldTinter, oldTErr := j.tdb.ViewById(j.db, ctx, oldJob.AssignedWorker); if oldTErr != nil {
+		loggableOldTinter = nil
+	} else {
+		loggableOldTinter = oldTinter.Loggable()
+	}
+
+	loggableOldJob := oldJob.Loggable(loggableOldTinter)
+
+	if workerAssignChanged {
+		cpyTinter.AppendLog(j.eventLogger.LogAssignedJob(ctx, j.eventLogger.GenerateEvent(loggableJob, EventTag), editor))
+		j.tdb.LogEvent(j.db, ctx, cpyTinter)
+	}
+
 	updated.AppendLog(j.eventLogger.LogUpdated(ctx,
-		j.eventLogger.GenerateEvent(oldJob, EventTag),
-		j.eventLogger.GenerateEvent(updated, EventTag),
+		j.eventLogger.GenerateEvent(loggableOldJob, EventTag),
+		j.eventLogger.GenerateEvent(loggableJob, EventTag),
 		editor))
 	j.jdb.LogEvent(j.db, ctx, updated)
 
