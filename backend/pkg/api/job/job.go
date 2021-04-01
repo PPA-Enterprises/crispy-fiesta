@@ -48,16 +48,20 @@ func (j Job) Create(c *gin.Context, req PPA.Job, editor PPA.Editor) (*PPA.Job, e
 		req.ID = primitive.NewObjectID()
 	}
 
+	var workerAssignChanged bool = false
+	var loggableTinter *PPA.Tinter
 	const matched int = 0
 	if bytes.Compare([]byte(req.AssignedWorker.Hex()), []byte(primitive.NilObjectID.Hex())) != matched {
 		// update tinter
 		tinter, tinterErr := j.tdb.ViewById(j.db, ctx, req.AssignedWorker); if tinterErr == nil {
+			workerAssignChanged = true
+			loggableTinter = tinter
 			//tinter.AttatchJob(req.AssignedWorker)
 			//_ = j.tdb.Update(j.db, ctx, tinter.ID, tinter)
 			_ = j.tdb.AssignJobId(j.db, ctx, tinter.JobsCollection, req.AssignedWorker)
 			// TODO: Append Tinter Log?
-			tinter.AppendLog(j.eventLogger.LogAssignedJob(ctx, j.eventLogger.GenerateEvent(tinter, EventTag), editor))
-			j.tdb.LogEvent(j.db, ctx, tinter)
+			//tinter.AppendLog(j.eventLogger.LogAssignedJob(ctx, j.eventLogger.GenerateEvent(tinter, EventTag), editor))
+			//j.tdb.LogEvent(j.db, ctx, tinter)
 		} else {
 			return nil, PPA.NewAppError(NotFound, "Tinter does not exist")
 		}
@@ -65,6 +69,12 @@ func (j Job) Create(c *gin.Context, req PPA.Job, editor PPA.Editor) (*PPA.Job, e
 
 	created, err := j.jdb.Create(j.db, ctx, &req); if err != nil {
 		return nil, err
+	}
+
+	if workerAssignChanged {
+		loggableTinter.AppendLog(j.eventLogger.LogAssignedJob(ctx, j.eventLogger.GenerateEvent(created, EventTag), editor))
+		j.tdb.LogEvent(j.db, ctx, loggableTinter)
+
 	}
 
 	created.AppendLog(j.eventLogger.LogCreated(ctx, j.eventLogger.GenerateEvent(created, EventTag), editor))
@@ -157,17 +167,22 @@ func (j Job) Update(c *gin.Context, req Update, id string, editor PPA.Editor) (*
 		return nil, err
 	}
 
+
+	var workerAssignChanged bool = false
+	var loggableTinter *PPA.Tinter
 	const matched int = 0
 	if bytes.Compare([]byte(req.AssignedWorker.Hex()), []byte(primitive.NilObjectID.Hex())) != matched {
+		workerAssignChanged = true
 		// update tinter
 		tinter, tinterErr := j.tdb.ViewById(j.db, ctx, req.AssignedWorker); if tinterErr == nil {
+			loggableTinter = tinter
 			//tinter.AttatchJob(req.AssignedWorker)
 			//_ = j.tdb.Update(j.db, ctx, tinter.ID, tinter)
 			//remove old OID
 			_ = j.tdb.RemoveJobId(j.db, ctx, tinter.JobsCollection, oldJob.AssignedWorker)
 			_ = j.tdb.AssignJobId(j.db, ctx, tinter.JobsCollection, req.AssignedWorker)
-			tinter.AppendLog(j.eventLogger.LogAssignedJob(ctx, j.eventLogger.GenerateEvent(tinter, EventTag), editor))
-			j.tdb.LogEvent(j.db, ctx, tinter)
+			//tinter.AppendLog(j.eventLogger.LogAssignedJob(ctx, j.eventLogger.GenerateEvent(oldJob, EventTag), editor))
+			//j.tdb.LogEvent(j.db, ctx, tinter)
 			// TODO: Append Tinter Log?
 		} else {
 			return nil, PPA.NewAppError(NotFound, "Tinter does not exist")
@@ -210,6 +225,11 @@ func (j Job) Update(c *gin.Context, req Update, id string, editor PPA.Editor) (*
 
 	updated, err := j.jdb.ViewById(j.db, ctx, oid); if err != nil {
 		return nil, PPA.InternalError
+	}
+
+	if workerAssignChanged {
+		loggableTinter.AppendLog(j.eventLogger.LogAssignedJob(ctx, j.eventLogger.GenerateEvent(updated, EventTag), editor))
+		j.tdb.LogEvent(j.db, ctx, loggableTinter)
 	}
 
 	updated.AppendLog(j.eventLogger.LogUpdated(ctx,
