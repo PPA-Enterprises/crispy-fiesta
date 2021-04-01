@@ -203,6 +203,7 @@ func (j Job) Update(c *gin.Context, req Update, id string, editor PPA.Editor) (*
 		Title: req.Title,
 		ClientName: req.ClientName,
 		ClientPhone: req.ClientPhone,
+		AssignedWorker: req.AssignedWorker,
 		CarInfo: req.CarInfo,
 		Notes: req.Notes,
 		Tag: req.Tag,
