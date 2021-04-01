@@ -84,16 +84,6 @@ func (j Job) Create(c *gin.Context, req PPA.Job, editor PPA.Editor) (*PPA.Job, e
 		return nil, err
 	}
 
-	/*const matched int = 0
-	if bytes.Compare([]byte(req.AssignedWorker.Hex()), []byte(primitive.NilObjectID.Hex())) != matched {
-		// update tinter
-		tinter, tinterErr := j.tdb.ViewById(j.db, ctx, req.AssignedWorker); if tinterErr != nil {
-			tinter.AttatchJob(req.AssignedWorker)
-			_ = j.tdb.Update(j.db, ctx, tinter.ID, tinter)
-			// TODO: Append Tinter Log?
-		}
-	}*/
-
 	return created, nil
 }
 
@@ -133,6 +123,14 @@ func (j Job) Delete(c *gin.Context, id string, editor PPA.Editor) error {
 		return err
 	}
 
+	tinter, tinterErr := j.tdb.ViewById(j.db, ctx, job.AssignedWorker); if tinterErr == nil {
+		tinter.FindAndRemoveJob(job.AssignedWorker)
+		_ = j.tdb.PutJobs(j.db, ctx, tinter.ID, tinter.Jobs)
+		// TODO: Append Tinter Log?
+	} else {
+		return PPA.NewAppError(NotFound, "Tinter does not exist")
+	}
+
 	job.AppendLog(j.eventLogger.LogDeleted(ctx, editor))
 	j.jdb.LogEvent(j.db, ctx, job)
 	return j.jdb.Delete(j.db, ctx, oid)
@@ -153,6 +151,18 @@ func (j Job) Update(c *gin.Context, req Update, id string, editor PPA.Editor) (*
 
 	client, err := j.cdb.ViewByPhone(j.db, ctx, oldJob.ClientPhone); if err != nil {
 		return nil, err
+	}
+
+	const matched int = 0
+	if bytes.Compare([]byte(req.AssignedWorker.Hex()), []byte(primitive.NilObjectID.Hex())) != matched {
+		// update tinter
+		tinter, tinterErr := j.tdb.ViewById(j.db, ctx, req.AssignedWorker); if tinterErr == nil {
+			tinter.AttatchJob(req.AssignedWorker)
+			_ = j.tdb.Update(j.db, ctx, tinter.ID, tinter)
+			// TODO: Append Tinter Log?
+		} else {
+			return nil, PPA.NewAppError(NotFound, "Tinter does not exist")
+		}
 	}
 
 	if len(req.ClientPhone) > 0 {

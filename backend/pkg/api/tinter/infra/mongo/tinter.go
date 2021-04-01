@@ -128,6 +128,24 @@ func (t Tinter) Update(db *mongo.DBConnection, ctx context.Context, oid primitiv
 	return nil
 }
 
+func (t Tinter) PutJobs(db *mongo.DBConnection, ctx context.Context, oid primitive.ObjectID, update []primitive.ObjectID) error {
+	coll := db.Use(Collection)
+
+	filter := bson.D{{"_id", oid}}
+	updateDoc := bson.D{{"$set", bson.D{{"jobs", update}} }}
+
+	var oldDoc PPA.Tinter
+	err := coll.FindOneAndUpdate(ctx, filter, updateDoc).Decode(&oldDoc)
+
+	if err == mongodb.ErrNoDocuments {
+		return PPA.NewAppError(NotFound, "Tinter Not Found")
+	}
+
+	if err != nil {
+		return PPA.InternalError
+	}
+	return nil
+}
 func (t Tinter) LogEvent(db *mongo.DBConnection, ctx context.Context, update *PPA.Tinter) {
 	if err := t.Update(db, ctx, update.ID, update); err != nil {
 		fmt.Println(err)

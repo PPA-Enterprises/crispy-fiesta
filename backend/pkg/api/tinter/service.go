@@ -49,6 +49,7 @@ type Repository interface {
 	List(*mongo.DBConnection, context.Context, PPA.BulkFetchOptions) (*[]PPA.Tinter, error)
 	Delete(*mongo.DBConnection, context.Context, primitive.ObjectID) error
 	Update(*mongo.DBConnection, context.Context, primitive.ObjectID, *PPA.Tinter) error
+	PutJobs(*mongo.DBConnection, context.Context, primitive.ObjectID, []primitive.ObjectID) error
 	Populate(*mongo.DBConnection, context.Context, []primitive.ObjectID) ([]PPA.Job, error)
 	LogEvent(*mongo.DBConnection, context.Context, *PPA.Tinter)
 }

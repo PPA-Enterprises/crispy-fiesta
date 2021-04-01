@@ -53,6 +53,7 @@ type ClientRepository interface {
 type TinterRepository interface {
 	ViewById(*mongo.DBConnection, context.Context, primitive.ObjectID) (*PPA.Tinter, error)
 	Update(*mongo.DBConnection, context.Context, primitive.ObjectID, *PPA.Tinter) error
+	PutJobs(*mongo.DBConnection, context.Context, primitive.ObjectID, []primitive.ObjectID) error
 }
 
 type EventLogger interface {
