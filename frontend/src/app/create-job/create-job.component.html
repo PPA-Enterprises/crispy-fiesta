@@ -51,7 +51,7 @@
     <div class="row">
       <div class="col-8">
         <!-- Kick start -->
-        <div id="kick-start" class="card height-550">
+        <div id="kick-start" class="card height-600">
           <div class="card-header">
             <h4 class="card-title">Job Informaton</h4>
           </div>
@@ -59,7 +59,7 @@
             <div class="card-body">
               <div class="card-text">
                 <div class="form-row">
-                  <div class="col-md-6 mb-4 form-group">
+                  <div class="col-md-4 mb-4 form-group">
                     <!-- <label for="carInfo">Car Info</label> -->
                     <textarea class="form-control" aria-label="With textarea" name="carInfo" class="form-control" id="carInfo" placeholder="Car Info"
                     [(ngModel)]="model.carInfo" #carInfo="ngModel"
@@ -67,15 +67,7 @@
                     required></textarea>
                     <div *ngIf="userForm.submitted && !carInfo.errors?.required" class="valid-tooltip">Looks good!</div>
                   </div>
-                  <div class="col-md-6 mb-4 form-group">
-                  <!-- <div class="form-row"> -->
-                    <!-- <label for="apptInfo">Appt Info</label> -->
-                    <!-- <textarea class="form-control" aria-label="With textarea" name="apptInfo" class="form-control" id="apptInfo" placeholder="Appt Info"
-                    [(ngModel)]="model.apptInfo" #apptInfo="ngModel"
-                    [ngClass]="{ 'is-invalid': userForm.submitted && apptInfo.invalid, 'is-valid': userForm.submitted &&  !apptInfo.invalid }"
-                    required></textarea>
-                    <div *ngIf="userForm.submitted && !apptInfo.errors?.required" class="valid-tooltip">Looks good!</div> -->
-
+                  <div class="col-md-8 mb-4 form-group">
                     <div class="form-row">
                       <div class="form-group col">
                           <label>Primary Color:</label>
@@ -89,23 +81,20 @@
                     <div class="form-row">
                       <div class="form-group col pl-4">
                           <label>Starts At:</label><br>
-                          <!-- <input class="form-control" type="text" placeholder="yyyy-mm-dd" [(ngModel)]="startDateModel" ngbDatepicker #d1="ngbDatepicker" (focus)="d1.toggle()" (dateSelect)="updateStart($event)" /> -->
-                          <ngb-datepicker [(ngModel)]="startDateModel" ngbDatepicker #d1="ngbDatepicker" (dateSelect)="updateStart($event)"></ngb-datepicker>
-                          <form [formGroup]="form1">
-                          <ngb-timepicker [(ngModel)]="startTimeModel" meridian="true" formControlName="time"></ngb-timepicker>
-                          </form>
+                          <!-- code here -->
+                          <!-- <input [owlDateTimeTrigger]="db" [owlDateTime]="db" [(ngModel)]="startDate" name="startDate">
+                          <owl-date-time [startAt]="startDate" #db></owl-date-time> -->
+                          <owl-date-time-inline [(ngModel)]="startDate" [startAt]="startDate" name="startDate"></owl-date-time-inline>
+
                       </div>
                       <div class="form-group col pl-4">
                           <label>Ends At:</label><br>
-                          <!-- <input class="form-control" type="text" placeholder="yyyy-mm-dd" [(ngModel)]="endDateModel" ngbDatepicker #d2="ngbDatepicker" (focus)="d2.toggle()" (dateSelect)="updateEnd($event)" /> -->
-                          <ngb-datepicker [(ngModel)]="endDateModel" ngbDatepicker #d2="ngbDatepicker" (dateSelect)="updateEnd($event)"></ngb-datepicker>
-                          <form [formGroup]="form1">
-                            <ngb-timepicker [(ngModel)]="endTimeModel" meridian="true" formControlName="time"></ngb-timepicker>
-                          </form>
+                          <!-- code here -->
+                          <owl-date-time-inline [(ngModel)]="endDate" [startAt]="endDate" name="endDate"></owl-date-time-inline>
+                          <!-- <input [owlDateTimeTrigger]="dt" [owlDateTime]="dt" [(ngModel)]="endDate" name="endDate">
+                          <owl-date-time [startAt]="endDate" #dt></owl-date-time> -->
                         </div>
                     </div>
-
-                  <!-- </div> -->
                   </div>
                 </div>
               </div>

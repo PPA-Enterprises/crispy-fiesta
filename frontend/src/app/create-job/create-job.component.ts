@@ -4,7 +4,6 @@ import { JobService } from '../shared/services/job.service'
 import { Router, ActivatedRoute, ParamMap } from '@angular/router';
 import { Job } from '../shared/models/job.model';
 import { Color } from '../shared/models/color.model';
-import { NgbDateStruct, NgbTimeStruct, NgbCalendar, NgbTimepicker } from '@ng-bootstrap/ng-bootstrap';
 
 export class JobForm {
   public fname: string;
@@ -27,34 +26,14 @@ export class CreateJobComponent implements OnInit {
   job: Job;
   model = new JobForm();
   submitted = false;
-  startDateModel: NgbDateStruct;
-  endDateModel: NgbDateStruct;
-  startTimeModel = {hour: 12, minute: 0};
-  endTimeModel = {hour: 12, minute: 0};
-  startDate: NgbDateStruct;
-  endDate: NgbDateStruct;
-  form1: FormGroup;
-  form2: FormGroup
+  startDate: any;
+  endDate: any;
 
-  constructor(private jobService: JobService, private router: Router, private calendar: NgbCalendar, private fb: FormBuilder) { 
-    this.form1 = this.fb.group({
-      'time' : [this.startTimeModel, Validators.required],
-    })
-    this.form2 = this.fb.group({
-      'time' : [this.endTimeModel, Validators.required],
-    })
-  }
+  constructor(private jobService: JobService, private router: Router) {}
 
   ngOnInit(): void {
   }
 
-  public updateStart(date: NgbDateStruct) {
-    this.startDate = date;
-  }
-
-  public updateEnd(date: NgbDateStruct) {
-    this.endDate = date;
-  }
 
   onSubmit(form) {
     this.submitted = true
@@ -65,8 +44,8 @@ export class CreateJobComponent implements OnInit {
       car_info: this.model.carInfo,
       notes: this.model.notes,
       tag: "NEW",
-      start: new Date(this.startDate.year, this.startDate.month - 1, this.startDate.day, this.startTimeModel.hour, this.startTimeModel.minute),
-      end: new Date(this.endDate.year, this.endDate.month - 1, this.endDate.day, this.endTimeModel.hour, this.endTimeModel.minute),
+      start: this.startDate,
+      end: this.endDate,
       title: this.model.carInfo + " - " + this.model.fname + " " + this.model.lname,
       color: {
         primary: this.model.primary,
