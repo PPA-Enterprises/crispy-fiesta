@@ -55,6 +55,8 @@ export class JobService {
     return this.http.get<any>("http://localhost:8888/api/v1/jobs/id/"+id)
     .pipe(map((response) => {
 			if(response.success) {
+        response.payload.start = new Date(response.payload.start);
+        response.payload.end = new Date(response.payload.end);
 				return response.payload as Job;
 			} else {
 				return null;

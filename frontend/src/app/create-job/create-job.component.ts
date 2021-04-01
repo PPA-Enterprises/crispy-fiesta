@@ -4,29 +4,13 @@ import { JobService } from '../shared/services/job.service'
 import { Router, ActivatedRoute, ParamMap } from '@angular/router';
 import { Job } from '../shared/models/job.model';
 import { Color } from '../shared/models/color.model';
-import { startOfDay, endOfDay, subDays, addDays, endOfMonth, isSameDay, isSameMonth, addHours } from 'date-fns';
 import { NgbDateStruct, NgbTimeStruct, NgbCalendar, NgbTimepicker } from '@ng-bootstrap/ng-bootstrap';
-import {
-  getSeconds,
-  getMinutes,
-  getHours,
-  getDate,
-  getMonth,
-  getYear,
-  setSeconds,
-  setMinutes,
-  setHours,
-  setDate,
-  setMonth,
-  setYear
-} from 'date-fns';
 
 export class JobForm {
   public fname: string;
   public lname: string;
   public phone: string;
   public carInfo: string;
-  public apptInfo: string;
   public notes: string;
   public start: any;
   public end: any;
@@ -40,7 +24,6 @@ export class JobForm {
   styleUrls: ['./create-job.component.scss']
 })
 export class CreateJobComponent implements OnInit {
-  @Input() placeholder: string;
   job: Job;
   model = new JobForm();
   submitted = false;
@@ -53,7 +36,7 @@ export class CreateJobComponent implements OnInit {
   form1: FormGroup;
   form2: FormGroup
 
-  constructor(private jobService: JobService, private cdr: ChangeDetectorRef, private router: Router, private calendar: NgbCalendar, private fb: FormBuilder) { 
+  constructor(private jobService: JobService, private router: Router, private calendar: NgbCalendar, private fb: FormBuilder) { 
     this.form1 = this.fb.group({
       'time' : [this.startTimeModel, Validators.required],
     })
