@@ -17,6 +17,21 @@ type JobRef struct {
 	ID primitive.ObjectID `json:"-" bson:"_id"`
 	JobId primitive.ObjectID `json:"-" bson:"job_id"`
 }
+
+type LoggableTinter struct {
+	ID primitive.ObjectID `m:"Database ID"`
+	Name string `m:"Name"`
+	Phone string `m:"Phone Number"`
+}
+
+func (t *Tinter) Loggable() *LoggableTinter {
+	return &LoggableTinter{
+		ID: t.ID,
+		Name: t.Name,
+		Phone: t.Phone,
+	}
+}
+
 /*
 func (c *Tinter) AttatchJob(jobOid primitive.ObjectID) {
 	const matched int = 0
