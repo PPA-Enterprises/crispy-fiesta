@@ -34,12 +34,30 @@ type Update struct {
 	Color *PPA.CalendarMeta
 }
 
+type LoggableJob struct {
+	ID primitive.ObjectID `m:"Database ID"`
+	Title string `m:"Title of Job"`
+	ClientName string `m:"Client Name"`
+	ClientPhone string `m:"Client Phone Number"`
+	AssignedWorker LoggableTinter `m:"Assigned Tinter"`
+	CarInfo string `m:"Car Info"`
+	Notes string `m:"Notes"`
+	StartTime string `m:"Start Time"`
+	EndTime string `m:"End Time"`
+	Tag string `m:"Status Tag"`
+	Color *PPA.CalendarMeta `m:"Calendar Colors"`
+}
+
+type LoggableTinter struct {
+	ID primitive.ObjectID `m:"Database ID"`
+	Name string `m:"Name"`
+	Phone string `m:"Phone Number"`
+}
+
 type ClientUpdate struct {
 	Name string
 	Phone string
 }
-
-// TODO: Loggable Job
 
 func (j Job) Create(c *gin.Context, req PPA.Job, editor PPA.Editor) (*PPA.Job, error) {
 	duration := time.Now().Add(5*time.Second)
@@ -73,13 +91,31 @@ func (j Job) Create(c *gin.Context, req PPA.Job, editor PPA.Editor) (*PPA.Job, e
 		return nil, err
 	}
 
+	loggableJob := LoggableJob {
+			ID: created.ID,
+			Title: created.Title,
+			StartTime: created.StartTime,
+			EndTime: created.EndTime,
+			Tag: created.Tag,
+			AssignedWorker: LoggableTinter {
+				ID: loggableTinter.ID,
+				Name: loggableTinter.Name,
+				Phone: loggableTinter.Phone,
+			},
+			ClientName: created.ClientName,
+			ClientPhone: created.ClientPhone,
+			CarInfo: created.CarInfo,
+			Notes: created.Notes,
+			Color: created.Color,
+		}
+
 	if workerAssignChanged {
-		loggableTinter.AppendLog(j.eventLogger.LogAssignedJob(ctx, j.eventLogger.GenerateEvent(created, EventTag), editor))
+		loggableTinter.AppendLog(j.eventLogger.LogAssignedJob(ctx, j.eventLogger.GenerateEvent(loggableJob, EventTag), editor))
 		j.tdb.LogEvent(j.db, ctx, loggableTinter)
 
 	}
 
-	created.AppendLog(j.eventLogger.LogCreated(ctx, j.eventLogger.GenerateEvent(created, EventTag), editor))
+	created.AppendLog(j.eventLogger.LogCreated(ctx, j.eventLogger.GenerateEvent(loggableJob, EventTag), editor))
 	j.jdb.LogEvent(j.db, ctx, created)
 
 	if !j.clientExists(ctx, created.ClientPhone) {
@@ -152,6 +188,7 @@ func (j Job) Delete(c *gin.Context, id string, editor PPA.Editor) error {
 	return j.jdb.Delete(j.db, ctx, oid)
 }
 
+// TODO: Job history gets logged twice for some reason
 func (j Job) Update(c *gin.Context, req Update, id string, editor PPA.Editor) (*PPA.Job, error) {
 	duration := time.Now().Add(5*time.Second)
 	ctx, cancel := context.WithDeadline(c.Request.Context(), duration)
@@ -230,14 +267,50 @@ func (j Job) Update(c *gin.Context, req Update, id string, editor PPA.Editor) (*
 		return nil, PPA.InternalError
 	}
 
+	// should have made a factory
+	loggableJob := LoggableJob {
+			ID: updated.ID,
+			Title: updated.Title,
+			StartTime: updated.StartTime,
+			EndTime: updated.EndTime,
+			Tag: updated.Tag,
+			AssignedWorker: LoggableTinter {
+				ID: loggableTinter.ID,
+				Name: loggableTinter.Name,
+				Phone: loggableTinter.Phone,
+			},
+			ClientName: updated.ClientName,
+			ClientPhone: updated.ClientPhone,
+			CarInfo: updated.CarInfo,
+			Notes: updated.Notes,
+			Color: updated.Color,
+		}
+	loggableOldJob := LoggableJob {
+			ID: oldJob.ID,
+			Title: oldJob.Title,
+			StartTime: oldJob.StartTime,
+			EndTime: oldJob.EndTime,
+			Tag: oldJob.Tag,
+			AssignedWorker: LoggableTinter {
+				ID: loggableTinter.ID,
+				Name: loggableTinter.Name,
+				Phone: loggableTinter.Phone,
+			},
+			ClientPhone: oldJob.ClientPhone,
+			ClientName: oldJob.ClientName,
+			CarInfo: oldJob.CarInfo,
+			Notes: oldJob.Notes,
+			Color: oldJob.Color,
+		}
+
 	if workerAssignChanged {
-		loggableTinter.AppendLog(j.eventLogger.LogAssignedJob(ctx, j.eventLogger.GenerateEvent(updated, EventTag), editor))
+		loggableTinter.AppendLog(j.eventLogger.LogAssignedJob(ctx, j.eventLogger.GenerateEvent(loggableJob, EventTag), editor))
 		j.tdb.LogEvent(j.db, ctx, loggableTinter)
 	}
 
 	updated.AppendLog(j.eventLogger.LogUpdated(ctx,
-		j.eventLogger.GenerateEvent(oldJob, EventTag),
-		j.eventLogger.GenerateEvent(updated, EventTag),
+		j.eventLogger.GenerateEvent(loggableOldJob, EventTag),
+		j.eventLogger.GenerateEvent(loggableJob, EventTag),
 		editor))
 	j.jdb.LogEvent(j.db, ctx, updated)
 
