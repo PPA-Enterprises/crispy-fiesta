@@ -9,7 +9,6 @@ import (
 type createTinterRequest struct {
 	Name string `json:"name" binding:"required"`
 	Phone string `json:"phone" binding:"required"`
-	Jobs []string `json:"jobs"`
 }
 
 type updateRequest struct {
@@ -24,19 +23,11 @@ func (h HTTP) fromUpdateRequest(data *updateRequest) tinter.Update {
 	}
 }
 
-func (h HTTP) tryFromCreateTinterRequest(data *createTinterRequest) (PPA.Tinter, error) {
-	oids := make([]primitive.ObjectID, 0)
-	if len(data.Jobs) > 0 {
-		for _, id := range data.Jobs {
-			oid, err := primitive.ObjectIDFromHex(id); if err != nil { return PPA.Tinter{}, err }
-			oids = append(oids, oid)
-		}
-	}
-
+func (h HTTP) fromCreateTinterRequest(data *createTinterRequest) PPA.Tinter {
 	return PPA.Tinter {
 		ID: primitive.NewObjectID(),
 		Name: data.Name,
 		Phone: data.Phone,
-		Jobs: oids,
-	}, nil
+		JobsCollection: "",
+	}
 }

@@ -44,11 +44,7 @@ func (h HTTP) create(c *gin.Context) {
 		Collection: "events" + oid.Hex() + "a",
 	}
 
-	newTinter, createErr := h.tryFromCreateTinterRequest(&data); if createErr != nil {
-		PPA.Response(c, PPA.NewAppError(BadRequest, "Invalid OID in Jobs"))
-	}
-
-	created, err := h.service.Create(c, newTinter, editor); if err != nil {
+	created, err := h.service.Create(c, h.fromCreateTinterRequest(&data), editor); if err != nil {
 		PPA.Response(c, err); return
 	}
 	c.JSON(http.StatusCreated, tinterCreated(created)); return

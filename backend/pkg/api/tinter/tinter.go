@@ -33,6 +33,7 @@ func (t Tinter) Create(c *gin.Context, req PPA.Tinter, editor PPA.Editor) (*PPA.
 	for t.oidExists(ctx, req.ID) {
 		req.ID = primitive.NewObjectID()
 	}
+	req.JobsCollection = "tinter" + req.ID.Hex() + "b"
 
 	created, err := t.tdb.Create(t.db, ctx, &req); if err != nil {
 		return nil, err

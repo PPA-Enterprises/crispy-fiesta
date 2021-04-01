@@ -1,7 +1,7 @@
 package PPA
 
 import (
-	"bytes"
+//	"bytes"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -9,11 +9,15 @@ type Tinter struct {
 	ID primitive.ObjectID `json:"_id,omitempty" bson:"_id,omitempty" m:"Database ID"`
 	Name string `json:"name" bson:"name,omitempty" m:"Name"`
 	Phone string `json:"phone" bson:"phone,omitempty" m:"Phone Number"`
-	Jobs []primitive.ObjectID `json:"jobs" bson:"jobs,omitempty"`
+	JobsCollection string `json:"-" bson:"jobs_collection,omitempty"`
 	History []LogEvent `json:"history" bson:"history,omitempty"`
 }
 
-
+type JobRef struct {
+	ID primitive.ObjectID `json:"-" bson:"_id"`
+	JobId primitive.ObjectID `json:"-" bson:"job_id"`
+}
+/*
 func (c *Tinter) AttatchJob(jobOid primitive.ObjectID) {
 	const matched int = 0
 	var exists = false
@@ -28,8 +32,8 @@ func (c *Tinter) AttatchJob(jobOid primitive.ObjectID) {
 	if !exists {
 		c.Jobs = append(c.Jobs, jobOid)
 	}
-}
-
+}*/
+/*
 func (c *Tinter) FindAndRemoveJob(jobOid primitive.ObjectID) {
 	const matched int = 0
 	for i, oid := range c.Jobs {
@@ -40,7 +44,7 @@ func (c *Tinter) FindAndRemoveJob(jobOid primitive.ObjectID) {
 			return
 		}
 	}
-}
+}*/
 
 func (c *Tinter) AppendLog(event LogEvent) {
 	c.History = append(c.History, event)

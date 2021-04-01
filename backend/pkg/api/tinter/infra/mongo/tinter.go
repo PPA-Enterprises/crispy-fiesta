@@ -21,7 +21,6 @@ const (
 
 type Tinter struct{}
 func (t Tinter) Create(db *mongo.DBConnection, ctx context.Context, tinter *PPA.Tinter) (*PPA.Tinter, error) {
-	fmt.Println("CALLED")
 	coll := db.Use(Collection)
 
 	if(t.phoneExists(db, ctx, tinter.Phone)) {
@@ -128,24 +127,6 @@ func (t Tinter) Update(db *mongo.DBConnection, ctx context.Context, oid primitiv
 	return nil
 }
 
-func (t Tinter) PutJobs(db *mongo.DBConnection, ctx context.Context, oid primitive.ObjectID, update []primitive.ObjectID) error {
-	coll := db.Use(Collection)
-
-	filter := bson.D{{"_id", oid}}
-	updateDoc := bson.D{{"$set", bson.D{{"jobs", update}} }}
-
-	var oldDoc PPA.Tinter
-	err := coll.FindOneAndUpdate(ctx, filter, updateDoc).Decode(&oldDoc)
-
-	if err == mongodb.ErrNoDocuments {
-		return PPA.NewAppError(NotFound, "Tinter Not Found")
-	}
-
-	if err != nil {
-		return PPA.InternalError
-	}
-	return nil
-}
 func (t Tinter) LogEvent(db *mongo.DBConnection, ctx context.Context, update *PPA.Tinter) {
 	if err := t.Update(db, ctx, update.ID, update); err != nil {
 		fmt.Println(err)
@@ -166,30 +147,22 @@ func (t Tinter) Populate(db *mongo.DBConnection, ctx context.Context, oids []pri
 	return jobs, nil
 }
 
-/*
-func (t Tinter) RemoveJob(db *mongo.DBConnection, ctx context.Context, tinterPhone string, jobOid primitive.ObjectID) error {
-	fetched, err := t.ViewByPhone(db, ctx, tinterPhone); if err != nil {
-		return err
-	}
-	fetched.FindAndRemoveJob(jobOid)
+func (t Tinter) AssignJobId(db *mongo.DBConnection, ctx context.Context, collection string, OID primitive.ObjectID) error {
+	coll := db.Use(collection)
 
-	coll := db.Use(Collection)
-
-	filter := bson.D{{"_id", fetched.ID}}
-	updateDoc := bson.D{{"$set", fetched}}
-
-	var oldDoc PPA.Tinter
-	err = coll.FindOneAndUpdate(ctx, filter, updateDoc).Decode(&oldDoc)
-
-	if err == mongodb.ErrNoDocuments {
-		return PPA.NewAppError(NotFound, "Tinter Not Found")
-	}
-
-	if err != nil {
+	if _, err := coll.InsertOne(ctx, bson.D{{"job_id", OID}}); err != nil {
 		return PPA.InternalError
 	}
 	return nil
-}*/
+}
+
+func (t Tinter) RemoveJobId(db *mongo.DBConnection, ctx context.Context, collection string, OID primitive.ObjectID) error {
+	coll := db.Use(collection)
+	if _, delErr := coll.DeleteOne(ctx, bson.D{{"job_id", OID}}); delErr != nil {
+		return PPA.InternalError //db error
+	}
+	return nil
+}
 
 func (t Tinter) phoneExists(db *mongo.DBConnection, ctx context.Context, phone string) bool {
 	if _, err := t.ViewByPhone(db, ctx, phone); err != nil {
