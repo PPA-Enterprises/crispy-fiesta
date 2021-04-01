@@ -82,17 +82,17 @@
                       <div class="form-group col pl-4">
                           <label>Starts At:</label><br>
                           <!-- code here -->
-                          <input [owlDateTimeTrigger]="db" [owlDateTime]="db" [(ngModel)]="startDate">
-                          <owl-date-time [startAt]="startDate" #db></owl-date-time>
-                          <!-- <owl-date-time-inline [(ngModel)]="startDate" [startAt]="startDate"></owl-date-time-inline> -->
+                          <!-- <input [owlDateTimeTrigger]="db" [owlDateTime]="db" [(ngModel)]="startDate" name="startDate">
+                          <owl-date-time [startAt]="startDate" #db></owl-date-time> -->
+                          <owl-date-time-inline [(ngModel)]="startDate" [startAt]="startDate" name="startDate"></owl-date-time-inline>
 
                       </div>
                       <div class="form-group col pl-4">
                           <label>Ends At:</label><br>
                           <!-- code here -->
-                          <!-- <owl-date-time-inline [(ngModel)]="endDate" [startAt]="endDate"></owl-date-time-inline> -->
-                          <input [owlDateTimeTrigger]="dt" [owlDateTime]="dt" [(ngModel)]="endDate">
-                          <owl-date-time [startAt]="endDate" #dt></owl-date-time>
+                          <owl-date-time-inline [(ngModel)]="endDate" [startAt]="endDate" name="endDate"></owl-date-time-inline>
+                          <!-- <input [owlDateTimeTrigger]="dt" [owlDateTime]="dt" [(ngModel)]="endDate" name="endDate">
+                          <owl-date-time [startAt]="endDate" #dt></owl-date-time> -->
                         </div>
                     </div>
                   </div>

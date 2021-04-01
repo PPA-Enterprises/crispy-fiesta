@@ -29,8 +29,8 @@ export class EditJobComponent implements OnInit {
   submitted = false;
   name: string[];
   notClosed = true;
-  startDate: Date;
-  endDate: Date;
+  startDate: any;
+  endDate: any;
 
 
   constructor(private jobService: JobService, private route: ActivatedRoute, private router: Router) {}
@@ -68,28 +68,28 @@ export class EditJobComponent implements OnInit {
   }
 
   onSubmit(form) {
-    console.log(this.startDate);
+    //console.log(this.startDate);
     
-    // this.job = {
-    //   _id: this.job._id,
-    //   client_name: this.model.fname + " " + this.model.lname,
-    //   client_phone: this.model.phone,
-    //   car_info: this.model.carInfo,
-    //   notes: this.model.notes,
-    //   tag: "OPEN",
-    //   start: new Date(),
-    //   end: new Date(),
-    //   title: this.model.carInfo + " - " + this.model.fname + " " + this.model.lname,
-    //   color: {
-    //     primary: this.model.primary,
-    //     secondary: this.model.secondary,
-    //   }
-    // }
+    this.job = {
+      _id: this.job._id,
+      client_name: this.model.fname + " " + this.model.lname,
+      client_phone: this.model.phone,
+      car_info: this.model.carInfo,
+      notes: this.model.notes,
+      tag: "OPEN",
+      start: this.startDate,
+      end: this.endDate,
+      title: this.model.carInfo + " - " + this.model.fname + " " + this.model.lname,
+      color: {
+        primary: this.model.primary,
+        secondary: this.model.secondary,
+      }
+    }
 
-    // this.jobService.editJobById(this.id, this.job).subscribe((job: Job) => {
-    //   this.job = job
-    //   this.router.navigate(['/jobs']);
-    // })
+    this.jobService.editJobById(this.id, this.job).subscribe((job: Job) => {
+      this.job = job
+      this.router.navigate(['/jobs']);
+    })
   }
 
   sendToTintWork() {
