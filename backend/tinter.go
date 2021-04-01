@@ -14,8 +14,8 @@ type Tinter struct {
 }
 
 type JobRef struct {
-	ID primitive.ObjectID `json:"-" bson:"_id"`
-	JobId primitive.ObjectID `json:"-" bson:"job_id"`
+	ID primitive.ObjectID `json:"-" bson:"_id" m:"Database ID"`
+	JobId primitive.ObjectID `json:"-" bson:"job_id" m:"Database ID of Assigned Job"`
 }
 
 type LoggableTinter struct {

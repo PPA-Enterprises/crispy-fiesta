@@ -40,6 +40,7 @@ type JobRepository interface {
 	Update(*mongo.DBConnection, context.Context, primitive.ObjectID, *PPA.Job) error
 	ViewById(*mongo.DBConnection, context.Context, primitive.ObjectID) (*PPA.Job, error)
 	LogEvent(*mongo.DBConnection, context.Context, *PPA.Job)
+	UnassignTinter(*mongo.DBConnection, context.Context, *PPA.Job) error
 }
 
 type Repository interface {
@@ -49,6 +50,7 @@ type Repository interface {
 	List(*mongo.DBConnection, context.Context, PPA.BulkFetchOptions) (*[]PPA.Tinter, error)
 	Delete(*mongo.DBConnection, context.Context, primitive.ObjectID) error
 	Update(*mongo.DBConnection, context.Context, primitive.ObjectID, *PPA.Tinter) error
+	ListAssignedJobs(*mongo.DBConnection, context.Context, string, PPA.BulkFetchOptions) (*[]PPA.Job, error)
 	Populate(*mongo.DBConnection, context.Context, []primitive.ObjectID) ([]PPA.Job, error)
 	LogEvent(*mongo.DBConnection, context.Context, *PPA.Tinter)
 }
@@ -59,14 +61,6 @@ type EventLogger interface {
 	LogDeleted(context.Context, PPA.Editor) PPA.LogEvent
 	GenerateEvent(interface{}, string) PPA.EventMap
 }
-/*
-type PopulatedTinter struct {
-	ID primitive.ObjectID `json:"_id"`
-	Name string `json:"name"`
-	Phone string `json:"phone"`
-	Jobs []PPA.Job `json:"jobs"`
-	History []PPA.LogEvent `json:"history"`
-}*/
 
 type RBAC interface {
 }

@@ -40,6 +40,7 @@ type Repository interface {
 	Delete(*mongo.DBConnection, context.Context, primitive.ObjectID) error
 	Update(*mongo.DBConnection, context.Context, primitive.ObjectID, *PPA.Job) error
 	LogEvent(*mongo.DBConnection, context.Context, *PPA.Job)
+	UnassignTinter(*mongo.DBConnection, context.Context, *PPA.Job) error
 }
 
 type ClientRepository interface {

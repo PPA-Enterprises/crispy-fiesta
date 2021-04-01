@@ -34,26 +34,6 @@ type Update struct {
 	Color *PPA.CalendarMeta
 }
 
-type LoggableJob struct {
-	ID primitive.ObjectID `m:"Database ID"`
-	Title string `m:"Title of Job"`
-	ClientName string `m:"Client Name"`
-	ClientPhone string `m:"Client Phone Number"`
-	AssignedWorker LoggableTinter `m:"Assigned Tinter"`
-	CarInfo string `m:"Car Info"`
-	Notes string `m:"Notes"`
-	StartTime string `m:"Start Time"`
-	EndTime string `m:"End Time"`
-	Tag string `m:"Status Tag"`
-	Color *PPA.CalendarMeta `m:"Calendar Colors"`
-}
-
-type LoggableTinter struct {
-	ID primitive.ObjectID `m:"Database ID"`
-	Name string `m:"Name"`
-	Phone string `m:"Phone Number"`
-}
-
 type ClientUpdate struct {
 	Name string
 	Phone string
@@ -69,44 +49,28 @@ func (j Job) Create(c *gin.Context, req PPA.Job, editor PPA.Editor) (*PPA.Job, e
 	}
 
 	var workerAssignChanged bool = false
-	var loggableTinter *PPA.Tinter
+	var cpyTinter *PPA.Tinter
 	const matched int = 0
 	if bytes.Compare([]byte(req.AssignedWorker.Hex()), []byte(primitive.NilObjectID.Hex())) != matched {
 		// update tinter
 		tinter, tinterErr := j.tdb.ViewById(j.db, ctx, req.AssignedWorker); if tinterErr == nil {
 			workerAssignChanged = true
-			loggableTinter = tinter
-			_ = j.tdb.AssignJobId(j.db, ctx, tinter.JobsCollection, req.AssignedWorker)
+			cpyTinter = tinter
+			_ = j.tdb.AssignJobId(j.db, ctx, tinter.JobsCollection, req.ID)
 		} else {
 			return nil, PPA.NewAppError(NotFound, "Tinter does not exist")
 		}
 	}
-
 	created, err := j.jdb.Create(j.db, ctx, &req); if err != nil {
 		return nil, err
 	}
 
-	loggableJob := LoggableJob {
-			ID: created.ID,
-			Title: created.Title,
-			StartTime: created.StartTime,
-			EndTime: created.EndTime,
-			Tag: created.Tag,
-			AssignedWorker: LoggableTinter {
-				ID: loggableTinter.ID,
-				Name: loggableTinter.Name,
-				Phone: loggableTinter.Phone,
-			},
-			ClientName: created.ClientName,
-			ClientPhone: created.ClientPhone,
-			CarInfo: created.CarInfo,
-			Notes: created.Notes,
-			Color: created.Color,
-		}
+	loggableTinter := cpyTinter.Loggable()
+	loggableJob := created.Loggable(loggableTinter)
 
 	if workerAssignChanged {
-		loggableTinter.AppendLog(j.eventLogger.LogAssignedJob(ctx, j.eventLogger.GenerateEvent(loggableJob, EventTag), editor))
-		j.tdb.LogEvent(j.db, ctx, loggableTinter)
+		cpyTinter.AppendLog(j.eventLogger.LogAssignedJob(ctx, j.eventLogger.GenerateEvent(loggableJob, EventTag), editor))
+		j.tdb.LogEvent(j.db, ctx, cpyTinter)
 
 	}
 
@@ -201,13 +165,13 @@ func (j Job) Update(c *gin.Context, req Update, id string, editor PPA.Editor) (*
 
 
 	var workerAssignChanged bool = false
-	var loggableTinter *PPA.Tinter
+	var cpyTinter *PPA.Tinter
 	const matched int = 0
 	if bytes.Compare([]byte(req.AssignedWorker.Hex()), []byte(primitive.NilObjectID.Hex())) != matched {
 		workerAssignChanged = true
 		// update tinter
 		tinter, tinterErr := j.tdb.ViewById(j.db, ctx, req.AssignedWorker); if tinterErr == nil {
-			loggableTinter = tinter
+			cpyTinter = tinter
 			// remove old OID
 			_ = j.tdb.RemoveJobId(j.db, ctx, tinter.JobsCollection, oldJob.AssignedWorker)
 			// insert the replacement
@@ -256,45 +220,22 @@ func (j Job) Update(c *gin.Context, req Update, id string, editor PPA.Editor) (*
 		return nil, PPA.InternalError
 	}
 
-	// should have made a factory
-	loggableJob := LoggableJob {
-			ID: updated.ID,
-			Title: updated.Title,
-			StartTime: updated.StartTime,
-			EndTime: updated.EndTime,
-			Tag: updated.Tag,
-			AssignedWorker: LoggableTinter {
-				ID: loggableTinter.ID,
-				Name: loggableTinter.Name,
-				Phone: loggableTinter.Phone,
-			},
-			ClientName: updated.ClientName,
-			ClientPhone: updated.ClientPhone,
-			CarInfo: updated.CarInfo,
-			Notes: updated.Notes,
-			Color: updated.Color,
-		}
-	loggableOldJob := LoggableJob {
-			ID: oldJob.ID,
-			Title: oldJob.Title,
-			StartTime: oldJob.StartTime,
-			EndTime: oldJob.EndTime,
-			Tag: oldJob.Tag,
-			AssignedWorker: LoggableTinter {
-				ID: loggableTinter.ID,
-				Name: loggableTinter.Name,
-				Phone: loggableTinter.Phone,
-			},
-			ClientPhone: oldJob.ClientPhone,
-			ClientName: oldJob.ClientName,
-			CarInfo: oldJob.CarInfo,
-			Notes: oldJob.Notes,
-			Color: oldJob.Color,
-		}
+	loggableTinter := cpyTinter.Loggable()
+	loggableJob := updated.Loggable(loggableTinter)
+
+	// fetch the old job's tinter for logging
+	var loggableOldTinter *PPA.LoggableTinter
+	oldTinter, oldTErr := j.tdb.ViewById(j.db, ctx, oldJob.AssignedWorker); if oldTErr != nil {
+		loggableOldTinter = nil
+	} else {
+		loggableOldTinter = oldTinter.Loggable()
+	}
+
+	loggableOldJob := oldJob.Loggable(loggableOldTinter)
 
 	if workerAssignChanged {
-		loggableTinter.AppendLog(j.eventLogger.LogAssignedJob(ctx, j.eventLogger.GenerateEvent(loggableJob, EventTag), editor))
-		j.tdb.LogEvent(j.db, ctx, loggableTinter)
+		cpyTinter.AppendLog(j.eventLogger.LogAssignedJob(ctx, j.eventLogger.GenerateEvent(loggableJob, EventTag), editor))
+		j.tdb.LogEvent(j.db, ctx, cpyTinter)
 	}
 
 	updated.AppendLog(j.eventLogger.LogUpdated(ctx,

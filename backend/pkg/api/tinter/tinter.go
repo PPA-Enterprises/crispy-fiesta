@@ -4,6 +4,7 @@ import(
 	"PPA"
 	"context"
 	"net/http"
+	"fmt"
 	"time"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -87,13 +88,12 @@ func (t Tinter) Delete(c *gin.Context, id string, editor PPA.Editor) error {
 	tinter, err := t.tdb.ViewById(t.db, ctx, oid); if err != nil {
 		return OidNotFound
 	}
-	// delete jobs
-	//cl.deletejobs(ctx, client.Jobs, editor)
+	// unassign tinter from jobs
+	_ = t.unassignFromJobs(ctx, tinter.JobsCollection, editor)
 
 	tinter.AppendLog(t.eventLogger.LogDeleted(ctx, editor))
 	t.tdb.LogEvent(t.db, ctx, tinter)
 	return t.tdb.Delete(t.db, ctx, oid)
-
 }
 
 func (t Tinter) Update(c *gin.Context, req Update, id string, editor PPA.Editor) (*PPA.Tinter, error) {
@@ -190,6 +190,40 @@ func (t Tinter) oidExists(ctx context.Context, oid primitive.ObjectID) bool {
 	return err == nil
 }
 
+func (t Tinter) unassignFromJobs(ctx context.Context, collection string, editor PPA.Editor) error {
+	jobs, err := t.tdb.ListAssignedJobs(t.db, ctx, collection,
+		PPA.BulkFetchOptions {
+			All: true,
+	}); if err != nil {
+		return err
+	}
+
+	for _, job := range *jobs {
+		oldJob := job
+		job.AssignedWorker = primitive.NilObjectID
+		_ = t.jdb.UnassignTinter(t.db, ctx, &job)
+
+		var loggableOldTinter *PPA.LoggableTinter
+		oldTinter, oldTErr := t.tdb.ViewById(t.db, ctx, oldJob.AssignedWorker); if oldTErr != nil {
+			loggableOldTinter = nil
+		} else {
+			loggableOldTinter = oldTinter.Loggable()
+		}
+
+		loggableOldJob := oldJob.Loggable(loggableOldTinter)
+		loggableJob := job.Loggable(nil)
+
+		job.AppendLog(t.eventLogger.LogUpdated(ctx,
+		t.eventLogger.GenerateEvent(loggableOldJob, EventTag),
+		t.eventLogger.GenerateEvent(loggableJob, EventTag),
+		editor))
+
+		err := t.jdb.Update(t.db, ctx, job.ID, &job); if err != nil {
+			fmt.Println(err)
+		}
+	}
+	return nil
+}
 /*
 func (t Tinter) deletejobs(ctx context.Context, oids []primitive.ObjectID, editor PPA.Editor) {
 	for _, oid := range oids {
@@ -226,6 +260,7 @@ func (t Tinter) updateJobs(ctx context.Context, oids []primitive.ObjectID, updat
 				cl.eventLogger.GenerateEvent(newDoc, EventTag),
 				editor))
 			cl.jdb.LogEvent(cl.db, ctx, newDoc)
+	fmt.Print(e)
 		}
 	}
 }*/

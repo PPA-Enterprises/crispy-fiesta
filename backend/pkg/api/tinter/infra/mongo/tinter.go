@@ -64,7 +64,7 @@ func(t Tinter) ViewByPhone(db *mongo.DBConnection, ctx context.Context, phone st
 
 func(t Tinter) List(db *mongo.DBConnection, ctx context.Context, fetchOpts PPA.BulkFetchOptions) (*[]PPA.Tinter, error) {
 	if fetchOpts.All {
-		return fetchAll(db, ctx, fetchOpts.Sort)
+		return fetchAll(db, ctx, fetchOpts.Sort, Collection)
 	}
 
 	coll := db.Use(Collection)
@@ -164,6 +164,43 @@ func (t Tinter) RemoveJobId(db *mongo.DBConnection, ctx context.Context, collect
 	return nil
 }
 
+func(t Tinter) ListAssignedJobs(db *mongo.DBConnection, ctx context.Context, collection string, fetchOpts PPA.BulkFetchOptions) (*[]PPA.Job, error) {
+	if fetchOpts.All {
+		return fetchAllJobs(db, ctx, fetchOpts.Sort, collection)
+	}
+
+	coll := db.Use(collection)
+	findOpts := options.
+	Find().
+	SetSkip(int64(fetchOpts.Source)).
+	SetLimit(int64(fetchOpts.Next))
+
+	if fetchOpts.Sort {
+		findOpts.SetSort(bson.D{{"_id", -1}})
+	}
+
+	cursor, err := coll.Find(ctx, bson.D{{}}, findOpts); if err != nil {
+		//perhaps a better error like no docs match
+		return nil, PPA.InternalError
+	}
+	defer cursor.Close(ctx)
+
+	var jobRefs []PPA.JobRef
+	if err = cursor.All(ctx, &jobRefs); err != nil {
+		return nil, PPA.InternalError
+	}
+
+	jobs := make([]PPA.Job, 0)
+
+	coll = db.Use("jobs")
+	var j PPA.Job
+	for _, ref := range jobRefs {
+		if err := coll.FindOne(ctx, bson.D{{"_id", ref.JobId}}).Decode(&j); err == nil {
+			jobs = append(jobs, j)
+		}
+	}
+	return &jobs, nil
+}
 func (t Tinter) phoneExists(db *mongo.DBConnection, ctx context.Context, phone string) bool {
 	if _, err := t.ViewByPhone(db, ctx, phone); err != nil {
 		return false
@@ -171,8 +208,8 @@ func (t Tinter) phoneExists(db *mongo.DBConnection, ctx context.Context, phone s
 	return true
 }
 
-func fetchAll(db *mongo.DBConnection, ctx context.Context, sort bool) (*[]PPA.Tinter, error) {
-	coll := db.Use(Collection)
+func fetchAll(db *mongo.DBConnection, ctx context.Context, sort bool, collection string) (*[]PPA.Tinter, error) {
+	coll := db.Use(collection)
 	opts := options.Find()
 
 	if sort {
@@ -190,4 +227,36 @@ func fetchAll(db *mongo.DBConnection, ctx context.Context, sort bool) (*[]PPA.Ti
 		return nil, PPA.InternalError
 	}
 	return &tinters, nil
+}
+
+func fetchAllJobs(db *mongo.DBConnection, ctx context.Context, sort bool, collection string) (*[]PPA.Job, error) {
+	coll := db.Use(collection)
+	opts := options.Find()
+
+	if sort {
+		opts.SetSort(bson.D{{"_id", -1}})
+	}
+
+	cursor, err := coll.Find(ctx, bson.D{{}}, opts); if err != nil {
+		return nil, PPA.InternalError
+	}
+	defer cursor.Close(ctx)
+
+	var jobRefs []PPA.JobRef
+	if err = cursor.All(ctx, &jobRefs); err != nil {
+		// TODO: check for err no docs?
+		return nil, PPA.InternalError
+	}
+
+
+	jobs := make([]PPA.Job, 0)
+
+	coll = db.Use("jobs")
+	var j PPA.Job
+	for _, ref := range jobRefs {
+		if err := coll.FindOne(ctx, bson.D{{"_id", ref.JobId}}).Decode(&j); err == nil {
+			jobs = append(jobs, j)
+		}
+	}
+	return &jobs, nil
 }
