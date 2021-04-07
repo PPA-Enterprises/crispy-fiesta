@@ -51,6 +51,8 @@ export class CreateJobComponent implements OnInit {
       secondary_color: this.model.secondary,
     }   
 
+    console.log(this.job)
+
     this.jobService.createJob(this.job).subscribe((job: Job) => {
         this.router.navigate(['/jobs']);
     })
