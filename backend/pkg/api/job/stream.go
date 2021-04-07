@@ -16,7 +16,7 @@ type JobStream struct {
 }
 
 type StreamService interface {
-	Subscribe(*gin.Context, chan string) error
+	Subscribe(*gin.Context, *PPA.StreamEvent) error
 }
 
 type TinterViewer interface {

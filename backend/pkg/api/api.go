@@ -72,8 +72,8 @@ func StreamAPI(cfg *config.Configuration) error {
 		c.JSON(404, gin.H{"message": "Not Found."})
 	})
 
-	stream := NewStreamServer()
-	server.Use(stream.ServeHTTP())
+	jobStream := NewStreamServer()
+	server.Use(jobStream.ServeHTTP())
 
 	v1 := server.Group("/stream/v1")
 	rbac := rbac.Service{}
@@ -84,7 +84,7 @@ func StreamAPI(cfg *config.Configuration) error {
 	}
 
 	authMiddleware := authMw.Middleware(jwt)
-	jobTransport.NewStream(jobService.InitStream(db, rbac, tinterRepo.Tinter{}), stream.Message, v1, authMiddleware)
+	jobTransport.NewStream(jobService.InitStream(db, rbac, tinterRepo.Tinter{}), jobStream, v1, authMiddleware)
 	server.Run(":8085")
 	return nil
 }
