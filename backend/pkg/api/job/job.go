@@ -218,14 +218,15 @@ func (j Job) Update(c *gin.Context, req Update, id string, editor PPA.Editor) (*
 		return nil, err
 	}
 
-	if err = j.cdb.Update(j.db, ctx, client.ID, &PPA.Client {
-		Name: req.ClientName,
-		Phone: req.ClientPhone,
-	}); err != nil {
-		return nil, err
+	if client.Name != req.ClientName || client.Phone != req.ClientPhone {
+		if err = j.cdb.Update(j.db, ctx, client.ID, &PPA.Client {
+			Name: req.ClientName,
+			Phone: req.ClientPhone,
+		}); err != nil {
+			return nil, err
+		}
+		j.updateJobs(ctx, client.Jobs, ClientUpdate{ Name: req.ClientName, Phone: req.ClientPhone }, editor)
 	}
-
-	j.updateJobs(ctx, client.Jobs, ClientUpdate{ Name: req.ClientName, Phone: req.ClientPhone }, editor)
 
 	updated, err := j.jdb.ViewById(j.db, ctx, oid); if err != nil {
 		return nil, PPA.InternalError
