@@ -20,7 +20,7 @@ const (
 func NewHTTP(service eventlog.Service, router *gin.RouterGroup, authMw gin.HandlerFunc) {
 	httpTransport := HTTP{service}
 	routes := router.Group("/eventlogs")
-	routes.GET("/", httpTransport.list)
+	routes.GET("/", authMw, httpTransport.list)
 }
 
 func (h HTTP) list(c *gin.Context) {

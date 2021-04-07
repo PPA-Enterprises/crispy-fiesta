@@ -21,13 +21,13 @@ const (
 func NewHTTP(service client.Service, router *gin.RouterGroup, authMw gin.HandlerFunc) {
 	httpTransport := HTTP{service}
 	routes := router.Group("/clients")
-	routes.POST("/", httpTransport.create)
-	routes.GET("/", httpTransport.list)
-	routes.GET("/id/:id", httpTransport.viewById)
-	routes.GET("/phone/:phone", httpTransport.viewByPhone)
-	routes.PATCH("/:id", httpTransport.update)
-	routes.DELETE("/:id", httpTransport.delete)
-	routes.PUT("/labels/:id", httpTransport.putClientLabels)
+	routes.POST("/", authMw, httpTransport.create)
+	routes.GET("/", authMw, httpTransport.list)
+	routes.GET("/id/:id", authMw, httpTransport.viewById)
+	routes.GET("/phone/:phone", authMw, httpTransport.viewByPhone)
+	routes.PATCH("/:id", authMw, httpTransport.update)
+	routes.DELETE("/:id", authMw, httpTransport.delete)
+	routes.PUT("/labels/:id", authMw, httpTransport.putClientLabels)
 }
 
 func (h HTTP) create(c *gin.Context) {
