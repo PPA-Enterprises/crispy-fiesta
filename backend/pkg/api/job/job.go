@@ -357,3 +357,8 @@ func (j Job) updateJobs(ctx context.Context, oids []primitive.ObjectID, currOID 
 		}
 	}
 }
+
+func (j JobStream) Subscribe(c *gin.Context, stream chan string) error {
+
+	return nil
+}
