@@ -8,7 +8,7 @@ import { CustomizerService } from 'app/shared/services/customizer.service';
   selector: 'app-content-layout',
   templateUrl: './content-layout.component.html',
   styleUrls: ['./content-layout.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.Default
 })
 
 export class ContentLayoutComponent implements OnInit, OnDestroy {

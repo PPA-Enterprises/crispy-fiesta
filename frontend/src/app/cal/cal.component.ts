@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, ViewChild, TemplateRef, OnInit } from '@angular/core';
+import { Component, ChangeDetectionStrategy, ViewChild, TemplateRef, OnInit, ViewEncapsulation } from '@angular/core';
 import { Router } from '@angular/router';
 import { startOfDay, endOfDay, subDays, addDays, endOfMonth, isSameDay, isSameMonth, addHours } from 'date-fns';
 import { Subject } from 'rxjs';
@@ -12,10 +12,10 @@ import { Client } from '../shared/models/client.model'
 
 @Component({
   selector: 'app-page',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './cal.component.html',
   styleUrls: ['./cal.component.scss'],
-  //encapsulation: ViewEncapsulation.None
+  //changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None
 })
 
 export class CalComponent implements OnInit{
@@ -47,8 +47,10 @@ export class CalComponent implements OnInit{
         }
         this.events.push(job);
       }
-      console.log(this.events);
+      this.refresh.next();
     })
+
+    
   }
 
 
