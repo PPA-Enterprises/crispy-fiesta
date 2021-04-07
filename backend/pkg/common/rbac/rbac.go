@@ -12,6 +12,6 @@ func boolToErr(b bool) error {
 	return PPA.Forbidden
 }
 
-func isAdmin(u *PPA.User) bool {
+func IsAdmin(u *PPA.AuthUser) bool {
 	return u.Role == "admin"
 }

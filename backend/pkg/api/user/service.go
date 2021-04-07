@@ -58,6 +58,7 @@ type EventLogger interface {
 }
 
 type RBAC interface {
+	IsAdmin(*PPA.AuthUser) bool
 	//User(*gin.Context) PPA.AuthUser
 	//AccountCreate(*gin.Context) error
 }
