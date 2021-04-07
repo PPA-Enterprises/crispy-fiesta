@@ -1,11 +1,10 @@
-package client
+package clientlabel
 import (
 	"PPA"
 	"pkg/common/mongo"
 	"github.com/gin-gonic/gin"
 	"context"
 	dbQuery "pkg/api/clientlabel/infra/mongo"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type ClientLabelStream struct {
@@ -24,9 +23,9 @@ type StreamService interface {
 }
 
 func NewStream(db *mongo.DBConnection, cldb StreamRepository, rbac RBAC) *ClientLabelStream {
-	return &ClientStream{db: db, cldb: cldb, rbac: rbac}
+	return &ClientLabelStream{db: db, cldb: cldb, rbac: rbac}
 }
 
 func InitStream(db *mongo.DBConnection, rbac RBAC) *ClientLabelStream {
-	return NewStream(db, dbQuery.ClientLabel{}, jdb, ldb, rbac)
+	return NewStream(db, dbQuery.ClientLabel{}, rbac)
 }

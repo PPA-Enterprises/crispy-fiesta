@@ -29,7 +29,6 @@ import (
 	clientLabelTransport "pkg/api/clientlabel/transport"
 	clientLabelService "pkg/api/clientlabel"
 	labelRepo "pkg/api/clientlabel/infra/mongo"
-	//jobRepo "pkg/api/job/infra/mongo"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
@@ -74,8 +73,10 @@ func StreamAPI(cfg *config.Configuration) error {
 
 	jobStream := NewStreamServer()
 	clientStream := NewStreamServer()
+	clientLabelStream := NewStreamServer()
 	server.Use(jobStream.ServeHTTP())
 	server.Use(clientStream.ServeHTTP())
+	server.Use(clientLabelStream.ServeHTTP())
 
 	v1 := server.Group("/stream/v1")
 	rbac := rbac.Service{}
@@ -88,6 +89,7 @@ func StreamAPI(cfg *config.Configuration) error {
 	authMiddleware := authMw.Middleware(jwt)
 	jobTransport.NewStream(jobService.InitStream(db, rbac, tinterRepo.Tinter{}), jobStream, v1, authMiddleware)
 	clientTransport.NewStream(clientService.InitStream(db, rbac, jobRepo.Job{}, labelRepo.ClientLabel{}), clientStream, v1, authMiddleware)
+	clientLabelTransport.NewStream(clientLabelService.InitStream(db, rbac), clientLabelStream, v1, authMiddleware)
 	server.Run(":8085")
 	return nil
 }

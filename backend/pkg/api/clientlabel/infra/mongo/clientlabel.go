@@ -123,6 +123,34 @@ func (cl ClientLabel) PutLabels(db *mongo.DBConnection, ctx context.Context, oid
 	return nil
 }
 
+func (cl ClientLabel) Stream(db *mongo.DBConnection, ctx context.Context, tx chan *PPA.StreamResult) {
+	coll := db.Use(Collection)
+
+	changeStream, streamErr := coll.Watch(ctx, mongodb.Pipeline{}); if streamErr != nil {
+		fmt.Println(streamErr)
+		return
+	}
+
+	defer changeStream.Close(ctx)
+
+	for changeStream.Next(ctx) {
+		var data bson.M
+		if err := changeStream.Decode(&data); err != nil {
+			fmt.Println(err)
+			return
+		}
+		oid := data["documentKey"].(primitive.M)["_id"].(primitive.ObjectID)
+
+		var label PPA.ClientLabel
+		_ = coll.FindOne(ctx, bson.D{{"_id", oid}}).Decode(&label)
+
+		tx <-&PPA.StreamResult {
+			EventType:data["operationType"].(string),
+			Data: label,
+		}
+	}
+}
+
 func (cl ClientLabel) LogEvent(db *mongo.DBConnection, ctx context.Context, update *PPA.ClientLabel) {
 	if err := cl.Update(db, ctx, update.ID, update); err != nil {
 		fmt.Println(err)
