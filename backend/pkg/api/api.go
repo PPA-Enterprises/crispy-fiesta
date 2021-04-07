@@ -1,6 +1,7 @@
 package api
 
 import (
+	"log"
 	"crypto/sha1"
 	"pkg/common/config"
 	"pkg/common/mongo"
@@ -62,4 +63,113 @@ func Start(cfg *config.Configuration) error {
 	eventlogTransport.NewHTTP(eventlogService.Init(db, userRepo.User{}, rbac), v1, authMiddleware)
 	server.Run(cfg.Server.Port)
 	return nil
+}
+
+func StreamAPI(cfg *config.Configuration) error {
+	//db := mongo.Init("mongodb://localhost:27017", "PPA")
+	server := gin.Default()
+	server.NoRoute(func(c *gin.Context) {
+		c.JSON(404, gin.H{"message": "Not Found."})
+	})
+
+	stream := NewStreamServer()
+	server.Use(stream.serveHTTP())
+
+	//v1 := server.Group("/stream/v1")
+	//rbac := rbac.Service{}
+	//security := secure.New(sha1.New())
+	//jwt, err := jwt.New(cfg.JWT.SigningAlgorithm, "my asdfasfasdfsafsadfasfasfasfsafasfsadfsadsecret from os get env", cfg.JWT.DurationMinutes, cfg.JWT.MinSecretLength)
+
+	//if err != nil {
+		//return err
+	//}
+
+	//authMiddleware := authMw.Middleware(jwt)
+	server.Run(":8085")
+	return nil
+}
+
+type Event struct {
+	// Events are pushed to this channel by the main events-gathering routine
+	Message chan string
+
+	// New client connections
+	NewClients chan chan string
+
+	// Closed client connections
+	ClosedClients chan chan string
+
+	// Total client connections
+	TotalClients map[chan string]bool
+}
+
+type ClientChan chan string
+
+func NewStreamServer() (event *Event) {
+
+	event = &Event{
+		Message:       make(chan string),
+		NewClients:    make(chan chan string),
+		ClosedClients: make(chan chan string),
+		TotalClients:  make(map[chan string]bool),
+	}
+
+	go event.listen()
+
+	return
+}
+
+func (stream *Event) listen() {
+	for {
+		select {
+		// Add new available client
+		case client := <-stream.NewClients:
+			stream.TotalClients[client] = true
+			log.Printf("Client added. %d registered clients", len(stream.TotalClients))
+
+		// Remove closed client
+		case client := <-stream.ClosedClients:
+			delete(stream.TotalClients, client)
+			log.Printf("Removed client. %d registered clients", len(stream.TotalClients))
+
+		// Broadcast message to client
+		case eventMsg := <-stream.Message:
+			for clientMessageChan := range stream.TotalClients {
+				clientMessageChan <- eventMsg
+			}
+		}
+	}
+}
+
+func (stream *Event) serveHTTP() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		// Initialize client channel
+		clientChan := make(ClientChan)
+
+		// Send new connection to event server
+		stream.NewClients <- clientChan
+
+		defer func() {
+			// Send closed connection to event server
+			stream.ClosedClients <- clientChan
+		}()
+
+		go func() {
+			// Send connection that is closed by client to event server
+			<-c.Done()
+			stream.ClosedClients <- clientChan
+		}()
+
+		c.Next()
+	}
+}
+
+func HeadersMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.Writer.Header().Set("Content-Type", "text/event-stream")
+		c.Writer.Header().Set("Cache-Control", "no-cache")
+		c.Writer.Header().Set("Connection", "keep-alive")
+		c.Writer.Header().Set("Transfer-Encoding", "chunked")
+		c.Next()
+	}
 }

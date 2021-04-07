@@ -14,6 +14,7 @@ func main() {
 	checkErr(err)
 
 	checkErr(api.Start(cfg))
+	checkErr(api.StreamAPI(cfg))
 }
 
 func checkErr(err error) {
