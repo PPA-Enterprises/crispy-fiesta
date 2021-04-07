@@ -21,10 +21,10 @@ func Middleware(tokenParser TokenParser) gin.HandlerFunc {
 		claims := token.Claims.(jwt.MapClaims)
 
 		id := string(claims["_id"].(string))
-		email := string(claims["e"].(string))
+		name := string(claims["name"].(string))
 
 		c.Set("_id", id)
-		c.Set("email", email)
+		c.Set("name", name)
 
 		c.Next()
 	}

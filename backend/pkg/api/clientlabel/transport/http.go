@@ -27,18 +27,22 @@ func NewHTTP(service clientlabel.Service, router *gin.RouterGroup, authMw gin.Ha
 }
 
 func (h HTTP) create(c *gin.Context) {
-	//check that user is allowed to make this request
-
 	var data createRequest
 	if err := c.ShouldBindJSON(&data); err != nil {
 		PPA.Response(c, err); return
 	}
 
-	oid := primitive.NewObjectID()
+	editorId := c.GetString(PPA.IdKey)
+	editorName := c.GetString(PPA.NameKey)
+
+	editorOid, err := primitive.ObjectIDFromHex(editorId); if err != nil {
+		PPA.Response(c, err); return
+	}
+
 	editor := PPA.Editor {
-		OID: oid,
-		Name: "Bob",
-		Collection: "events" + oid.Hex() + "a",
+		OID: editorOid,
+		Name: editorName,
+		Collection: "events" + editorOid.Hex() + "a",
 	}
 
 	newLabel := h.fromCreateRequest(&data)
@@ -74,13 +78,17 @@ func (h HTTP) delete(c *gin.Context) {
 		PPA.Response(c, PPA.NewAppError(BadRequest, "ID Required")); return
 	}
 
-	oid := primitive.NewObjectID()
+	editorId := c.GetString(PPA.IdKey)
+	editorName := c.GetString(PPA.NameKey)
+
+	editorOid, err := primitive.ObjectIDFromHex(editorId); if err != nil {
+		PPA.Response(c, err); return
+	}
 
 	editor := PPA.Editor {
-		OID: oid,
-		Name: "Bob",
-		Collection: "events" + oid.Hex() + "a",
-
+		OID: editorOid,
+		Name: editorName,
+		Collection: "events" + editorOid.Hex() + "a",
 	}
 
 	if err := h.service.Delete(c, id, editor); err != nil {
@@ -100,13 +108,17 @@ func (h HTTP) update(c *gin.Context) {
 		PPA.Response(c, err); return
 	}
 
-	oid := primitive.NewObjectID()
+	editorId := c.GetString(PPA.IdKey)
+	editorName := c.GetString(PPA.NameKey)
+
+	editorOid, err := primitive.ObjectIDFromHex(editorId); if err != nil {
+		PPA.Response(c, err); return
+	}
 
 	editor := PPA.Editor {
-		OID: oid,
-		Name: "Bob",
-		Collection: "events" + oid.Hex() + "a",
-
+		OID: editorOid,
+		Name: editorName,
+		Collection: "events" + editorOid.Hex() + "a",
 	}
 
 	updated, err := h.service.Update(c, h.fromUpdateRequest(&data), id, editor); if err != nil {
