@@ -30,7 +30,7 @@ export class JobService {
   constructor(private http: HttpClient) { }
 
   createJob (job: Job): Observable<Job> {
-    return this.http.post<any>("http://localhost:8888/api/v1/jobs/", job)
+    return this.http.post<any>("http://ppaenterprises.com:8888/api/v1/jobs/", job)
     .pipe(map((response) => {
 			if(response.success) {
 				return response.payload as Job;
@@ -41,7 +41,7 @@ export class JobService {
   }
 
   getAllJobs(): Observable<Job[]> {
-    return this.http.get<any>("http://localhost:8888/api/v1/jobs/")
+    return this.http.get<any>("http://ppaenterprises.com:8888/api/v1/jobs/")
     .pipe(map((response) => {
 			if(response.success) {
 				return response.payload as Job[];
@@ -52,7 +52,7 @@ export class JobService {
   }
 
   getJobById(id: string): Observable<Job> {
-    return this.http.get<any>("http://localhost:8888/api/v1/jobs/id/"+id)
+    return this.http.get<any>("http://ppaenterprises.com:8888/api/v1/jobs/id/"+id)
     .pipe(map((response) => {
 			if(response.success) {
         response.payload.start = new Date(response.payload.start);
@@ -65,7 +65,7 @@ export class JobService {
   }
 
   editJobById(id: string, job: Job): Observable<Job> {
-    return this.http.patch<any>("http://localhost:8888/api/v1/jobs/"+id, job)
+    return this.http.patch<any>("http://ppaenterprises.com:8888/api/v1/jobs/"+id, job)
     .pipe(map((response) => {
 			if(response.success) {
 				return response.payload as Job;
@@ -76,7 +76,7 @@ export class JobService {
   }
 
   deleteJobById(id: string): Observable<any> {
-    return this.http.delete<any>("http://localhost:8888/api/v1/jobs/"+id)
+    return this.http.delete<any>("http://ppaenterprises.com:8888/api/v1/jobs/"+id)
     .pipe(map((response) => {
 			if(response.success) {
 				return true;

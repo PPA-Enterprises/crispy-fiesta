@@ -1,7 +1,7 @@
 package secure
+
 import (
 	"github.com/gin-gonic/gin"
-	"PPA/middleware"
 )
 
 func Add(r *gin.Engine, h ...gin.HandlerFunc) {
@@ -20,4 +20,3 @@ func SecureHeaders() gin.HandlerFunc {
 		c.Header("X-XSS-Protection", "1; mode=block")
 	}
 }
-
