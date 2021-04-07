@@ -23,6 +23,7 @@ const (
 type Update struct {
 	Name string
 	Email string
+	Role string
 }
 
 func (u User) Create(c *gin.Context, req PPA.User, editor PPA.Editor) (*PPA.User, error) {
@@ -120,6 +121,7 @@ func (u User) Update(c *gin.Context, req Update, id string, editor PPA.Editor) (
 		ID: primitive.NilObjectID,
 		Name: req.Name,
 		Email: req.Email,
+		Role: req.Role,
 		Password: "",
 	}); err != nil {
 		return nil, err
