@@ -16,7 +16,7 @@ type STREAM struct {
 func NewStream(service client.StreamService, stream *PPA.StreamEvent, router *gin.RouterGroup, authMw gin.HandlerFunc) {
 	httpTransport := STREAM{service:service, stream: stream}
 	routes := router.Group("/clients")
-	routes.GET("/", /*authMw,*/ httpTransport.subscribe)
+	routes.GET("/", authMw, httpTransport.subscribe)
 }
 
 func (h STREAM) subscribe(c *gin.Context) {
