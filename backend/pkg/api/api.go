@@ -35,7 +35,7 @@ import (
 )
 
 func Start(cfg *config.Configuration) error {
-	db := mongo.Init("mongodb://localhost:27017", "PPA")
+	db := mongo.Init("mongodb://localhost:27017/?replicaSet=replicaset&readPreference=primaryPreferred", "PPA")
 	server := gin.Default()
 	server.Use(cors.Default())
 	server.NoRoute(func(c *gin.Context) {
@@ -66,7 +66,7 @@ func Start(cfg *config.Configuration) error {
 }
 
 func StreamAPI(cfg *config.Configuration) error {
-	db := mongo.Init("mongodb://localhost:27017", "PPA")
+	db := mongo.Init("mongodb://localhost:27017/?replicaSet=replicaset&readPreference=primaryPreferred", "PPA")
 	server := gin.Default()
 	server.NoRoute(func(c *gin.Context) {
 		c.JSON(404, gin.H{"message": "Not Found."})
