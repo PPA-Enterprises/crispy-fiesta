@@ -51,7 +51,16 @@ export class CreateJobComponent implements OnInit {
       secondary_color: this.model.secondary,
     }   
 
-    console.log(this.job)
+    if (this.job.primary_color == undefined) {
+      this.job.primary_color = "#ff0000";
+    }
+
+    if(this.job.secondary_color == undefined) {
+      this.job.secondary_color = "#00ff4c";
+    }
+
+    console.log(this.job);
+    
 
     this.jobService.createJob(this.job).subscribe((job: Job) => {
         this.router.navigate(['/jobs']);
