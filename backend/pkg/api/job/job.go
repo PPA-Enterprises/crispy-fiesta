@@ -1,6 +1,7 @@
 package job
 import (
 	"PPA"
+	//"fmt"
 	"context"
 	"bytes"
 	"net/http"
@@ -65,7 +66,13 @@ func (j Job) Create(c *gin.Context, req PPA.Job, editor PPA.Editor) (*PPA.Job, e
 		return nil, err
 	}
 
-	loggableTinter := cpyTinter.Loggable()
+	var loggableTinter *PPA.LoggableTinter
+	if cpyTinter != nil {
+		loggableTinter = cpyTinter.Loggable()
+	} else {
+		loggableTinter = nil
+	}
+
 	loggableJob := created.Loggable(loggableTinter)
 
 	if workerAssignChanged {

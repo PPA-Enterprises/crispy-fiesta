@@ -1,6 +1,7 @@
 package auth
 
 import(
+	"fmt"
 	"net/http"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
@@ -14,6 +15,7 @@ func Middleware(tokenParser TokenParser) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		token, err := tokenParser.ParseToken(c.Request.Header.Get("Authorization"))
 		if err != nil || !token.Valid {
+			fmt.Println(err)
 			c.AbortWithStatusJSON(http.StatusUnauthorized,
 			gin.H{"success": false, "Message": "Not Authorized"}); return
 		}
