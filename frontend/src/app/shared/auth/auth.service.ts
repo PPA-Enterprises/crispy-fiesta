@@ -30,10 +30,14 @@ export class AuthService {
   }
 
   logout() {
-    
+
   }
 
   isAuthenticated() {
     return true;
+  }
+
+  public tokenFromLocalStorage() : string {
+    return localStorage.getItem('token');
   }
 }
