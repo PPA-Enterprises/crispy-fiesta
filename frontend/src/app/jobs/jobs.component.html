@@ -15,7 +15,7 @@
                     <table class="table table-striped table-hover">
                         <thead class="thead-dark">
                             <tr>
-                                <th>Date Created</th>
+                                <th>Date</th>
                                 <th>Car</th>
                                 <th>Client Name</th>
                                 <th>Status</th>
@@ -23,7 +23,7 @@
                             </thead>
                             <tbody>
                             <tr class="cursor-pointer" *ngFor="let job of newJobs" [routerLink]="['/edit-job', job._id]">
-                                <th scope="row">{{ job.start }}</th>
+                                <th scope="row">{{ job.start | date:'MMMM d, y, h:mm a' }}</th>
                                 <td>{{ job.car_info }}</td>
                                 <td>{{ job.client_name }}</td>
                                 <td class="text-success">{{ job.tag }}</td>
@@ -44,7 +44,7 @@
                     <table class="table table-striped table-hover">
                         <thead class="thead-dark">
                             <tr>
-                                <th>Date Created</th>
+                                <th>Date</th>
                                 <th>Car</th>
                                 <th>Client Name</th>
                                 <th>Status</th>
@@ -52,7 +52,7 @@
                             </thead>
                             <tbody>
                             <tr class="cursor-pointer" *ngFor="let job of openJobs" [routerLink]="['/edit-job', job._id]">
-                                <th scope="row">{{ job.start }}</th>
+                                <th scope="row">{{ job.start | date:'MMMM d, y, h:mm a'}}</th>
                                 <td>{{ job.car_info }}</td>
                                 <td>{{ job.client_name }}</td>
                                 <td class="text-primary">{{ job.tag }}</td>
@@ -75,7 +75,7 @@
                     <table class="table table-striped table-hover">
                         <thead class="thead-dark">
                             <tr>
-                                <th>Date Created</th>
+                                <th>Date</th>
                                 <th>Car</th>
                                 <th>Client Name</th>
                                 <th>Status</th>
@@ -83,7 +83,7 @@
                             </thead>
                             <tbody>
                             <tr class="cursor-pointer" *ngFor="let job of closedJobs" [routerLink]="['/edit-job', job._id]">
-                                <th scope="row">{{ job.start }}</th>
+                                <th scope="row">{{ job.start | date:'MMMM d, y, h:mm a'}}</th>
                                 <td>{{ job.car_info }}</td>
                                 <td>{{ job.client_name }}</td>
                                 <td class="text-danger">{{ job.tag }}</td>
