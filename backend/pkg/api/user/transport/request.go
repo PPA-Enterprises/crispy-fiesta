@@ -33,7 +33,7 @@ func (h HTTP) fromUpdateRequest(data *updateRequest) user.Update {
 	return user.Update {
 		Name: data.Name,
 		Email: data.Email,
-		Role: data.Role
+		Role: data.Role,
 	}
 }
 
@@ -51,7 +51,7 @@ func (h HTTP) fromSignupRequest(data *signupRequest) PPA.User {
 	return PPA.User {
 		ID: oid,
 		Name: data.Name,
-		Role: data.Role
+		Role: data.Role,
 		Email: data.Email,
 		Password: data.Password,
 	}

@@ -53,8 +53,7 @@ func (s Service) ParseToken(authHeader string) (*jwt.Token, error) {
 func (s Service) GenerateToken(u PPA.User) (string, error) {
 	return jwt.NewWithClaims(s.algo, jwt.MapClaims{
 		"_id":  u.ID.Hex(),
-		"e":   u.Email,
-		//"r":   u.Role.AccessLevel,
+		"role":   u.Role,
 		"exp": time.Now().Add(s.ttl).Unix(),
 	}).SignedString(s.key)
 
