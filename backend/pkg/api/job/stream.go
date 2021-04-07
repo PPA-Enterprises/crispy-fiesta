@@ -11,8 +11,13 @@ import (
 type JobStream struct {
 	db *mongo.DBConnection
 	tdb TinterViewer
-	jdb Repository
+	jdb StreamRepository
 	rbac RBAC
+}
+
+
+type StreamRepository interface {
+	Stream(*mongo.DBConnection, context.Context, chan *PPA.Job)
 }
 
 type StreamService interface {
@@ -23,7 +28,7 @@ type TinterViewer interface {
 	ViewById(*mongo.DBConnection, context.Context, primitive.ObjectID) (*PPA.Tinter, error)
 }
 
-func NewStream(db *mongo.DBConnection, jdb Repository, tdb TinterViewer, rbac RBAC) *JobStream {
+func NewStream(db *mongo.DBConnection, jdb StreamRepository, tdb TinterViewer, rbac RBAC) *JobStream {
 	return &JobStream{db: db, jdb: jdb, tdb: tdb, rbac: rbac}
 }
 

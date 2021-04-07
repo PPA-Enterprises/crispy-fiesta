@@ -139,6 +139,34 @@ func (j Job) LogEvent(db *mongo.DBConnection, ctx context.Context, update *PPA.J
 	}
 }
 
+func (j Job) Stream(db *mongo.DBConnection, ctx context.Context, tx chan *PPA.Job) {
+	coll := db.Use(Collection)
+
+	changeStream, streamErr := coll.Watch(ctx, mongodb.Pipeline{}); if streamErr != nil {
+		fmt.Println(streamErr)
+		return
+	}
+
+	defer changeStream.Close(ctx)
+
+	for changeStream.Next(ctx) {
+		var data bson.M
+		if err := changeStream.Decode(&data); err != nil {
+			fmt.Println(err)
+			return
+		}
+		oid := data["documentKey"].(primitive.M)["_id"].(primitive.ObjectID)
+
+		var job PPA.Job
+		_ = coll.FindOne(ctx, bson.D{{"_id", oid}}).Decode(&job)
+
+		tx <-&job
+		//panic(data)
+		//doc := data["fullDocument"]
+		//fmt.Println(doc["_id"])
+	}
+}
+
 func fetchAll(db *mongo.DBConnection, ctx context.Context, sort bool) (*[]PPA.Job, error) {
 	coll := db.Use(Collection)
 	opts := options.Find()

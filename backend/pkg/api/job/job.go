@@ -5,6 +5,7 @@ import (
 	//"fmt"
 	"bytes"
 	"context"
+	"encoding/json"
 	"net/http"
 	"time"
 
@@ -360,6 +361,18 @@ func (j Job) updateJobs(ctx context.Context, oids []primitive.ObjectID, currOID 
 
 func (j JobStream) Subscribe(c *gin.Context, stream *PPA.StreamEvent) error {
 
-	stream.Message <- "some new jobs or whatever"
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	rx := make(chan *PPA.Job)
+	go j.jdb.Stream(j.db, ctx, rx)
+
+
+	for {
+		job := <-rx
+		res, _ := json.Marshal(job)
+		stream.Message <-string(res)
+	}
+
+//	stream.Message <- "some new jobs or whatever"
 	return nil
 }
