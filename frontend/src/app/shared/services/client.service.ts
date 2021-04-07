@@ -14,7 +14,7 @@ export class ClientService {
     constructor(private http: HttpClient, private jobService: JobService) { }
 
     getAllClients(): Observable<Client[]> {
-      return this.http.get<any>("http://ppaenterprises.com:8888/api/v1/clients")
+      return this.http.get<any>("http://ppaenterprises.com:8888/api/v1/clients/")
       .pipe(map((response) => {
         if(response.success) {
           return response.payload as Client[];
