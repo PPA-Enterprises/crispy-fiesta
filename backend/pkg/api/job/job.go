@@ -231,7 +231,12 @@ func (j Job) Update(c *gin.Context, req Update, id string, editor PPA.Editor) (*
 		return nil, PPA.InternalError
 	}
 
-	loggableTinter := cpyTinter.Loggable()
+	var loggableTinter *PPA.LoggableTinter
+	if cpyTinter != nil {
+		loggableTinter = cpyTinter.Loggable()
+	} else {
+		loggableTinter = nil
+	}
 	loggableJob := updated.Loggable(loggableTinter)
 
 	// fetch the old job's tinter for logging
