@@ -31,7 +31,7 @@ export class EditJobComponent implements OnInit {
   notClosed = true;
   startDate: any;
   endDate: any;
-
+  history: any;
 
   constructor(private jobService: JobService, private route: ActivatedRoute, private router: Router) {}
 
@@ -60,6 +60,16 @@ export class EditJobComponent implements OnInit {
 
       this.startDate = this.job.start;
       this.endDate = this.job.end;
+
+      this.job.history.forEach((change,i) => {
+        if (i % 2 == 0) {
+          change.placement = "right"
+        } else {
+          change.placement = "left"
+        }
+      });
+
+      this.history = this.job.history;
     })
   }
 
