@@ -42,8 +42,8 @@ func Start(cfg *config.Configuration) error {
 	server.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"http://ppaenterprises.com"},
 		AllowMethods:     []string{"PUT", "PATCH", "POST", "OPTIONS", "GET", "DELETE"},
-		AllowHeaders:     []string{"Origin"},
-		ExposeHeaders:    []string{"Content-Type", "Content-Length", "Accept-Encoding", "X-CSRF-Token", "authorization", "accept", "origin", "Cache-Control", "X-Requested-With"},
+		AllowHeaders:     []string{"Origin", "authorization"},
+		ExposeHeaders:    []string{"Content-Type", "Content-Length", "Accept-Encoding", "X-CSRF-Token", "Authorization", "accept", "origin", "Cache-Control", "X-Requested-With"},
 		AllowCredentials: true,
 		AllowOriginFunc: func(origin string) bool {
 			return origin == "http://ppaenterprises.com"
