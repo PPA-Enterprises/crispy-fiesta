@@ -19,6 +19,11 @@ type StreamEvent struct {
 	TotalClients map[chan string]bool
 }
 
+type StreamResult struct {
+	EventType string `json:"event_type"`
+	Data interface{} `json:"data"`
+}
+
 func (stream *StreamEvent) Listen() {
 	for {
 		select {

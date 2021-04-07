@@ -17,7 +17,7 @@ type JobStream struct {
 
 
 type StreamRepository interface {
-	Stream(*mongo.DBConnection, context.Context, chan *PPA.Job)
+	Stream(*mongo.DBConnection, context.Context, chan *PPA.StreamResult)
 }
 
 type StreamService interface {

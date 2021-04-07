@@ -360,19 +360,15 @@ func (j Job) updateJobs(ctx context.Context, oids []primitive.ObjectID, currOID 
 }
 
 func (j JobStream) Subscribe(c *gin.Context, stream *PPA.StreamEvent) error {
-
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	rx := make(chan *PPA.Job)
+	rx := make(chan *PPA.StreamResult)
 	go j.jdb.Stream(j.db, ctx, rx)
 
-
 	for {
-		job := <-rx
-		res, _ := json.Marshal(job)
+		changeRes := <-rx
+		res, _ := json.Marshal(changeRes)
 		stream.Message <-string(res)
 	}
-
-//	stream.Message <- "some new jobs or whatever"
 	return nil
 }

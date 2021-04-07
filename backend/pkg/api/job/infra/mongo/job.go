@@ -139,7 +139,7 @@ func (j Job) LogEvent(db *mongo.DBConnection, ctx context.Context, update *PPA.J
 	}
 }
 
-func (j Job) Stream(db *mongo.DBConnection, ctx context.Context, tx chan *PPA.Job) {
+func (j Job) Stream(db *mongo.DBConnection, ctx context.Context, tx chan *PPA.StreamResult) {
 	coll := db.Use(Collection)
 
 	changeStream, streamErr := coll.Watch(ctx, mongodb.Pipeline{}); if streamErr != nil {
@@ -160,10 +160,10 @@ func (j Job) Stream(db *mongo.DBConnection, ctx context.Context, tx chan *PPA.Jo
 		var job PPA.Job
 		_ = coll.FindOne(ctx, bson.D{{"_id", oid}}).Decode(&job)
 
-		tx <-&job
-		//panic(data)
-		//doc := data["fullDocument"]
-		//fmt.Println(doc["_id"])
+		tx <-&PPA.StreamResult {
+			EventType:data["operationType"].(string),
+			Data: job,
+		}
 	}
 }
 
