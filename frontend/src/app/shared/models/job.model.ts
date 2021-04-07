@@ -9,4 +9,5 @@ export class Job {
     public end: Date;
     public title: string;
     public color: any;
+    public history?: any;
   }

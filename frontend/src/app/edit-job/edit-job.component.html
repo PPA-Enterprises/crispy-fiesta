@@ -145,3 +145,91 @@
     </ng-template>
   
   </form>
+
+<h2 class="text-center py-4">Job History</h2>
+<!--Vertical Timeline Starts-->
+<section id="vertical-timeline-center" class="timeline-center timeline-wrapper col-sm-10 col-12 offset-sm-1">
+  <ul class="timeline">
+    <li class="timeline-line mt-4"></li>
+      <li class="timeline-group">
+        <h5><span class="badge badge-primary cursor-default">Today</span></h5>
+      </li>
+  </ul>
+
+  <ul class="timeline">
+    <li class="timeline-line"></li>
+    <ng-container *ngFor="let change of history">
+      <ng-container *ngIf="change.placement == 'right'">
+        <li class="timeline-item">
+          <div class="timeline-badge">
+            <span class="bg-primary bg-lighten-4" data-toggle="tooltip" placement="right" ngbTooltip="Nullam facilisis fermentum">
+              <i class="ft-command primary"></i>
+            </span>
+          </div>
+          <div class="timeline-card card shadow-z-1">
+            <div class="card-content">
+              <div class="card-body">
+                <h4 class="card-title mb-0">{{ change.editor }}</h4>
+                <div class="card-subtitle text-muted mt-0">
+                  <span class="font-small-3">{{ change.timestamp }}</span>
+                </div>
+                <hr class="mt-0 mb-2">
+                <div *ngFor="let event of change.changes | keyvalue">
+                  <ng-container *ngIf="change.event_type == 'Created'">
+                    <p class="m-0 mb-1 font-medium-1">
+                      The field <span class="text-bold-600">{{event.key}}</span> was created with <span class="text-primary">{{ event.value.new }}</span> value.
+                    </p>
+                  </ng-container>
+                  <ng-container *ngIf="change.event_type == 'Edited'">
+                    <p class="m-0 mb-1 font-medium-1">
+                      The field <span class="text-bold-600">{{event.key}}</span> changed from <span class="text-warning">{{ event.value.old }}</span> to <span class="text-primary">{{ event.value.new }}</span>
+                    </p>
+                  </ng-container>
+                </div>
+              </div>
+            </div>
+          </div>
+        </li>
+      </ng-container>
+      <ng-container *ngIf="change.placement == 'left'">
+        <li class="timeline-item mt-5">
+          <div class="timeline-badge">
+            <span class="bg-primary bg-lighten-4" data-toggle="tooltip" placement="left" ngbTooltip="Nullam facilisis fermentum">
+              <i class="ft-command primary"></i>
+            </span>
+          </div>
+          <div class="timeline-card card shadow-z-1">
+            <div class="card-content">
+              <div class="card-body">
+                <h4 class="card-title mb-0">{{ change.editor }}</h4>
+                <div class="card-subtitle text-muted mt-0">
+                  <span class="font-small-3">{{ change.timestamp }}</span>
+                </div>
+                <hr class="mt-0 mb-2">
+                <div *ngFor="let event of change.changes | keyvalue">
+                  <ng-container *ngIf="change.event_type == 'Created'">
+                    <p class="m-0 mb-1 font-medium-1">
+                      The field <span class="text-bold-600">{{event.key}}</span> was created with <span class="text-primary">{{ event.value.new }}</span> value.
+                    </p>
+                  </ng-container>
+                  <ng-container *ngIf="change.event_type == 'Edited'">
+                    <p class="m-0 mb-1 font-medium-1">
+                      The field <span class="text-bold-600">{{event.key}}</span> changed from <span class="text-warning">{{ event.value.old }}</span> to <span class="text-primary">{{ event.value.new }}</span>
+                    </p>
+                  </ng-container>
+                </div>
+              </div>
+            </div>
+          </div>
+        </li>
+      </ng-container>
+    </ng-container>
+  </ul>
+  <ul class="timeline">
+    <li class="timeline-line mb-4"></li>
+    <li class="timeline-group">
+      <h5><span class="badge badge-primary cursor-default">Founded in 2013</span></h5>
+    </li>
+  </ul>
+</section>
+<!--Vertical Timeline Ends-->
