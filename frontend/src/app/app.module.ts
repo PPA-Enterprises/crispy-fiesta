@@ -30,6 +30,10 @@ import { WINDOW_PROVIDERS } from './shared/services/window.service';
 import { CalendarModule, DateAdapter } from 'angular-calendar';
 import { adapterFactory } from 'angular-calendar/date-adapters/date-fns';
 
+// for interceptor
+import { TokenInterceptorService as TokenInterceptor } from './shared/auth/token-interceptor.service';
+import { HTTP_INTERCEPTORS } from '@angular/common/http';
+
 
 var firebaseConfig = {
   apiKey: "YOUR_API_KEY", //YOUR_API_KEY
@@ -78,6 +82,11 @@ export function createTranslateLoader(http: HttpClient) {
     CalendarModule.forRoot({ provide: DateAdapter, useFactory: adapterFactory })
   ],
   providers: [
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: TokenInterceptor,
+      multi: true
+    }
     AuthService,
     AuthGuard,
     { provide: PERFECT_SCROLLBAR_CONFIG, useValue: DEFAULT_PERFECT_SCROLLBAR_CONFIG },
