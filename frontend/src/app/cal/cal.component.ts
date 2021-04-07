@@ -41,7 +41,10 @@ export class CalComponent implements OnInit{
       for(let job of jobs) {
         job.start = new Date(job.start);
         job.end = new Date(job.end);
-
+        job.color = {
+          primary: job.primary_color,
+          secondary: job.secondary_color
+        }
         this.events.push(job);
       }
       console.log(this.events);

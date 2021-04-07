@@ -8,6 +8,7 @@ export class Job {
     public start: Date;
     public end: Date;
     public title: string;
-    public color: any;
+    public primary_color: string;
+    public secondary_color: string;
     public history?: any;
   }

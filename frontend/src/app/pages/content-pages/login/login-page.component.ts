@@ -3,6 +3,7 @@ import { NgForm, FormGroup, FormControl, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from "@angular/router";
 import { AuthService } from 'app/shared/auth/auth.service';
 import { NgxSpinnerService } from "ngx-spinner";
+import { first } from 'rxjs/operators';
 
 
 @Component({
@@ -48,16 +49,30 @@ export class LoginPageComponent {
         fullScreen: true
       });
 
-    this.authService.signinUser(this.loginForm.value.username, this.loginForm.value.password)
-      .then((res) => {
-        this.spinner.hide();
-        this.router.navigate(['/home']);
-      })
-      .catch((err) => {
-        this.isLoginFailed = true;
-        this.spinner.hide();
-        console.log('error: ' + err)
-      }
+    // this.authService.signinUser(this.loginForm.value.username, this.loginForm.value.password)
+    //   .then((res) => {
+    //     this.spinner.hide();
+    //     this.router.navigate(['/home']);
+    //   })
+    //   .catch((err) => {
+    //     this.isLoginFailed = true;
+    //     this.spinner.hide();
+    //     console.log('error: ' + err)
+    //   }
+    //   );
+
+      this.authService.signinUser(this.loginForm.value.username, this.loginForm.value.password)
+      .pipe(first())
+      .subscribe(
+        result => {
+          this.spinner.hide();
+          this.router.navigate(['/home']);
+        },
+        err => {
+          this.isLoginFailed = true;
+          this.spinner.hide();
+          console.log('error: ' + err)
+        }
       );
   }
 

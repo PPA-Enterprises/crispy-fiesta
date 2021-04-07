@@ -54,8 +54,8 @@ export class EditJobComponent implements OnInit {
         phone: this.job.client_phone,
         carInfo: this.job.car_info,
         notes: this.job.notes,
-        primary: this.job.color.primary,
-        secondary: this.job.color.secondary
+        primary: this.job.primary_color,
+        secondary: this.job.secondary_color
       }
 
       this.startDate = this.job.start;
@@ -90,10 +90,8 @@ export class EditJobComponent implements OnInit {
       start: this.startDate,
       end: this.endDate,
       title: this.model.carInfo + " - " + this.model.fname + " " + this.model.lname,
-      color: {
-        primary: this.model.primary,
-        secondary: this.model.secondary,
-      }
+        primary_color: this.model.primary,
+        secondary_color: this.model.secondary,
     }
 
     this.jobService.editJobById(this.id, this.job).subscribe((job: Job) => {
@@ -103,27 +101,27 @@ export class EditJobComponent implements OnInit {
   }
 
   sendToTintWork() {
-    console.log("Before:" + this.job);
-    this.job = {
-      _id: this.job._id,
-      client_name: this.model.fname + " " + this.model.lname,
-      client_phone: this.model.phone,
-      car_info: this.model.carInfo,
-      notes: this.model.notes,
-      tag: "CLOSED",
-      start: subDays(startOfDay(new Date()), 1),
-      end: addDays(new Date(), 1),
-      title: this.model.carInfo + " - " + this.model.fname + " " + this.model.lname,
-      color: {
-        primary: '#ad2121',
-        secondary: '#FAE3E3',
-      }
-    }
+    // console.log("Before:" + this.job);
+    // this.job = {
+    //   _id: this.job._id,
+    //   client_name: this.model.fname + " " + this.model.lname,
+    //   client_phone: this.model.phone,
+    //   car_info: this.model.carInfo,
+    //   notes: this.model.notes,
+    //   tag: "CLOSED",
+    //   start: subDays(startOfDay(new Date()), 1),
+    //   end: addDays(new Date(), 1),
+    //   title: this.model.carInfo + " - " + this.model.fname + " " + this.model.lname,
+    //   color: {
+    //     primary: '#ad2121',
+    //     secondary: '#FAE3E3',
+    //   }
+    // }
 
-    this.jobService.editJobById(this.id, this.job).subscribe((job: Job) => {
-      this.job = job
-      this.router.navigate(['/jobs']);
-    })
+    // this.jobService.editJobById(this.id, this.job).subscribe((job: Job) => {
+    //   this.job = job
+    //   this.router.navigate(['/jobs']);
+    // })
 
   }
 

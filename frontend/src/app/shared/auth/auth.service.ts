@@ -1,15 +1,17 @@
 import { Router } from '@angular/router';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { User } from '../models/user.model';
-import { Cred } from '../models/cred.model';
+import { HttpClient } from '@angular/common/http';
+import * as moment from "moment";
 
 @Injectable()
 export class AuthService {
   // private user: Observable<firebase.User>;
   // private userDetails: firebase.User = null;
 
-  constructor(public router: Router) {
+  constructor(public router: Router, private http: HttpClient) {
 
   }
 
@@ -19,22 +21,23 @@ export class AuthService {
 
   signinUser(email: string, password: string) {
     
-    return this.http.post<User>()
-
-    // return new Promise(function(resolve, reject) {
-    //   setTimeout(function() {
-    //     resolve(true);
-    //   }, 1000);
-    // });
-
+    return this.http.post<any>("http://localhost:8888/api/v1/auth/", {email: email, password: password})
+      .pipe(map(result => {
+        console.log(result);
+        localStorage.setItem('token', result.payload.token);
+      }));
+      
+      
   }
+
+    
 
   logout() {
-
+    localStorage.removeItem('token');
   }
 
-  isAuthenticated() {
-    return true;
+  public get isAuthenticated(): boolean {
+    return (localStorage.getItem('token') !== null);
   }
 
   public tokenFromLocalStorage() : string {

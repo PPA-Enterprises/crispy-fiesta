@@ -290,17 +290,17 @@
                 </div>
               </a>
               <div class="dropdown-divider"></div>
-              <a class="dropdown-item" routerLink="/pages/login">
+              <a class="dropdown-item" (click)="logout()" routerLink="/pages/login">
                 <div class="d-flex align-items-center">
                   <i class="ft-power mr-2"></i><span>Logout</span>
                 </div>
               </a>
             </div>
           </li>
-          <!-- <li class="nav-item d-none d-lg-block mr-2 mt-1">
+          <li class="nav-item d-none d-lg-block mr-2 mt-1">
             <a class="nav-link notification-sidebar-toggle" (click)="toggleNotificationSidebar();"><i
                 class="ft-align-right font-medium-3"></i></a>
-          </li> -->
+          </li>
         </ul>
       </div>
     </div>

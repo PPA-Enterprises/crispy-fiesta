@@ -47,10 +47,8 @@ export class CreateJobComponent implements OnInit {
       start: this.startDate,
       end: this.endDate,
       title: this.model.carInfo + " - " + this.model.fname + " " + this.model.lname,
-      color: {
-        primary: this.model.primary,
-        secondary: this.model.secondary,
-      }
+      primary_color: this.model.primary,
+      secondary_color: this.model.secondary,
     }   
 
     this.jobService.createJob(this.job).subscribe((job: Job) => {

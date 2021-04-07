@@ -7,7 +7,6 @@ import {
   HttpErrorResponse
 } from '@angular/common/http';
 import { tap } from 'rxjs/operators';
-import { Store } from '@ngxs/store';
 import { AuthService } from './auth.service';
 import { retry, catchError } from 'rxjs/operators';
 import { Observable, throwError } from 'rxjs';
@@ -16,12 +15,13 @@ import { Observable, throwError } from 'rxjs';
   providedIn: 'root'
 })
 export class TokenInterceptorService implements HttpInterceptor {
-constructor(private _authService) {}
+constructor(private _authService: AuthService) {}
 
 intercept(
     request: HttpRequest<any>,
     next: HttpHandler
   ): Observable<HttpEvent<any>> {
+    console.log(this._authService.tokenFromLocalStorage())
     request = request.clone({
       setHeaders: {
         Authorization: `Bearer ${this._authService.tokenFromLocalStorage()}`
@@ -46,6 +46,7 @@ intercept(
         } else {
           this._utils.error(error && error.error ? error.error : '');
         }*/
+        
         return throwError(errorMessage);
       })
     )
