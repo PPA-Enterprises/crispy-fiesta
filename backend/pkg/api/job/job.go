@@ -225,7 +225,7 @@ func (j Job) Update(c *gin.Context, req Update, id string, editor PPA.Editor) (*
 		}); err != nil {
 			return nil, err
 		}
-		j.updateJobs(ctx, client.Jobs, ClientUpdate{ Name: req.ClientName, Phone: req.ClientPhone }, editor)
+		j.updateJobs(ctx, client.Jobs, oid, ClientUpdate{ Name: req.ClientName, Phone: req.ClientPhone }, editor)
 	}
 
 	updated, err := j.jdb.ViewById(j.db, ctx, oid); if err != nil {
@@ -314,27 +314,30 @@ func (j Job) attatchJobToClient(ctx context.Context, phone string, job *PPA.Job,
 	return updateErr
 }
 
-func (j Job) updateJobs(ctx context.Context, oids []primitive.ObjectID, update ClientUpdate, editor PPA.Editor) {
+func (j Job) updateJobs(ctx context.Context, oids []primitive.ObjectID, currOID primitive.ObjectID, update ClientUpdate, editor PPA.Editor) {
 	if len(oids) <= 0 { return } // Note that len(nil) is 0
 
 	for _, oid := range oids {
-		oldDoc, _ := j.jdb.ViewById(j.db, ctx, oid)
+		const matched int = 0
+		if bytes.Compare([]byte(oid.Hex()), []byte(currOID.Hex())) != matched {
+			oldDoc, _ := j.jdb.ViewById(j.db, ctx, oid)
 
-		if err := j.jdb.Update(j.db, ctx, oid, &PPA.Job {
-			ClientName: update.Name,
-			ClientPhone: update.Phone,
-		}); err != nil {
+			if err := j.jdb.Update(j.db, ctx, oid, &PPA.Job {
+				ClientName: update.Name,
+				ClientPhone: update.Phone,
+			}); err != nil {
 			// do nothing or fail, depends
-		}
+			}
 
-		newDoc, _ := j.jdb.ViewById(j.db, ctx, oid)
+			newDoc, _ := j.jdb.ViewById(j.db, ctx, oid)
 
-		if newDoc != nil && oldDoc != nil {
-			newDoc.AppendLog(j.eventLogger.LogUpdated(ctx,
-				j.eventLogger.GenerateEvent(oldDoc, EventTag),
-				j.eventLogger.GenerateEvent(newDoc, EventTag),
-				editor))
-			j.jdb.LogEvent(j.db, ctx, newDoc)
+			if newDoc != nil && oldDoc != nil {
+				newDoc.AppendLog(j.eventLogger.LogUpdated(ctx,
+					j.eventLogger.GenerateEvent(oldDoc, EventTag),
+					j.eventLogger.GenerateEvent(newDoc, EventTag),
+					editor))
+				j.jdb.LogEvent(j.db, ctx, newDoc)
+			}
 		}
 	}
 }
