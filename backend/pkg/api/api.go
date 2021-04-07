@@ -28,7 +28,6 @@ import (
 	"pkg/common/mongo"
 	"pkg/common/rbac"
 	"pkg/common/secure"
-	"time"
 
 	//jobRepo "pkg/api/job/infra/mongo"
 	"github.com/gin-contrib/cors"
@@ -39,17 +38,23 @@ func Start(cfg *config.Configuration) error {
 	db := mongo.Init("mongodb://localhost:27017", "PPA")
 	server := gin.Default()
 	//server.Use(cors.Default())
-	server.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://ppaenterprises.com"},
-		AllowMethods:     []string{"PUT", "PATCH", "POST", "OPTIONS", "GET", "DELETE"},
-		AllowHeaders:     []string{"Origin", "authorization", "content-type", "origin"},
-		ExposeHeaders:    []string{"Content-Type", "Content-Length", "Accept-Encoding", "X-CSRF-Token", "Authorization", "accept", "origin", "Cache-Control", "X-Requested-With"},
-		AllowCredentials: true,
-		AllowOriginFunc: func(origin string) bool {
-			return true
-		},
-		MaxAge: 12 * time.Hour,
-	}))
+	// server.Use(cors.New(cors.Config{
+	// 	AllowOrigins:     []string{"http://ppaenterprises.com"},
+	// 	AllowMethods:     []string{"PUT", "PATCH", "POST", "OPTIONS", "GET", "DELETE"},
+	// 	AllowHeaders:     []string{"Origin", "authorization", "content-type", "origin"},
+	// 	ExposeHeaders:    []string{"Content-Type", "Content-Length", "Accept-Encoding", "X-CSRF-Token", "Authorization", "accept", "origin", "Cache-Control", "X-Requested-With"},
+	// 	AllowCredentials: true,
+	// 	AllowOriginFunc: func(origin string) bool {
+	// 		return true
+	// 	},
+	// 	MaxAge: 12 * time.Hour,
+	// }))
+
+	config := cors.DefaultConfig()
+	config.AllowAllOrigins = true
+	config.AllowCredentials = true
+	config.AddAllowHeaders("authorization", "content-type")
+	server.Use(cors.New(config))
 
 	server.NoRoute(func(c *gin.Context) {
 		c.JSON(404, gin.H{"message": "Not Found."})
