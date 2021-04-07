@@ -53,7 +53,7 @@ func Start(cfg *config.Configuration) error {
 	config := cors.DefaultConfig()
 	config.AllowAllOrigins = true
 	config.AllowCredentials = true
-	config.AddAllowHeaders("authorization", "content-type")
+	config.AddAllowHeaders("authorization", "content-type", "Access-Control-Allow-Origin")
 	server.Use(cors.New(config))
 
 	server.NoRoute(func(c *gin.Context) {
