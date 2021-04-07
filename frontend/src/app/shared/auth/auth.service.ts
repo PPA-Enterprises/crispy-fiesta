@@ -1,6 +1,8 @@
 import { Router } from '@angular/router';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { User } from '../models/user.model';
+import { Cred } from '../models/cred.model';
 
 @Injectable()
 export class AuthService {
@@ -16,15 +18,14 @@ export class AuthService {
   }
 
   signinUser(email: string, password: string) {
-    //your code for checking credentials and getting tokens for for signing in user
-    // return this._firebaseAuth.signInWithEmailAndPassword(email, password)
+    
+    return this.http.post<User>()
 
-    //uncomment above firebase auth code and remove this temp code
-    return new Promise(function(resolve, reject) {
-      setTimeout(function() {
-        resolve(true);
-      }, 1000);
-    });
+    // return new Promise(function(resolve, reject) {
+    //   setTimeout(function() {
+    //     resolve(true);
+    //   }, 1000);
+    // });
 
   }
 
