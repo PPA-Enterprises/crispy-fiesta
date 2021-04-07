@@ -32,7 +32,9 @@ type Update struct {
 	StartTime string
 	EndTime string
 	Tag string
-	Color *PPA.CalendarMeta
+	//Color *PPA.CalendarMeta
+	PrimaryColor string
+	SecondaryColor string
 }
 
 type ClientUpdate struct {
@@ -206,7 +208,9 @@ func (j Job) Update(c *gin.Context, req Update, id string, editor PPA.Editor) (*
 		CarInfo: req.CarInfo,
 		Notes: req.Notes,
 		Tag: req.Tag,
-		Color: req.Color,
+		//Color: req.Color,
+		PrimaryColor: req.PrimaryColor,
+		SecondaryColor: req.SecondaryColor,
 		StartTime: req.StartTime,
 		EndTime: req.EndTime,
 

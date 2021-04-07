@@ -14,14 +14,16 @@ type Job struct {
 	ClientPhone string `json:"client_phone" bson:"client_phone,omitempty" m:"Client Phone Number"`
 	CarInfo string `json:"car_info" bson:"car_info,omitempty" m:"Car Information"`
 	Notes string `json:"notes" bson:"notes,omitempty" m:"Notes"`
-	Color *CalendarMeta `json:"color" bson:"color,omitempty" m:"Calendar Colors"`
+	//Color *CalendarMeta `json:"color" bson:"color,omitempty" m:"Calendar Colors"`
+	PrimaryColor string `json:"primary_color" bson:"primary_color,omitempty" m:"Primary Calendar Color"`
+	SecondaryColor string `json:"secondary_color" bson:"secondary_color,omitempty" m:"Secondary Calendar Color"`
 	History []LogEvent `json:"history" bson:"history,omitempty"`
 }
 
-type CalendarMeta struct {
+/*type CalendarMeta struct {
 	PrimaryColor string `json:"primary" bson:"primary_color,omitempty" m:"Calendar Primary Color"`
 	SecondaryColor string `json:"secondary" bson:"secondary_color,omitempty" m:"Calendar Secondary Color"`
-}
+}*/
 
 type LoggableJob struct {
 	ID primitive.ObjectID `m:"Database ID"`
@@ -34,7 +36,9 @@ type LoggableJob struct {
 	StartTime string `m:"Start Time"`
 	EndTime string `m:"End Time"`
 	Tag string `m:"Status Tag"`
-	Color *CalendarMeta `m:"Calendar Colors"`
+	//Color *CalendarMeta `m:"Calendar Colors"`
+	PrimaryColor string `m:"Primary Calendar Color"`
+	SecondaryColor string `m:"Secondary Calendar Color"`
 }
 
 func (j *Job) AppendLog(event LogEvent) {
@@ -53,6 +57,8 @@ func (j *Job) Loggable(t *LoggableTinter) *LoggableJob {
 		ClientPhone: j.ClientPhone,
 		CarInfo: j.CarInfo,
 		Notes: j.Notes,
-		Color: j.Color,
+		//Color: j.Color,
+		PrimaryColor: j.PrimaryColor,
+		SecondaryColor: j.SecondaryColor,
 	}
 }

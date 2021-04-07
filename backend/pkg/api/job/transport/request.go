@@ -17,7 +17,9 @@ type submitJobRequest struct {
 	StartTime       string				`json:"start" binding:"required"`
 	EndTime         string				`json:"end" binding:"required"`
 	Tag             string				`json:"tag" binding:"required"`
-	Color           PPA.CalendarMeta	`json:"color" binding:"required"`
+	//Color           PPA.CalendarMeta	`json:"color" binding:"required"`
+	PrimaryColor	string				`json:"primary_color" binding:"required"`
+	SecondaryColor	string				`json:"secondary_color" binding:"required"`
 }
 
 type updateRequest struct {
@@ -30,7 +32,9 @@ type updateRequest struct {
 	StartTime       string				`json:"start,omitempty"`
 	EndTime         string				`json:"end,omitempty"`
 	Tag             string				`json:"tag,omitempty"`
-	Color           *PPA.CalendarMeta	`json:"color,omitempty"`
+	//Color           *PPA.CalendarMeta	`json:"color,omitempty"`
+	PrimaryColor	string				`json:"primary_color,omitempty"`
+	SecondaryColor	string				`json:"secondary_color,omitempty"`
 }
 
 func (h HTTP) tryFromUpdateRequest(data *updateRequest) (job.Update, error) {
@@ -41,16 +45,18 @@ func (h HTTP) tryFromUpdateRequest(data *updateRequest) (job.Update, error) {
 		assignedWorkerOID = primitive.NilObjectID
 	}
 	return job.Update{
-		Title:           data.Title,
-		ClientName:      data.ClientName,
-		ClientPhone:     data.ClientPhone,
-		AssignedWorker:  assignedWorkerOID,
-		CarInfo:         data.CarInfo,
-		Notes:           data.Notes,
-		StartTime:       data.StartTime,
-		EndTime:         data.EndTime,
-		Tag:             data.Tag,
-		Color:           data.Color,
+		Title: data.Title,
+		ClientName: data.ClientName,
+		ClientPhone: data.ClientPhone,
+		AssignedWorker: assignedWorkerOID,
+		CarInfo: data.CarInfo,
+		Notes: data.Notes,
+		StartTime: data.StartTime,
+		EndTime: data.EndTime,
+		Tag: data.Tag,
+		//Color:           data.Color,
+		PrimaryColor: data.PrimaryColor,
+		SecondaryColor: data.SecondaryColor,
 	}, nil
 }
 
@@ -62,16 +68,18 @@ func (h HTTP) tryFromSubmitJobRequest(data *submitJobRequest) (PPA.Job, error) {
 		assignedWorkerOID = primitive.NilObjectID
 	}
 	return PPA.Job{
-		ID:              primitive.NewObjectID(),
-		Title:           data.Title,
-		ClientName:      data.ClientName,
-		ClientPhone:     data.ClientPhone,
-		AssignedWorker:  assignedWorkerOID,
-		CarInfo:         data.CarInfo,
-		Notes:           data.Notes,
-		StartTime:       data.StartTime,
-		EndTime:         data.EndTime,
-		Color:           &data.Color,
-		Tag:             data.Tag,
+		ID: primitive.NewObjectID(),
+		Title: data.Title,
+		ClientName: data.ClientName,
+		ClientPhone: data.ClientPhone,
+		AssignedWorker: assignedWorkerOID,
+		CarInfo: data.CarInfo,
+		Notes: data.Notes,
+		StartTime: data.StartTime,
+		EndTime: data.EndTime,
+		//Color:           &data.Color,
+		PrimaryColor: data.PrimaryColor,
+		SecondaryColor: data.SecondaryColor,
+		Tag: data.Tag,
 	}, nil
 }
