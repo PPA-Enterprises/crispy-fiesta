@@ -139,3 +139,17 @@ func (cl ClientLabel) oidExists(ctx context.Context, oid primitive.ObjectID) boo
 	err := coll.FindOne(ctx, bson.D{{"_id", oid}}).Decode(&inserted)
 	return err == nil
 }
+
+func (cl ClientLabelStream) Subscribe(c *gin.Context, stream *PPA.StreamEvent) error {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	rx := make(chan *PPA.StreamResult)
+	go cl.cldb.Stream(cl.db, ctx, rx)
+
+	for {
+		changeRes := <-rx
+		res, _ := json.Marshal(changeRes)
+		stream.Message <-string(res)
+	}
+	return nil
+}
