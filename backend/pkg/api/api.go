@@ -46,7 +46,7 @@ func Start(cfg *config.Configuration) error {
 		ExposeHeaders:    []string{"Content-Type", "Content-Length", "Accept-Encoding", "X-CSRF-Token", "Authorization", "accept", "origin", "Cache-Control", "X-Requested-With"},
 		AllowCredentials: true,
 		AllowOriginFunc: func(origin string) bool {
-			return origin == "http://ppaenterprises.com"
+			return true
 		},
 		MaxAge: 12 * time.Hour,
 	}))
