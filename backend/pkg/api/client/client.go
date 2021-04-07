@@ -4,6 +4,7 @@ import(
 	"PPA"
 	"context"
 	"net/http"
+	"encoding/json"
 	"time"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -391,4 +392,45 @@ func (cl Client) updateJobs(ctx context.Context, oids []primitive.ObjectID, upda
 			cl.jdb.LogEvent(cl.db, ctx, newDoc)
 		}
 	}
+}
+
+func (cl ClientStream) Subscribe(c *gin.Context, stream *PPA.StreamEvent) error {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	rx := make(chan *PPA.StreamResult)
+	go cl.cdb.Stream(cl.db, ctx, rx)
+
+	for {
+		changeRes := <-rx
+		client := changeRes.Data.(PPA.Client)
+
+		jobs := make([]PPA.Job, 0)
+		if client.Jobs != nil {
+			res, err := cl.cdb.PopulateJobs(cl.db, ctx, client.Jobs); if err != nil {
+				return err
+			}
+			jobs = res;
+		}
+
+		labels := make([]string, 0)
+		if client.Labels != nil {
+			res, lErr := cl.cdb.PopulateLabels(cl.db, ctx, client.Labels); if lErr != nil {
+				return lErr
+			}
+			labels = res
+		}
+
+		result := &PopulatedClient {
+			ID: client.ID,
+			Name: client.Name,
+			Phone: client.Phone,
+			Jobs: jobs,
+			Labels: labels,
+			History: client.History,
+		}
+
+		res, _ := json.Marshal(PPA.StreamResult{EventType: changeRes.EventType, Data: result})
+		stream.Message <-string(res)
+	}
+	return nil
 }

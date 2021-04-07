@@ -73,7 +73,9 @@ func StreamAPI(cfg *config.Configuration) error {
 	})
 
 	jobStream := NewStreamServer()
+	clientStream := NewStreamServer()
 	server.Use(jobStream.ServeHTTP())
+	server.Use(clientStream.ServeHTTP())
 
 	v1 := server.Group("/stream/v1")
 	rbac := rbac.Service{}
@@ -85,6 +87,7 @@ func StreamAPI(cfg *config.Configuration) error {
 
 	authMiddleware := authMw.Middleware(jwt)
 	jobTransport.NewStream(jobService.InitStream(db, rbac, tinterRepo.Tinter{}), jobStream, v1, authMiddleware)
+	clientTransport.NewStream(clientService.InitStream(db, rbac, jobRepo.Job{}, labelRepo.ClientLabel{}), clientStream, v1, authMiddleware)
 	server.Run(":8085")
 	return nil
 }

@@ -170,6 +170,34 @@ func (c Client) PopulateLabels(db *mongo.DBConnection, ctx context.Context, oids
 
 }
 
+func (c Client) Stream(db *mongo.DBConnection, ctx context.Context, tx chan *PPA.StreamResult) {
+	coll := db.Use(Collection)
+
+	changeStream, streamErr := coll.Watch(ctx, mongodb.Pipeline{}); if streamErr != nil {
+		fmt.Println(streamErr)
+		return
+	}
+
+	defer changeStream.Close(ctx)
+
+	for changeStream.Next(ctx) {
+		var data bson.M
+		if err := changeStream.Decode(&data); err != nil {
+			fmt.Println(err)
+			return
+		}
+		oid := data["documentKey"].(primitive.M)["_id"].(primitive.ObjectID)
+
+		var client PPA.Client
+		_ = coll.FindOne(ctx, bson.D{{"_id", oid}}).Decode(&client)
+
+		tx <-&PPA.StreamResult {
+			EventType:data["operationType"].(string),
+			Data: client,
+		}
+	}
+}
+
 func (c Client) RemoveJob(db *mongo.DBConnection, ctx context.Context, clientPhone string, jobOid primitive.ObjectID) error {
 	fetched, err := c.ViewByPhone(db, ctx, clientPhone); if err != nil {
 		return err
