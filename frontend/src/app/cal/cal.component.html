@@ -76,16 +76,45 @@
       <span aria-hidden="true">&times;</span>
     </button>
   </div>
-  <div class="modal-body">
-    <div>
-      Action:
-      <pre>{{ modalData?.action }}</pre>
-    </div>
-    <div>
-      Event:
-      <pre>{{ modalData?.event | json }}</pre>
-    </div>
-  </div>
+  <div class="modal-body p-2">
+    <h3 class="text-center">Client Information</h3>
+
+              <div class="row">
+                <div class="col">
+                  <p class="font-medium-3 text-primary">Name:</p>
+                  <p class="font-medium-2">{{modalData?.event.client_name}}</p>
+                </div>
+                <div class="col">
+                  <p class="font-medium-3 text-primary">Phone Number:</p>
+                  <p class="font-medium-2">{{modalData?.event.client_phone}}</p>
+                </div>
+              </div>
+              <hr>
+              <h3 class="text-center">Job Information</h3>
+              <div class="row">
+                <div class="col">
+                  <p class="font-medium-3 text-primary">Car Information:<p>
+                  <p class="font-medium-2">{{modalData?.event.car_info}}</p>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col">
+                  <p class="font-medium-3 text-primary">Start Date:</p>
+                  <p class="font-medium-2">{{modalData?.event.start | date:'MMMM d, y, h:mm a' }}</p>
+                </div>
+                <div class="col">
+                  <p class="font-medium-3 text-primary">End Date:</p>
+                  <p class="font-medium-2">{{modalData?.event.end | date:'MMMM d, y, h:mm a' }}</p>
+                </div>
+              </div>
+              <hr>
+              <h3 class="text-center">Notes</h3>
+              <div class="row">
+                <div class="col">
+                  <p class="font-medium-2">{{modalData?.event.notes}}</p>
+                </div>
+              </div>
+      </div>
   <div class="modal-footer">
     <button type="button" class="btn btn-outline-secondary" [routerLink]="['/edit-job', modalData.event._id]"
       (click)="close()">

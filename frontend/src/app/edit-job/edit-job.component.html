@@ -48,18 +48,18 @@
       </div>
     </div>
   
-    <div class="row">
-      <div class="col-8">
+<div class="row">
+      <div class="col-sm-12 col-md-12 col-lg-8">
         <!-- Kick start -->
-        <div id="kick-start" class="card height-600">
+        <div id="kick-start" class="card">
           <div class="card-header">
             <h4 class="card-title">Job Informaton</h4>
           </div>
           <div class="card-content">
             <div class="card-body">
               <div class="card-text">
-                <div class="form-row">
-                  <div class="col-md-4 mb-4 form-group">
+
+                  <div class="mb-4 form-group">
                     <!-- <label for="carInfo">Car Info</label> -->
                     <textarea class="form-control" aria-label="With textarea" name="carInfo" class="form-control" id="carInfo" placeholder="Car Info"
                     [(ngModel)]="model.carInfo" #carInfo="ngModel"
@@ -67,19 +67,19 @@
                     required></textarea>
                     <div *ngIf="userForm.submitted && !carInfo.errors?.required" class="valid-tooltip">Looks good!</div>
                   </div>
-                  <div class="col-md-8 mb-4 form-group">
+                  <div class="mb-4 form-group">
                     <div class="form-row">
-                      <div class="form-group col">
+                      <div class="form-group col-sm-12 col-md-12 col-lg-6">
                           <label>Primary Color:</label>
                           <input class="form-control" type="color" name="primary-color" [(ngModel)]="model.primary">
                       </div>
-                      <div class="form-group col">
+                      <div class="form-group col-sm-12 col-md-12 col-lg-6">
                           <label>Secondary Color:</label>
                           <input class="form-control" type="color" name="secondary-color" [(ngModel)]="model.secondary">
                       </div>
                     </div>
                     <div class="form-row">
-                      <div class="form-group col pl-4">
+                      <div class="form-group col-sm-12 col-md-12 col-lg-6 pl-4">
                           <label>Starts At:</label><br>
                           <!-- code here -->
                           <!-- <input [owlDateTimeTrigger]="db" [owlDateTime]="db" [(ngModel)]="startDate" name="startDate">
@@ -87,7 +87,7 @@
                           <owl-date-time-inline [(ngModel)]="startDate" [startAt]="startDate" name="startDate"></owl-date-time-inline>
 
                       </div>
-                      <div class="form-group col pl-4">
+                      <div class="form-group col-sm-12 col-md-12 col-lg-6 pl-4">
                           <label>Ends At:</label><br>
                           <!-- code here -->
                           <owl-date-time-inline [(ngModel)]="endDate" [startAt]="endDate" name="endDate"></owl-date-time-inline>
@@ -96,7 +96,7 @@
                         </div>
                     </div>
                   </div>
-                </div>
+
               </div>
             </div>
           </div>
@@ -104,15 +104,15 @@
         <!--/ Kick start -->
       </div>
   
-      <div class="col-4">
+      <div class="col-sm-12 col-md-12 col-lg-4">
         <!-- Kick start -->
-        <div id="kick-start" class="card height-500">
+        <div id="kick-start" class="card">
           <div class="card-header">
             <h4 class="card-title">Notes</h4>
           </div>
           <div class="card-content">
             <div class="card-body">
-              <textarea class="form-control" aria-label="With textarea" name="notes" class="form-control" id="notes" placeholder="Notes"
+              <textarea class="form-control notes" rows="29" style="height:100%;" aria-label="With textarea" name="notes" class="form-control" id="notes" placeholder="Notes"
               [(ngModel)]="model.notes" #notes="ngModel"
               [ngClass]="{ 'is-invalid': userForm.submitted && notes.invalid, 'is-valid': userForm.submitted &&  !notes.invalid }"
               required></textarea>
@@ -152,7 +152,7 @@
   <ul class="timeline">
     <li class="timeline-line mt-4"></li>
       <li class="timeline-group">
-        <h5><span class="badge badge-primary cursor-default">Today</span></h5>
+        <h5><span class="badge badge-primary cursor-default">Start</span></h5>
       </li>
   </ul>
 
@@ -228,7 +228,7 @@
   <ul class="timeline">
     <li class="timeline-line mb-4"></li>
     <li class="timeline-group">
-      <h5><span class="badge badge-primary cursor-default">Founded in 2013</span></h5>
+      <h5><span class="badge badge-primary cursor-default">Today</span></h5>
     </li>
   </ul>
 </section>

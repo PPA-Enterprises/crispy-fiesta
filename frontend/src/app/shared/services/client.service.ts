@@ -11,10 +11,12 @@ import { map } from 'rxjs/operators';
   providedIn: 'root'
 })
 export class ClientService {
+  url ="http://ppaenterprises.com/"
+
     constructor(private http: HttpClient, private jobService: JobService) { }
 
     getAllClients(): Observable<Client[]> {
-      return this.http.get<any>("http://localhost:8888/api/v1/clients")
+      return this.http.get<any>(this.url + "api/v1/clients/")
       .pipe(map((response) => {
         if(response.success) {
           return response.payload as Client[];
@@ -25,7 +27,7 @@ export class ClientService {
     }
 
     getClientById(id: string): Observable<Client> {
-      return this.http.get<any>("http://localhost:8888/api/v1/clients/id/"+id)
+      return this.http.get<any>(this.url + "api/v1/clients/id/"+id)
       .pipe(map((response) => {
         if(response.success) {
           return response.payload as Client;
@@ -36,7 +38,7 @@ export class ClientService {
     }
 
     editClientById(id: string, client: Client): Observable<Client> {
-      return this.http.patch<any>("http://localhost:8888/api/v1/clients/"+id, client)
+      return this.http.patch<any>(this.url + "api/v1/clients/"+id, client)
       .pipe(map((response) => {
         if(response.success) {
           return response.payload as Client;

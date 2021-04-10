@@ -3,32 +3,33 @@ package api
 import (
 	"PPA"
 	"crypto/sha1"
+	authService "pkg/api/auth"
+	authTransport "pkg/api/auth/transport"
+	clientService "pkg/api/client"
+	clientRepo "pkg/api/client/infra/mongo"
+	clientTransport "pkg/api/client/transport"
+	clientLabelService "pkg/api/clientlabel"
+	labelRepo "pkg/api/clientlabel/infra/mongo"
+	clientLabelTransport "pkg/api/clientlabel/transport"
+	eventlogService "pkg/api/eventlog"
+	eventlogTransport "pkg/api/eventlog/transport"
+	jobService "pkg/api/job"
+	jobRepo "pkg/api/job/infra/mongo"
+	jobTransport "pkg/api/job/transport"
+	tinterService "pkg/api/tinter"
+	tinterRepo "pkg/api/tinter/infra/mongo"
+	tinterTransport "pkg/api/tinter/transport"
+	userService "pkg/api/user"
+	userRepo "pkg/api/user/infra/mongo"
+	userTransport "pkg/api/user/transport"
 	"pkg/common/config"
+	"pkg/common/eventlog"
+	"pkg/common/jwt"
+	authMw "pkg/common/middleware/auth"
 	"pkg/common/mongo"
 	"pkg/common/rbac"
 	"pkg/common/secure"
-	"pkg/common/jwt"
-	"pkg/common/eventlog"
-	authMw "pkg/common/middleware/auth"
-	userTransport "pkg/api/user/transport"
-	userService "pkg/api/user"
-	userRepo "pkg/api/user/infra/mongo"
-	authTransport "pkg/api/auth/transport"
-	authService "pkg/api/auth"
-	clientTransport "pkg/api/client/transport"
-	clientService "pkg/api/client"
-	clientRepo "pkg/api/client/infra/mongo"
-	jobTransport "pkg/api/job/transport"
-	jobService "pkg/api/job"
-	jobRepo "pkg/api/job/infra/mongo"
-	eventlogTransport "pkg/api/eventlog/transport"
-	eventlogService "pkg/api/eventlog"
-	tinterTransport "pkg/api/tinter/transport"
-	tinterService "pkg/api/tinter"
-	tinterRepo "pkg/api/tinter/infra/mongo"
-	clientLabelTransport "pkg/api/clientlabel/transport"
-	clientLabelService "pkg/api/clientlabel"
-	labelRepo "pkg/api/clientlabel/infra/mongo"
+
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
@@ -36,7 +37,17 @@ import (
 func Start(cfg *config.Configuration) error {
 	db := mongo.Init("mongodb://localhost:27017/?replicaSet=replicaset&readPreference=primaryPreferred", "PPA")
 	server := gin.Default()
-	server.Use(cors.Default())
+	//server.Use(cors.Default())
+	server.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"http://ppaenterprises.com/"},
+		AllowMethods:     []string{"PUT", "PATCH", "POST", "OPTIONS", "GET", "DELETE"},
+		AllowHeaders:     []string{"Origin", "authorization", "content-type", "origin"},
+		ExposeHeaders:    []string{"Content-Type", "Content-Length", "Accept-Encoding", "X-CSRF-Token", "Authorization", "accept", "origin", "Cache-Control", "X-Requested-With"},
+		AllowCredentials: true,
+		AllowOriginFunc: func(origin string) bool {
+			return true
+		},
+	}))
 	server.NoRoute(func(c *gin.Context) {
 		c.JSON(404, gin.H{"message": "Not Found."})
 	})
@@ -93,7 +104,6 @@ func StreamAPI(cfg *config.Configuration) error {
 	server.Run(":8085")
 	return nil
 }
-
 
 func NewStreamServer() (event *PPA.StreamEvent) {
 	event = &PPA.StreamEvent{
