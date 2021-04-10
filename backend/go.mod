@@ -8,6 +8,7 @@ require (
 	github.com/gin-gonic/gin v1.6.3
 	github.com/go-playground/validator/v10 v10.2.0
 	github.com/matthewhartstonge/argon2 v0.1.4 // indirect
+	github.com/mitchellh/mapstructure v1.4.1 // indirect
 	go.mongodb.org/mongo-driver v1.4.4
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	pkg v1.0.0

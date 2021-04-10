@@ -78,7 +78,7 @@
                   class="font-small-3">German</span></a>
             </div>
           </li> -->
-          <li class="dropdown nav-item" placement="bottom-left" display="static" ngbDropdown >
+          <!-- <li class="dropdown nav-item" placement="bottom-left" display="static" ngbDropdown >
             <a class="nav-link dropdown-toggle dropdown-notification p-0 mt-2" id="drp-notification" href="javascript:;"
               data-toggle="dropdown" ngbDropdownToggle><i class="ft-bell font-medium-3"></i><span
                 class="notification badge badge-pill badge-danger">4</span></a>
@@ -94,7 +94,7 @@
                   <span class="text-bold-400 cursor-pointer">Mark all as read</span>
                 </div>
               </li>
-              <li class="scrollable-container" [perfectScrollbar]>
+              <li class="scrollable-container" [perfectScrollbar]> -->
                 <!-- <a class="d-flex justify-content-between" href="javascript:void(0)">
                   <div class="media d-flex align-items-center">
                     <div class="media-left">
@@ -255,14 +255,14 @@
                     </div>
                   </div>
                 </a> -->
-              </li>
+              <!-- </li>
               <li class="dropdown-menu-footer">
                 <div class="noti-footer text-center cursor-pointer primary border-top text-bold-400 py-1">
                   Read All Notifications
                 </div>
               </li>
             </ul>
-          </li>
+          </li> -->
           <li class="dropdown nav-item mr-1" placement="bottom-left" display="static" ngbDropdown >
             <a class="nav-link dropdown-toggle user-dropdown d-flex align-items-end" id="dropdownBasic2"
               href="javascript:;" data-toggle="dropdown" ngbDropdownToggle>
@@ -290,17 +290,17 @@
                 </div>
               </a>
               <div class="dropdown-divider"></div>
-              <a class="dropdown-item" routerLink="/pages/login">
+              <a class="dropdown-item" (click)="logout()" routerLink="/pages/login">
                 <div class="d-flex align-items-center">
                   <i class="ft-power mr-2"></i><span>Logout</span>
                 </div>
               </a>
             </div>
           </li>
-          <!-- <li class="nav-item d-none d-lg-block mr-2 mt-1">
+          <li class="nav-item d-none d-lg-block mr-2 mt-1">
             <a class="nav-link notification-sidebar-toggle" (click)="toggleNotificationSidebar();"><i
                 class="ft-align-right font-medium-3"></i></a>
-          </li> -->
+          </li>
         </ul>
       </div>
     </div>

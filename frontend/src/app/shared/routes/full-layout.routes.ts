@@ -27,4 +27,8 @@ export const Full_ROUTES: Routes = [
     path: 'edit-job/:id',
     loadChildren: () => import('../../edit-job/edit-job.module').then(m => m.EditJobModule)
   },
+  {
+    path: 'calendar',
+    loadChildren: () => import('../../cal/cal.module').then(m => m.CalModule)
+  },
 ];

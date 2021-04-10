@@ -13,15 +13,16 @@ type User struct {
 
 	LastLogin time.Time `json:"last_login,omitempty"`
 	Token string `json:"-"`
-	Role *Role `json:"role,omitempty" m:"Permission Level"`
-	RoleID AccessRole `json:"-" m:"Access Role"`
+	//Role *Role `json:"role,omitempty" m:"Permission Level"`
+	//RoleID AccessRole `json:"-" m:"Access Role"`
+	Role string `json:"-" bson:"role,omitempty" m:"Access Level"`
 	History []LogEvent `json:"-" bson:"history,omitempty"`
 }
 
 type AuthUser struct {
 	ID string
 	Email string
-	Role AccessRole
+	Role string
 }
 
 func (u *User) UpdateLastLogin(token string) {

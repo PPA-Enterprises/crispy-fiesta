@@ -10,6 +10,9 @@ export const HROUTES: RouteInfo[] = [
   {
     path: '/jobs', title: 'Jobs', icon: 'ft-home', class: 'dropdown nav-item', isExternalLink: false, submenu: []
   },
+  {
+    path: '/calendar', title: 'Calendar', icon: 'ft-home', class: 'dropdown nav-item', isExternalLink: false, submenu: []
+  },
 
 //   {
 //     path: '', title: 'Menu Levels', icon: 'ft-align-left', class: 'dropdown nav-item has-sub', badge: '', badgeClass: '', isExternalLink: false,

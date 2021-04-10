@@ -3,25 +3,9 @@ import { FormControl, FormGroup, Validators, NgForm } from '@angular/forms';
 import { Router, ActivatedRoute, ParamMap } from '@angular/router';
 import { JobService } from '../shared/services/job.service'
 import { ClientService } from '../shared/services/client.service'
+import { Job } from '../shared/models/job.model'
+import { Client } from '../shared/models/client.model'
 
-export class Job {
-  public id: number;
-  public client_name: string
-  public client_phone: string;
-  public car_info: string;
-  public appointment_info: string;
-  public notes: string;
-  public tag: string;
-  public date: string;
-}
-
-export class Client {
-  public id: number;
-  public name: string
-  public phone: string;
-  public email: string;
-  public jobs: Job[];
-}
 
 export class ClientForm {
   public lname: string
@@ -37,18 +21,21 @@ export class ClientForm {
 })
 
 export class ClientComponent implements OnInit {
-  id: number;
+  id: string;
   private sub: any;
   client: Client;
   model = new ClientForm();
   name: string[];
 
-  constructor(private jobService: JobService, private clientService: ClientService, private route: ActivatedRoute, private router: Router) {
+  constructor(private jobService: JobService, private clientService: ClientService, private route: ActivatedRoute, private router: Router) {}
+
+  ngOnInit() {
     this.sub = this.route.params.subscribe(params => {
-      this.id = +params['id'];
+      this.id = params['id'];
     });
 
-    this.client = this.clientService.getClientById(this.id);
+    this.clientService.getClientById(this.id).subscribe((client: Client) => {
+    this.client = client;
     this.name = this.client.name.split(" ");
     this.model = {
       fname: this.name[0],
@@ -56,10 +43,7 @@ export class ClientComponent implements OnInit {
       phone: this.client.phone,
       email: this.client.email
     }
-  }
-
-  ngOnInit() {
-
+    })
   }
 
   delete() {
@@ -67,19 +51,14 @@ export class ClientComponent implements OnInit {
   }
 
   onSubmit(form) {
-    this.client = {
-      id: this.client.id,
-      name: this.model.fname + " " + this.model.lname,
-      email: this.model.email,
-      phone: this.model.phone,
-      jobs: this.client.jobs
-    }
+    this.client.name = this.model.fname + " " + this.model.lname;
+    this.client.email = this.model.email;
+    this.client.phone = this.model.phone;
 
-    if(this.clientService.editClientById(this.id, this.client).id == this.id) {
+    this.clientService.editClientById(this.id, this.client).subscribe((client: Client) => {
+      this.client = client;
       this.router.navigate(['/clients']);
-    } else {
-      console.log("ERROR EDITING CLIENT!")
-    }
+    });
   }
 
 

@@ -1,17 +1,8 @@
 import { Component, ViewChild, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators, NgForm } from '@angular/forms';
 import { JobService } from '../shared/services/job.service'
+import { Job } from '../shared/models/job.model'
 
-export class Job {
-  public id: number;
-  public client_name: string
-  public client_phone: string;
-  public car_info: string;
-  public appointment_info: string;
-  public notes: string;
-  public tag: string;
-  public date: string;
-}
 
 @Component({
   selector: 'app-page',
@@ -24,21 +15,21 @@ export class JobsComponent implements OnInit {
   openJobs: Job[] = [];
   closedJobs: Job[] = [];
   allJobs: Job[] = [];
-  constructor(private jobService: JobService) {
-    this.allJobs = this.jobService.getAllJobs();
-
-    for(let job of this.allJobs) {
-      if(job.tag == "NEW") {
-        this.newJobs.push(job);
-      } else if(job.tag == "OPEN"){
-        this.openJobs.push(job);
-      } else {
-        this.closedJobs.push(job);
-      }
-    }
-   }
+  constructor(private jobService: JobService) {}
 
   ngOnInit() {
+    this.jobService.getAllJobs().subscribe((jobs: Job[]) => {
+      for(let job of jobs) {
+        console.log(job)
+        if(job.tag == "NEW") {
+          this.newJobs.push(job);
+        } else if(job.tag == "OPEN"){
+          this.openJobs.push(job);
+        } else {
+          this.closedJobs.push(job);
+        }
+      }
+    });
   }
 
 }

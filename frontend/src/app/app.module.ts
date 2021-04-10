@@ -27,6 +27,12 @@ import { FullLayoutComponent } from "./layouts/full/full-layout.component";
 import { AuthService } from "./shared/auth/auth.service";
 import { AuthGuard } from "./shared/auth/auth-guard.service";
 import { WINDOW_PROVIDERS } from './shared/services/window.service';
+import { CalendarModule, DateAdapter } from 'angular-calendar';
+import { adapterFactory } from 'angular-calendar/date-adapters/date-fns';
+
+// for interceptor
+import { TokenInterceptorService as TokenInterceptor } from './shared/auth/token-interceptor.service';
+import { HTTP_INTERCEPTORS } from '@angular/common/http';
 
 
 var firebaseConfig = {
@@ -72,9 +78,15 @@ export function createTranslateLoader(http: HttpClient) {
     AgmCoreModule.forRoot({
       apiKey: "YOUR_GOOGLE_MAP_API_KEY"
     }),
-    PerfectScrollbarModule
+    PerfectScrollbarModule,
+    CalendarModule.forRoot({ provide: DateAdapter, useFactory: adapterFactory })
   ],
   providers: [
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: TokenInterceptor,
+      multi: true
+    },
     AuthService,
     AuthGuard,
     { provide: PERFECT_SCROLLBAR_CONFIG, useValue: DEFAULT_PERFECT_SCROLLBAR_CONFIG },

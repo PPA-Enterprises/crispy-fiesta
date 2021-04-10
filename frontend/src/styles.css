@@ -1,1 +1,11 @@
-/* You can add global styles to this file, and also import other style files */
+@import "~@danielmoncada/angular-datetime-picker/assets/style/picker.min.css";
+
+h3 {
+    margin: 0 0 10px;
+  }
+  
+  pre {
+    background-color: #f5f5f5;
+    padding: 15px;
+  }
+

@@ -1,13 +1,17 @@
 import { Router } from '@angular/router';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
+import { User } from '../models/user.model';
+import { HttpClient } from '@angular/common/http';
+import * as moment from "moment";
 
 @Injectable()
 export class AuthService {
   // private user: Observable<firebase.User>;
   // private userDetails: firebase.User = null;
 
-  constructor(public router: Router) {
+  constructor(public router: Router, private http: HttpClient) {
 
   }
 
@@ -16,23 +20,27 @@ export class AuthService {
   }
 
   signinUser(email: string, password: string) {
-    //your code for checking credentials and getting tokens for for signing in user
-    // return this._firebaseAuth.signInWithEmailAndPassword(email, password)
-
-    //uncomment above firebase auth code and remove this temp code
-    return new Promise(function(resolve, reject) {
-      setTimeout(function() {
-        resolve(true);
-      }, 1000);
-    });
-
+    
+    return this.http.post<any>("http://localhost:8888/api/v1/auth/", {email: email, password: password})
+      .pipe(map(result => {
+        console.log(result);
+        localStorage.setItem('token', result.payload.token);
+      }));
+      
+      
   }
+
+    
 
   logout() {
-    
+    localStorage.removeItem('token');
   }
 
-  isAuthenticated() {
-    return true;
+  public get isAuthenticated(): boolean {
+    return (localStorage.getItem('token') !== null);
+  }
+
+  public tokenFromLocalStorage() : string {
+    return localStorage.getItem('token');
   }
 }

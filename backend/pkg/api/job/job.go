@@ -1,40 +1,52 @@
 package job
+
 import (
 	"PPA"
+	//"fmt"
+	"bytes"
 	"context"
+	"encoding/json"
 	"net/http"
 	"time"
+
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 const (
-	NotFound = http.StatusNotFound
-	Conflict = http.StatusConflict
-	Collection = "jobs"
+	NotFound         = http.StatusNotFound
+	Conflict         = http.StatusConflict
+	Collection       = "jobs"
 	ClientCollection = "clients"
-	EventTag = "m"
+	EventTag         = "m"
 )
 
 var OidNotFound = PPA.NewAppError(NotFound, "Does not exist")
 var JobNotFound = PPA.NewAppError(NotFound, "Does not exist")
 
 type Update struct {
-	ClientName string
-	ClientPhone string
-	CarInfo string
-	AppointmentInfo string
-	Notes string
+	Title          string
+	ClientName     string
+	ClientPhone    string
+	AssignedWorker primitive.ObjectID
+	CarInfo        string
+	Notes          string
+	StartTime      string
+	EndTime        string
+	Tag            string
+	//Color *PPA.CalendarMeta
+	PrimaryColor   string
+	SecondaryColor string
 }
 
 type ClientUpdate struct {
-	Name string
+	Name  string
 	Phone string
 }
 
 func (j Job) Create(c *gin.Context, req PPA.Job, editor PPA.Editor) (*PPA.Job, error) {
-	duration := time.Now().Add(5*time.Second)
+	duration := time.Now().Add(5 * time.Second)
 	ctx, cancel := context.WithDeadline(c.Request.Context(), duration)
 	defer cancel()
 
@@ -42,20 +54,50 @@ func (j Job) Create(c *gin.Context, req PPA.Job, editor PPA.Editor) (*PPA.Job, e
 		req.ID = primitive.NewObjectID()
 	}
 
-	created, err := j.jdb.Create(j.db, ctx, &req); if err != nil {
+	var workerAssignChanged bool = false
+	var cpyTinter *PPA.Tinter
+	const matched int = 0
+	if bytes.Compare([]byte(req.AssignedWorker.Hex()), []byte(primitive.NilObjectID.Hex())) != matched {
+		// update tinter
+		tinter, tinterErr := j.tdb.ViewById(j.db, ctx, req.AssignedWorker)
+		if tinterErr == nil {
+			workerAssignChanged = true
+			cpyTinter = tinter
+			_ = j.tdb.AssignJobId(j.db, ctx, tinter.JobsCollection, req.ID)
+		} else {
+			return nil, PPA.NewAppError(NotFound, "Tinter does not exist")
+		}
+	}
+	created, err := j.jdb.Create(j.db, ctx, &req)
+	if err != nil {
 		return nil, err
 	}
 
-	created.AppendLog(j.eventLogger.LogCreated(ctx, j.eventLogger.GenerateEvent(created, EventTag), editor))
+	var loggableTinter *PPA.LoggableTinter
+	if cpyTinter != nil {
+		loggableTinter = cpyTinter.Loggable()
+	} else {
+		loggableTinter = nil
+	}
+
+	loggableJob := created.Loggable(loggableTinter)
+
+	if workerAssignChanged {
+		cpyTinter.AppendLog(j.eventLogger.LogAssignedJob(ctx, j.eventLogger.GenerateEvent(loggableJob, EventTag), editor))
+		j.tdb.LogEvent(j.db, ctx, cpyTinter)
+
+	}
+
+	created.AppendLog(j.eventLogger.LogCreated(ctx, j.eventLogger.GenerateEvent(loggableJob, EventTag), editor))
 	j.jdb.LogEvent(j.db, ctx, created)
 
 	if !j.clientExists(ctx, created.ClientPhone) {
 		// create the client
-		if _, err := j.createClient(ctx, &PPA.Client {
-			ID: primitive.NilObjectID,
-			Name: created.ClientName,
+		if _, err := j.createClient(ctx, &PPA.Client{
+			ID:    primitive.NilObjectID,
+			Name:  created.ClientName,
 			Phone: created.ClientPhone,
-			Jobs: []primitive.ObjectID{},
+			Jobs:  []primitive.ObjectID{},
 		}, editor); err != nil {
 			return nil, err
 		}
@@ -69,19 +111,20 @@ func (j Job) Create(c *gin.Context, req PPA.Job, editor PPA.Editor) (*PPA.Job, e
 	return created, nil
 }
 
-func (j Job) ViewById( c *gin.Context, id string) (*PPA.Job, error) {
-	duration := time.Now().Add(5*time.Second)
+func (j Job) ViewById(c *gin.Context, id string) (*PPA.Job, error) {
+	duration := time.Now().Add(5 * time.Second)
 	ctx, cancel := context.WithDeadline(c.Request.Context(), duration)
 	defer cancel()
 
-	oid, err := primitive.ObjectIDFromHex(id); if err != nil {
+	oid, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
 		return nil, OidNotFound
 	}
 	return j.jdb.ViewById(j.db, ctx, oid)
 }
 
 func (j Job) List(c *gin.Context, opts PPA.BulkFetchOptions) (*[]PPA.Job, error) {
-	duration := time.Now().Add(5*time.Second)
+	duration := time.Now().Add(5 * time.Second)
 	ctx, cancel := context.WithDeadline(c.Request.Context(), duration)
 	defer cancel()
 
@@ -89,20 +132,31 @@ func (j Job) List(c *gin.Context, opts PPA.BulkFetchOptions) (*[]PPA.Job, error)
 }
 
 func (j Job) Delete(c *gin.Context, id string, editor PPA.Editor) error {
-	duration := time.Now().Add(5*time.Second)
+	duration := time.Now().Add(5 * time.Second)
 	ctx, cancel := context.WithDeadline(c.Request.Context(), duration)
 	defer cancel()
 
-	oid, err := primitive.ObjectIDFromHex(id); if err != nil {
+	oid, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
 		return OidNotFound
 	}
 
-	job, err := j.jdb.ViewById(j.db, ctx, oid); if err != nil {
+	job, err := j.jdb.ViewById(j.db, ctx, oid)
+	if err != nil {
 		return JobNotFound
 	}
 
 	if err := j.cdb.RemoveJob(j.db, ctx, job.ClientPhone, oid); err != nil {
 		return err
+	}
+
+	tinter, tinterErr := j.tdb.ViewById(j.db, ctx, job.AssignedWorker)
+	if tinterErr == nil {
+		_ = j.tdb.RemoveJobId(j.db, ctx, tinter.JobsCollection, job.AssignedWorker)
+		tinter.AppendLog(j.eventLogger.LogDeleted(ctx, editor))
+		j.tdb.LogEvent(j.db, ctx, tinter)
+	} else {
+		return PPA.NewAppError(NotFound, "Tinter does not exist")
 	}
 
 	job.AppendLog(j.eventLogger.LogDeleted(ctx, editor))
@@ -111,20 +165,41 @@ func (j Job) Delete(c *gin.Context, id string, editor PPA.Editor) error {
 }
 
 func (j Job) Update(c *gin.Context, req Update, id string, editor PPA.Editor) (*PPA.Job, error) {
-	duration := time.Now().Add(5*time.Second)
+	duration := time.Now().Add(5 * time.Second)
 	ctx, cancel := context.WithDeadline(c.Request.Context(), duration)
 	defer cancel()
 
-	oid, err := primitive.ObjectIDFromHex(id); if err != nil {
+	oid, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
 		return nil, OidNotFound
 	}
 
-	oldJob, err := j.jdb.ViewById(j.db, ctx, oid); if err != nil {
+	oldJob, err := j.jdb.ViewById(j.db, ctx, oid)
+	if err != nil {
 		return nil, err
 	}
 
-	client, err := j.cdb.ViewByPhone(j.db, ctx, oldJob.ClientPhone); if err != nil {
+	client, err := j.cdb.ViewByPhone(j.db, ctx, oldJob.ClientPhone)
+	if err != nil {
 		return nil, err
+	}
+
+	var workerAssignChanged bool = false
+	var cpyTinter *PPA.Tinter
+	const matched int = 0
+	if bytes.Compare([]byte(req.AssignedWorker.Hex()), []byte(primitive.NilObjectID.Hex())) != matched {
+		workerAssignChanged = true
+		// update tinter
+		tinter, tinterErr := j.tdb.ViewById(j.db, ctx, req.AssignedWorker)
+		if tinterErr == nil {
+			cpyTinter = tinter
+			// remove old OID
+			_ = j.tdb.RemoveJobId(j.db, ctx, tinter.JobsCollection, oldJob.AssignedWorker)
+			// insert the replacement
+			_ = j.tdb.AssignJobId(j.db, ctx, tinter.JobsCollection, req.AssignedWorker)
+		} else {
+			return nil, PPA.NewAppError(NotFound, "Tinter does not exist")
+		}
 	}
 
 	if len(req.ClientPhone) > 0 {
@@ -136,34 +211,66 @@ func (j Job) Update(c *gin.Context, req Update, id string, editor PPA.Editor) (*
 		}
 	}
 
-
-	if err := j.jdb.Update(j.db, ctx, oid, &PPA.Job {
-		ID: primitive.NilObjectID,
-		ClientName: req.ClientName,
-		ClientPhone: req.ClientPhone,
-		CarInfo: req.CarInfo,
-		AppointmentInfo: req.AppointmentInfo,
-		Notes: req.Notes,
+	if err := j.jdb.Update(j.db, ctx, oid, &PPA.Job{
+		ID:             primitive.NilObjectID,
+		Title:          req.Title,
+		ClientName:     req.ClientName,
+		ClientPhone:    req.ClientPhone,
+		AssignedWorker: req.AssignedWorker,
+		CarInfo:        req.CarInfo,
+		Notes:          req.Notes,
+		Tag:            req.Tag,
+		//Color: req.Color,
+		PrimaryColor:   req.PrimaryColor,
+		SecondaryColor: req.SecondaryColor,
+		StartTime:      req.StartTime,
+		EndTime:        req.EndTime,
 	}); err != nil {
 		return nil, err
 	}
 
-	if err = j.cdb.Update(j.db, ctx, client.ID, &PPA.Client {
-		Name: req.ClientName,
-		Phone: req.ClientPhone,
-	}); err != nil {
-		return nil, err
+	if client.Name != req.ClientName || client.Phone != req.ClientPhone {
+		if err = j.cdb.Update(j.db, ctx, client.ID, &PPA.Client{
+			Name:  req.ClientName,
+			Phone: req.ClientPhone,
+		}); err != nil {
+			return nil, err
+		}
+		j.updateJobs(ctx, client.Jobs, oid, ClientUpdate{Name: req.ClientName, Phone: req.ClientPhone}, editor)
 	}
 
-	j.updateJobs(ctx, client.Jobs, ClientUpdate{ Name: req.ClientName, Phone: req.ClientPhone }, editor)
-
-	updated, err := j.jdb.ViewById(j.db, ctx, oid); if err != nil {
+	updated, err := j.jdb.ViewById(j.db, ctx, oid)
+	if err != nil {
 		return nil, PPA.InternalError
 	}
 
+	var loggableTinter *PPA.LoggableTinter
+	if cpyTinter != nil {
+		loggableTinter = cpyTinter.Loggable()
+	} else {
+		loggableTinter = nil
+	}
+	loggableJob := updated.Loggable(loggableTinter)
+
+	// fetch the old job's tinter for logging
+	var loggableOldTinter *PPA.LoggableTinter
+	oldTinter, oldTErr := j.tdb.ViewById(j.db, ctx, oldJob.AssignedWorker)
+	if oldTErr != nil {
+		loggableOldTinter = nil
+	} else {
+		loggableOldTinter = oldTinter.Loggable()
+	}
+
+	loggableOldJob := oldJob.Loggable(loggableOldTinter)
+
+	if workerAssignChanged {
+		cpyTinter.AppendLog(j.eventLogger.LogAssignedJob(ctx, j.eventLogger.GenerateEvent(loggableJob, EventTag), editor))
+		j.tdb.LogEvent(j.db, ctx, cpyTinter)
+	}
+
 	updated.AppendLog(j.eventLogger.LogUpdated(ctx,
-		j.eventLogger.GenerateEvent(oldJob, EventTag),
-		j.eventLogger.GenerateEvent(updated, EventTag),
+		j.eventLogger.GenerateEvent(loggableOldJob, EventTag),
+		j.eventLogger.GenerateEvent(loggableJob, EventTag),
 		editor))
 	j.jdb.LogEvent(j.db, ctx, updated)
 
@@ -189,7 +296,8 @@ func (j Job) createClient(ctx context.Context, client *PPA.Client, editor PPA.Ed
 		client.ID = primitive.NewObjectID()
 	}
 
-	created, err := j.cdb.Create(j.db, ctx, client); if err != nil {
+	created, err := j.cdb.Create(j.db, ctx, client)
+	if err != nil {
 		return nil, err
 	}
 
@@ -208,7 +316,8 @@ func (j Job) clientOidExists(ctx context.Context, oid primitive.ObjectID) bool {
 }
 
 func (j Job) attatchJobToClient(ctx context.Context, phone string, job *PPA.Job, editor PPA.Editor) error {
-	client, err := j.cdb.ViewByPhone(j.db, ctx, phone); if err != nil {
+	client, err := j.cdb.ViewByPhone(j.db, ctx, phone)
+	if err != nil {
 		return err
 	}
 
@@ -220,27 +329,46 @@ func (j Job) attatchJobToClient(ctx context.Context, phone string, job *PPA.Job,
 	return updateErr
 }
 
-func (j Job) updateJobs(ctx context.Context, oids []primitive.ObjectID, update ClientUpdate, editor PPA.Editor) {
-	if len(oids) <= 0 { return } // Note that len(nil) is 0
+func (j Job) updateJobs(ctx context.Context, oids []primitive.ObjectID, currOID primitive.ObjectID, update ClientUpdate, editor PPA.Editor) {
+	if len(oids) <= 0 {
+		return
+	} // Note that len(nil) is 0
 
 	for _, oid := range oids {
-		oldDoc, _ := j.jdb.ViewById(j.db, ctx, oid)
+		const matched int = 0
+		if bytes.Compare([]byte(oid.Hex()), []byte(currOID.Hex())) != matched {
+			oldDoc, _ := j.jdb.ViewById(j.db, ctx, oid)
 
-		if err := j.jdb.Update(j.db, ctx, oid, &PPA.Job {
-			ClientName: update.Name,
-			ClientPhone: update.Phone,
-		}); err != nil {
-			// do nothing or fail, depends
-		}
+			if err := j.jdb.Update(j.db, ctx, oid, &PPA.Job{
+				ClientName:  update.Name,
+				ClientPhone: update.Phone,
+			}); err != nil {
+				// do nothing or fail, depends
+			}
 
-		newDoc, _ := j.jdb.ViewById(j.db, ctx, oid)
+			newDoc, _ := j.jdb.ViewById(j.db, ctx, oid)
 
-		if newDoc != nil && oldDoc != nil {
-			newDoc.AppendLog(j.eventLogger.LogUpdated(ctx,
-				j.eventLogger.GenerateEvent(oldDoc, EventTag),
-				j.eventLogger.GenerateEvent(newDoc, EventTag),
-				editor))
-			j.jdb.LogEvent(j.db, ctx, newDoc)
+			if newDoc != nil && oldDoc != nil {
+				newDoc.AppendLog(j.eventLogger.LogUpdated(ctx,
+					j.eventLogger.GenerateEvent(oldDoc, EventTag),
+					j.eventLogger.GenerateEvent(newDoc, EventTag),
+					editor))
+				j.jdb.LogEvent(j.db, ctx, newDoc)
+			}
 		}
 	}
+}
+
+func (j JobStream) Subscribe(c *gin.Context, stream *PPA.StreamEvent) error {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	rx := make(chan *PPA.StreamResult)
+	go j.jdb.Stream(j.db, ctx, rx)
+
+	for {
+		changeRes := <-rx
+		res, _ := json.Marshal(changeRes)
+		stream.Message <-string(res)
+	}
+	return nil
 }

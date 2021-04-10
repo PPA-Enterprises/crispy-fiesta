@@ -13,7 +13,8 @@ func main() {
 	cfg, err := config.Load(*cfgPath)
 	checkErr(err)
 
-	checkErr(api.Start(cfg))
+	//checkErr(api.Start(cfg))
+	checkErr(api.StreamAPI(cfg))
 }
 
 func checkErr(err error) {

@@ -1,26 +1,20 @@
-import { Component, OnInit } from '@angular/core';
-import { FormControl, FormGroup, Validators, NgForm } from '@angular/forms';
+import { Component, OnInit, Input, ChangeDetectorRef } from '@angular/core';
+import { FormControl, FormGroup, Validators, NgForm, FormBuilder } from '@angular/forms';
 import { JobService } from '../shared/services/job.service'
 import { Router, ActivatedRoute, ParamMap } from '@angular/router';
-
-export class Job {
-  public id: number;
-  public client_name: string
-  public client_phone: string;
-  public car_info: string;
-  public appointment_info: string;
-  public notes: string;
-  public tag: string;
-  public date: string;
-}
+import { Job } from '../shared/models/job.model';
+import { Color } from '../shared/models/color.model';
 
 export class JobForm {
   public fname: string;
   public lname: string;
   public phone: string;
   public carInfo: string;
-  public apptInfo: string;
   public notes: string;
+  public start: any;
+  public end: any;
+  public primary: any;
+  public secondary: any;
 }
 
 @Component({
@@ -32,30 +26,44 @@ export class CreateJobComponent implements OnInit {
   job: Job;
   model = new JobForm();
   submitted = false;
-  
-  constructor(private jobService: JobService, private router: Router) { }
+  startDate: any;
+  endDate: any;
+
+  constructor(private jobService: JobService, private router: Router) {}
 
   ngOnInit(): void {
   }
 
+
   onSubmit(form) {
+    this.submitted = true
+
     this.job = {
-      id: Math.floor(Math.random() * Math.floor(250)),
       client_name: this.model.fname + " " + this.model.lname,
       client_phone: this.model.phone,
       car_info: this.model.carInfo,
-      appointment_info: this.model.apptInfo,
       notes: this.model.notes,
       tag: "NEW",
-      date: new Date().toLocaleString(),
-    }
-    
-    if (this.jobService.createJob(this.job).tag == "NEW") {
-      this.router.navigate(['/jobs']);
-    } else {
-      console.log("ERROR CREATING JOB!")
-    }
-    
-  }
+      start: this.startDate,
+      end: this.endDate,
+      title: this.model.carInfo + " - " + this.model.fname + " " + this.model.lname,
+      primary_color: this.model.primary,
+      secondary_color: this.model.secondary,
+    }   
 
+    if (this.job.primary_color == undefined) {
+      this.job.primary_color = "#ff0000";
+    }
+
+    if(this.job.secondary_color == undefined) {
+      this.job.secondary_color = "#00ff4c";
+    }
+
+    console.log(this.job);
+    
+
+    this.jobService.createJob(this.job).subscribe((job: Job) => {
+        this.router.navigate(['/jobs']);
+    })
+  }
 }

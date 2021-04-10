@@ -22,6 +22,7 @@
               "src/favicon.ico"
             ],
             "styles": [
+              "node_modules/angular-calendar/css/angular-calendar.css",
               "node_modules/perfect-scrollbar/css/perfect-scrollbar.css",
               "node_modules/prismjs/plugins/toolbar/prism-toolbar.css",
               "node_modules/@swimlane/ngx-datatable/index.css",
@@ -90,6 +91,7 @@
               "src/assets/vendor/pace/pace.min.js"
             ],
             "styles": [
+              "node_modules/angular-calendar/css/angular-calendar.css",
               "src/assets/css/demo.css",
               "src/assets/sass/app.scss",
               "src/styles.css"

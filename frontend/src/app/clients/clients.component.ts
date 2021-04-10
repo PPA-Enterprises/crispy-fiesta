@@ -5,26 +5,9 @@ import {
   SelectionType
 } from '@swimlane/ngx-datatable';
 import { ClientService } from '../shared/services/client.service'
+import { Job } from '../shared/models/job.model'
+import { Client } from '../shared/models/client.model'
 
-
-export class Job {
-  public id: number;
-  public client_name: string
-  public client_phone: string;
-  public car_info: string;
-  public appointment_info: string;
-  public notes: string;
-  public tag: string;
-  public date: string;
-}
-
-export class Client {
-  public id: number;
-  public name: string
-  public phone: string;
-  public email: string;
-  public jobs: Job[];
-}
 
 @Component({
   selector: 'app-page',
@@ -33,32 +16,34 @@ export class Client {
   encapsulation: ViewEncapsulation.None
 })
 
-export class ClientsComponent {
+export class ClientsComponent implements OnInit{
   @ViewChild(DatatableComponent) table: DatatableComponent;
-    DatatableData: Client[] = this.clientService.getAllClients();
-    // row data
-    public rows = this.DatatableData;
-    SelectionType = SelectionType;
-    selected = [];
-  
-    // column header
-    public columns = [
-      { name: 'Name', prop: 'name' },
-      { name: 'Email', prop: 'email' },
-      { name: 'Phone', prop: 'phone' },
-    ];
+  DatatableData: Client[];
+  private tempData = [];
+  // row data
+  public rows;
+  SelectionType = SelectionType;
+  selected = [];
 
-    public ColumnMode = ColumnMode;
+  // column header
+  public columns = [
+    { name: 'Name', prop: 'name' },
+    { name: 'Email', prop: 'email' },
+    { name: 'Phone', prop: 'phone' },
+  ];
 
-    @ViewChild('tableRowDetails') tableRowDetails: any;
-    @ViewChild('tableResponsive') tableResponsive: any;
-  
-    // private
-    private tempData = [];
+  public ColumnMode = ColumnMode;
 
-    
-  constructor(private clientService: ClientService) {
-    this.tempData = this.DatatableData;
+  @ViewChild('tableRowDetails') tableRowDetails: any;
+  @ViewChild('tableResponsive') tableResponsive: any;
+
+  constructor(private clientService: ClientService) {}
+
+  ngOnInit() {
+    this.clientService.getAllClients().subscribe((clients: Client[]) => {
+      this.DatatableData = clients;
+      this.rows = this.DatatableData;
+    });
   }
 
   filterUpdate(event) {

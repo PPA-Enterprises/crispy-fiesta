@@ -64,8 +64,8 @@
                 </tr>
                 </thead>
                 <tbody>
-                <tr class="cursor-pointer" *ngFor="let job of client.jobs" [routerLink]="['/edit-job', job.id]">
-                    <th scope="row">{{ job.date }}</th>
+                <tr class="cursor-pointer" *ngFor="let job of client.jobs" [routerLink]="['/edit-job', job._id]">
+                    <th scope="row">{{ job.start }}</th>
                     <td>{{ job.car_info }}</td>
                     <td>{{ job.client_name }}</td>
                     <td class="text-success">{{ job.tag }}</td>

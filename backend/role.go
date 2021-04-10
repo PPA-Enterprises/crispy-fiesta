@@ -1,5 +1,6 @@
 package PPA
 
+/*
 type AccessRole int
 
 const(
@@ -12,4 +13,4 @@ type Role struct {
 	ID AccessRole `json:"id"`
 	AccessLevel AccessRole `json:"access_level"`
 	Name string `json:"name"`
-}
+}*/
