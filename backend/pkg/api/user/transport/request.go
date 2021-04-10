@@ -43,7 +43,7 @@ func (h HTTP) fromEmailRequest(data *emailRequest) string {
 
 func (h HTTP) fromSignupRequest(data *signupRequest) PPA.User {
 	data.Role = strings.ToLower(data.Role)
-	if data.Role != "user" || data.Role != "admin" {
+	if data.Role != "user" && data.Role != "admin" {
 		data.Role = "user"
 	}
 	oid := primitive.NewObjectID()
