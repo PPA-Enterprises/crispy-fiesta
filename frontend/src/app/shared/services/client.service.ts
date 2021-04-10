@@ -11,7 +11,7 @@ import { map } from 'rxjs/operators';
   providedIn: 'root'
 })
 export class ClientService {
-  url ="http://ppaenterprises.com/"
+  url ="http://ppaenterprises.com:8888/"
 
     constructor(private http: HttpClient, private jobService: JobService) { }
 

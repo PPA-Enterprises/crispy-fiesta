@@ -8,7 +8,7 @@ import * as moment from "moment";
 
 @Injectable()
 export class AuthService {
-  url ="http://ppaenterprises.com/"
+  url ="http://ppaenterprises.com:8888/"
   // private user: Observable<firebase.User>;
   // private userDetails: firebase.User = null;
 
